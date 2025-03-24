@@ -1,0 +1,120 @@
+.home-container {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Fixed header styles */
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 70px;
+}
+
+/* Logo styles */
+.nav-logo img {
+    height: 40px;
+}
+
+/* Navigation links styles */
+.nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.nav-link:hover {
+    color: #007bff;
+}
+
+/* Right side actions */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.nav-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Auth buttons */
+.auth-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.signup-btn,
+.signin-btn,
+.logout-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.signup-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.signin-btn {
+    background-color: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.logout-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.signup-btn:hover {
+    background-color: #0069d9;
+}
+
+.signin-btn:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+
+/* Add some spacing for the main content so it doesn't hide under the navbar */
+.main-content {
+    padding-top: 90px;
+}

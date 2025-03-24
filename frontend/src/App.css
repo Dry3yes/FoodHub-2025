@@ -1,0 +1,24 @@
+.app{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+}
+
+/* Make .App take full height */
+.App {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make container take full remaining height */
+.Login-Register {
+  display: flex;
+  flex-direction: row;
+  flex: 1; /* This makes it expand to fill available space */
+  overflow: hidden; /* Prevents scrollbars if content is too large */
+}
+
+
