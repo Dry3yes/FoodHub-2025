@@ -1,6 +1,6 @@
 using api.Interfaces;
 using api.Middlewares;
-using api.Repository;
+using api.Repositories;
 using api.Services;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -25,6 +25,7 @@ builder.Services.AddSingleton(FirestoreDb.Create("finshark-5228a"));
 builder.Services.AddSingleton<FirebaseAuthService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 
 builder.Services.AddCors(options =>
 {

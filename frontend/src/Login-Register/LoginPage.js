@@ -36,8 +36,8 @@ const LoginPage = () => {
             console.log('Login successful:', response);
             
             localStorage.setItem('user', JSON.stringify({
-                userId: response.userId,
-                role: response.role,
+                email: response.data.email,
+                role: response.data.role,
                 token: response.token
             }));
 

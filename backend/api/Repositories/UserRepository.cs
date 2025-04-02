@@ -1,20 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using api.Interfaces;
 using api.Models;
+using api.Services;
 using Google.Cloud.Firestore;
-using FirebaseAdmin.Auth;
 
-namespace api.Repository
+namespace api.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private readonly FirestoreDb _firestoreDb;
-        public UserRepository(FirestoreDb firestoreDb)
+        private readonly FirebaseAuthService _firebaseAuthService;
+        public UserRepository(FirestoreDb firestoreDb, FirebaseAuthService firebaseAuthService)
         {
             _firestoreDb = firestoreDb;
+            _firebaseAuthService = firebaseAuthService;
         }
 
         public async Task<User> CreateAsync(User user)
@@ -23,7 +21,7 @@ namespace api.Repository
             return user;
         }
 
-        public async Task<List<User>> GetAllAsync()
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
             return await Task.FromResult(_firestoreDb.Collection("Users").GetSnapshotAsync().Result.Documents
                 .Where(u => u.Exists && u.Id != "init")
@@ -31,16 +29,33 @@ namespace api.Repository
                 .ToList());
         }
 
-        public Task<User?> GetByEmailAsync(string email)
+        public async Task<User?> GetByEmailAsync(string email)
         {
-            return Task.FromResult(_firestoreDb.Collection("Users").WhereEqualTo("Email", email).GetSnapshotAsync().Result.Documents
+            return await Task.FromResult(_firestoreDb.Collection("Users").WhereEqualTo("Email", email).GetSnapshotAsync().Result.Documents
                 .Select(u => u.ConvertTo<User>())
                 .FirstOrDefault());
         }
 
-        public async Task<User> GetByIdAsync(int id)
+        public async Task<User?> GetByIdAsync(int id)
         {
-            return await Task.FromResult(_firestoreDb.Collection("Users").Document(id.ToString()).GetSnapshotAsync().Result.ConvertTo<User>());
+            var userRef = _firestoreDb.Collection("Users").Document(id.ToString());
+            var snapshot = await userRef.GetSnapshotAsync();
+            if (snapshot.Exists)
+            {
+                return snapshot.ConvertTo<User>();
+            }
+            return null;
+        }
+
+        public async Task<(User? User, string? Token)> LoginAsync(string email, string password)
+        {
+            var token = await _firebaseAuthService.LoginUserAsync(email, password);
+            var user = await GetByEmailAsync(email);
+            if (user != null)
+            {
+                return (user, token);
+            }
+            return (null, null);
         }
     }
 }
