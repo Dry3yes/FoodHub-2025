@@ -2,11 +2,14 @@ using api.Dtos.Menu;
 using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace api.Controllers
 {
-    [Route("api")]
+    [Route("api/v{version:apiVersion}")]
+    [ApiVersion("1.0")]
     [ApiController]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]  // Disable caching by default
     public class MenuController : ControllerBase
     {
         private readonly IMenuRepository _menuRepository;
@@ -17,6 +20,7 @@ namespace api.Controllers
 
         [HttpPost]
         [Route("create-menu")]
+        [Authorize(Roles = "Admin,Seller")]
         public async Task<IActionResult> Create([FromBody] CreateMenuRequestDto menuDto)
         {
             var items = await _menuRepository.GetAllMenusAsync();
@@ -33,6 +37,8 @@ namespace api.Controllers
 
         [HttpGet]
         [Route("get-menus")]
+        [AllowAnonymous]
+        [ResponseCache(Duration = 60)]  // Cache for 1 minute
         public async Task<IActionResult> Get()
         {
             var menus = await _menuRepository.GetAllMenusAsync();
@@ -47,6 +53,8 @@ namespace api.Controllers
 
         [HttpGet]
         [Route("get-menu/{id}")]
+        [AllowAnonymous]
+        [ResponseCache(Duration = 60)]  // Cache for 1 minute
         public async Task<IActionResult> GetById(int id)
         {
             var menu = await _menuRepository.GetMenuByIdAsync(id);
@@ -60,6 +68,7 @@ namespace api.Controllers
 
         [HttpPut]
         [Route("update-menu/{id}")]
+        [Authorize(Roles = "Admin,Seller")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateMenuRequestDto menuDto)
         {
             var menu = await _menuRepository.GetMenuByIdAsync(id);
@@ -79,6 +88,7 @@ namespace api.Controllers
 
         [HttpDelete]
         [Route("delete-menu/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var menu = await _menuRepository.GetMenuByIdAsync(id);
@@ -94,6 +104,8 @@ namespace api.Controllers
 
         [HttpGet]
         [Route("get-menus-by-category/{category}")]
+        [AllowAnonymous]
+        [ResponseCache(Duration = 60)]  // Cache for 1 minute
         public async Task<IActionResult> GetByCategory(string category)
         {
             var menus = await _menuRepository.GetMenusByCategoryAsync(category);

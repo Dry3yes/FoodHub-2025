@@ -32,10 +32,11 @@ namespace api.Repositories
 
         public async Task<IEnumerable<Menu>> GetAllMenusAsync()
         {
-            return await Task.FromResult(_firestoreDb.Collection("Menus").GetSnapshotAsync().Result.Documents
+            var snapshot = await _firestoreDb.Collection("Menus").GetSnapshotAsync();
+            return snapshot.Documents
                 .Where(u => u.Exists && u.Id != "init")
                 .Select(u => u.ConvertTo<Menu>())
-                .ToList());
+                .ToList();
         }
 
         public async Task<Menu?> GetMenuByIdAsync(int id)

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Dtos.User;
 using api.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace api.Mappers
 {
@@ -28,16 +30,23 @@ namespace api.Mappers
                 Name = userDto.Name,
                 Email = userDto.Email,
                 Role = userDto.Role,
-                CreatedAt = userDto.CreatedAt
+                Password = userDto.Password, // Store original password for Firebase auth
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
             };
         }
 
-        public static User ToUserFromLoginDto(this LoginUserRequestDto userDto)
+        public static string HashPassword(string password)
         {
-            return new User
-            {
-                Email = userDto.Email,
-            };
+            using var sha256 = SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hashedBytes);
+        }
+
+        public static bool VerifyPassword(string password, string storedHash)
+        {
+            var hashedInput = HashPassword(password);
+            return storedHash.Equals(hashedInput, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
