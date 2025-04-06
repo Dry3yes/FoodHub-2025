@@ -1,3 +1,12 @@
 backend/api/serviceAccountKey.json
-backend/api/bin/Debug/
-backend/api/obj/Debug/
+backend/api/bin/Debug/net9.0/api.dll
+backend/api/bin/Debug/net9.0/api.exe
+backend/api/bin/Debug/net9.0/api.pdb
+backend/api/obj/Debug/net9.0/api.AssemblyInfo.cs
+backend/api/obj/Debug/net9.0/api.AssemblyInfoInputs.cache
+backend/api/obj/Debug/net9.0/api.dll
+backend/api/obj/Debug/net9.0/api.pdb
+backend/api/obj/Debug/net9.0/api.sourcelink.json
+backend/api/obj/Debug/net9.0/apphost.exe
+backend/api/obj/Debug/net9.0/ref/api.dll
+backend/api/obj/Debug/net9.0/refint/api.dll
