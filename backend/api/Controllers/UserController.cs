@@ -206,48 +206,6 @@ namespace api.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("users/{userId}")]
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetUser(string userId)
-        {
-            try
-            {
-                var user = await _userRepository.GetByIdAsync(userId);
-                if (user == null)
-                {
-                    return NotFound(new { success = false, message = "User not found" });
-                }
-
-                // Only allow users to access their own data unless they're an admin
-                var userRole = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
-                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-
-                if (userRole != "Admin" && userIdClaim != userId)
-                {
-                    return Forbid();
-                }
-
-                var userResponse = user.ToUserDto();
-                return Ok(new
-                {
-                    success = true,
-                    data = userResponse
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving user: {UserId}", userId);
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "An error occurred while retrieving the user"
-                });
-            }
-        }
-
         private bool ValidateRole(string role)
         {
             var validRoles = new[] { "Admin", "User", "Seller" };

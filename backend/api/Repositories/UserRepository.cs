@@ -1,5 +1,4 @@
 using api.Interfaces;
-using api.Models;
 using api.Services;
 using api.Mappers;
 using Google.Cloud.Firestore;
