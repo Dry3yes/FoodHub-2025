@@ -3,6 +3,7 @@ using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace api.Controllers
 {
@@ -202,6 +203,93 @@ namespace api.Controllers
                 {
                     success = false,
                     message = "An error occurred while retrieving users"
+                });
+            }
+        }
+
+        [HttpPut]
+        [Route("users/{id}")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserRequestDto updateUserDto)
+        {
+            try
+            {
+                // Check if the user exists
+                var user = await _userRepository.GetByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                // Get current user info from token
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                // Security check: Only allow users to update their own data OR admins to update any user
+                if (currentUserId != id && currentUserRole != "Admin")
+                {
+                    return StatusCode(403, new { success = false, message = "You don't have permission to update this user" });
+                }
+
+                // Additional validation for role changes
+                if (!string.IsNullOrEmpty(updateUserDto.Role) &&
+                    updateUserDto.Role != user.Role &&
+                    currentUserRole != "Admin")
+                {
+                    return StatusCode(403, new { success = false, message = "Only administrators can change user roles" });
+                }
+
+                // Validate role if provided
+                if (!string.IsNullOrEmpty(updateUserDto.Role) && !ValidateRole(updateUserDto.Role))
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid role. Please provide a valid role (Admin, User, Seller)."
+                    });
+                }
+
+                // Update email check: Ensure new email is not already taken by someone else
+                if (!string.IsNullOrEmpty(updateUserDto.Email) &&
+                    !updateUserDto.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    var existingUser = await _userRepository.GetByEmailAsync(updateUserDto.Email);
+                    if (existingUser != null && existingUser.UserId != id)
+                    {
+                        return BadRequest(new { success = false, message = "Email is already registered by another user" });
+                    }
+                }
+
+                // Apply updates to user object
+                user.UpdateUserFromDto(updateUserDto);
+
+                // Save the updated user
+                var result = await _userRepository.UpdateUserAsync(user);
+                if (!result)
+                {
+                    return StatusCode(500, new { success = false, message = "Failed to update user" });
+                }
+
+                _logger.LogInformation("User updated successfully: {UserId}", id);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "User updated successfully",
+                    data = user.ToUserDto()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user: {UserId}", id);
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred while updating the user"
                 });
             }
         }

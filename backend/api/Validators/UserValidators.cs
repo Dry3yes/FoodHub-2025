@@ -31,6 +31,25 @@ namespace api.Validators
         }
     }
 
+    public class UpdateUserValidator : AbstractValidator<UpdateUserRequestDto>
+    {
+        public UpdateUserValidator()
+        {
+            RuleFor(x => x.Name)
+                .MinimumLength(2).WithMessage("Name must be at least 2 characters long")
+                .MaximumLength(50).WithMessage("Name cannot exceed 50 characters")
+                .When(x => !string.IsNullOrEmpty(x.Name));
+
+            RuleFor(x => x.Email)
+                .EmailAddress().WithMessage("Invalid email format")
+                .When(x => !string.IsNullOrEmpty(x.Email));
+
+            RuleFor(x => x.Role)
+                .Must(role => string.IsNullOrEmpty(role) || role == "Admin" || role == "User" || role == "Seller")
+                .WithMessage("Role must be either 'Admin', 'User', or 'Seller'");
+        }
+    }
+
     public class LoginUserValidator : AbstractValidator<LoginUserRequestDto>
     {
         public LoginUserValidator()

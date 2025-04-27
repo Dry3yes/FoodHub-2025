@@ -36,6 +36,28 @@ namespace api.Mappers
             };
         }
 
+        public static void UpdateUserFromDto(this User user, UpdateUserRequestDto updateDto)
+        {
+            // Only update properties that are provided in the DTO (not empty)
+            if (!string.IsNullOrEmpty(updateDto.Name))
+            {
+                user.Name = updateDto.Name;
+            }
+
+            if (!string.IsNullOrEmpty(updateDto.Email))
+            {
+                user.Email = updateDto.Email;
+            }
+
+            if (!string.IsNullOrEmpty(updateDto.Role))
+            {
+                user.Role = updateDto.Role;
+            }
+
+            // Always update IsActive flag since it has a default value
+            user.IsActive = updateDto.IsActive;
+        }
+
         public static string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
