@@ -1,0 +1,353 @@
+/* Main container */
+.find-store-page {
+  padding: 1rem;
+  position: relative;
+  /* Add top padding to account for fixed header height */
+  padding-top: 90px; /* 70px header height + 20px additional space */
+  min-height: calc(100vh - 90px); /* Subtract header height from viewport height */
+  /* Bottom padding for fixed button and to prevent footer overlap */
+  padding-bottom: 80px; /* Space for the fixed button and footer */
+}
+
+/* Category Filter Section */
+.category-filter {
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.category-scrollable {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  flex-wrap: nowrap;
+}
+
+.category-button {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px; /* Fully rounded */
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-button.selected {
+  background-color: #3490dc; /* Primary blue color */
+  color: white;
+  border: none;
+}
+
+.category-button.unselected {
+  background-color: white;
+  color: #3490dc;
+  border: 1px solid #3490dc;
+}
+
+/* Food Grid Section */
+.food-grid {
+  margin-left: 5%;
+  margin-right: 5%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .food-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .food-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.food-card {
+  background: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.food-card:hover {
+  transform: translateY(-4px);
+}
+
+.food-image-container {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+
+.food-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.food-info {
+  padding: 1rem;
+}
+
+.food-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.food-location {
+  color: #718096;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.food-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.star-icon {
+  color: #ecc94b; /* Yellow for star */
+}
+
+/* Inbox Button */
+.inbox-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: #3490dc;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  z-index: 10;
+}
+
+.inbox-button:hover {
+  background-color: #2779bd;
+}
+
+/* Chat container */
+.chat-container {
+  position: fixed;
+  bottom: 6rem;
+  right: 2rem;
+  width: 800px;
+  max-width: 90vw;
+  height: 500px;
+  max-height: 70vh;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background-color: #3490dc;
+  color: white;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.chat-header h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.chat-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left panel - Contacts */
+.chat-contacts {
+  width: 30%;
+  border-right: 1px solid #e2e8f0;
+  overflow-y: auto;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.contact-item:hover {
+  background-color: #f8fafc;
+}
+
+.contact-item.active {
+  background-color: #ebf5ff;
+  border-left: 3px solid #3490dc;
+}
+
+.contact-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #3490dc;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  margin-right: 0.75rem;
+}
+
+.contact-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.contact-name {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.contact-last-message {
+  font-size: 0.85rem;
+  color: #718096;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unread-badge {
+  background-color: #e53e3e;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Right panel - Messages */
+.chat-messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-header {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.message-list {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.message {
+  display: flex;
+  max-width: 70%;
+}
+
+.message.sent {
+  align-self: flex-end;
+}
+
+.message.received {
+  align-self: flex-start;
+}
+
+.message-content {
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+}
+
+.message.sent .message-content {
+  background-color: #3490dc;
+  color: white;
+  border-top-right-radius: 0;
+}
+
+.message.received .message-content {
+  background-color: #e2e8f0;
+  color: #1a202c;
+  border-top-left-radius: 0;
+}
+
+.message-content p {
+  margin: 0 0 5px 0;
+}
+
+.message-time {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  display: block;
+  text-align: right;
+}
+
+.message-input {
+  display: flex;
+  padding: 0.75rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.message-input input {
+  flex: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  margin-right: 0.5rem;
+}
+
+.message-input button {
+  background-color: #3490dc;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.no-chat-selected {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #718096;
+  font-style: italic;
+}
+

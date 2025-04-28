@@ -1,0 +1,122 @@
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    padding-top: 90px; /* Adjust this value based on the height of your header */
+    padding-bottom: 60px; /* Adjust this value based on the height of your footer */
+}
+
+/* Hero Section */
+.hero-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.hero-text {
+    max-width: 50%;
+}
+
+.hero-text p {
+    font-size: 18px;
+    color: #666;
+    margin: 10px 0;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.secondary {
+    background-color: #f8f9fa;
+    color: black;
+    border: 1px solid #ddd;
+}
+
+/* Hero Image Section */
+.hero-image {
+    padding: 5px;
+    position: relative;
+    max-width: 40%;
+}
+
+.hero-image img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.discover-menu {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: black;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Promo Section */
+.promo-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: 1200px;
+    padding: 20px;
+}
+
+.promo-card {
+    background: #222;
+    color: white;
+    margin: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 100%;
+}
+
+.promo-card img {
+    width: 100%;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.team-info {
+    display: flex;
+    flex-direction: row;
+}
+
+.team-info img {
+    width: 100%;
+    border-radius: 10px;
+    height: auto;
+}
+
+.SimpleStress,
+.OrderingFast,
+.SeamlessFood {
+    font-size: 50px;
+    font-weight: bold;
+    color: #333;
+    padding: 0;
+    margin: 0;
+}

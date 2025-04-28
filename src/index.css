@@ -11,3 +11,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Add these styles to ensure full height inheritance */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}

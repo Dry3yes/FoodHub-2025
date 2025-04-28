@@ -1,0 +1,240 @@
+/* General Page Layout */
+.LoginPage_Left,
+.RegisterPage_Left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    height: 100vh;
+    background-color: #fff;
+}
+
+.LoginRegis_RightSide {
+    background-image: url('/public/Images/Rectangle21.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 50%;
+    height: 100vh;
+    color: white;
+}
+
+.LoginForm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 80%;
+    max-width: 400px;
+}
+
+.LoginForm h3 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.LoginForm h6 {
+    font-size: 1rem;
+    font-weight: normal;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+.LoginForm label {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.LoginForm div {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+/* Form Styling */
+.RegisterForm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 80%;
+    max-width: 400px;
+}
+
+.RegisterForm h3 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.RegisterForm h6 {
+    font-size: 1rem;
+    font-weight: normal;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+.RegisterForm label {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.RegisterForm div {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+/* Input Fields */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    border-radius: 12px;
+    width: 94%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    outline: none;
+    transition: 0.3s ease-in-out;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #4a90e2;
+    box-shadow: 0px 0px 5px rgba(74, 144, 226, 0.5);
+}
+
+/* Placeholder Styling */
+input::placeholder {
+    color: #aaa;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* Sign In Button */
+.SubmitButton {
+    width: 100%;
+    padding: 12px;
+    background-color: black;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+}
+
+button:hover {
+    background-color: #333;
+}
+
+.MainLogo{
+    display: flex;
+    position: fixed;
+    height: 40px;
+    left: 20px; /* Adjust this value to match the padding in the header */
+    top: 15px; /* Adjust this value to match the height of the header */
+    z-index: 1000; /* Ensure it stays on top */
+}
+
+
+.LoginRegis_RightSide h2{
+    right: 10px;
+    top: 10px;
+}
+
+.GoogleLogo {
+    display: flex;
+    height: 30px;
+}
+
+.GoogleButton{
+    width: 100%;
+        background-color: black;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: 0.3s ease-in-out;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+}
+
+
+.DontHaveAccount,
+.AlreadyHaveAccount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.AlreadyHaveAccount a,
+.DontHaveAccount a {
+    display: flex;
+    padding-bottom: 5px;
+}
+
+.TopRight{
+    display: flex;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    padding-right: 10px;
+}
+
+.BotRight_Large1{
+    display: flex;
+    position: fixed;
+    bottom: 90px;
+    right: 10px;
+    font-size: 20px;
+    padding: 20px;
+}
+
+.BotRight_Large2 {
+    display: flex;
+    position: fixed;
+    bottom: 50px;
+    right: 10px;
+    font-size: 20px;
+    padding: 20px;
+}
+
+.BotRight{
+    display: flex;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 20px;
+    padding: 20px;  
+}
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    width: 100%;
+}
+
+.separator::before,
+.separator::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ccc;
+}
+
+.separator span {
+    padding: 0 10px;
+    font-size: 14px;
+    color: #777;
+}

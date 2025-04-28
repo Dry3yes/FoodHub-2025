@@ -1,0 +1,150 @@
+.home-container {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Fixed header styles */
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 70px;
+}
+
+/* Logo styles */
+.nav-logo img {
+    height: 40px;
+}
+
+/* Search input styling */
+.nav-logo.with-search {
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+/* Search section styling */
+.search-section {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.search-container {
+    margin-left: 10px;
+}
+
+.search-input {
+    border-radius: 20px;
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    width: 180px;
+    outline: none;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+/* Navigation links styles */
+.nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.nav-link:hover {
+    color: #007bff;
+}
+
+/* Right side actions */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    overflow: hidden;
+}
+
+.icon-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.nav-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+/* Auth buttons */
+.auth-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.signup-btn,
+.signin-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.signup-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.signin-btn {
+    background-color: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.signup-btn:hover {
+    background-color: #0069d9;
+}
+
+.signin-btn:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.main-content {
+    padding-top: 90px;
+}
