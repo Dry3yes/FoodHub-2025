@@ -174,6 +174,7 @@ builder.Services.AddSingleton<FirebaseAuthService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<ISellerApplicationRepository, SellerApplicationRepository>();
 
 builder.Services.AddCors(options =>
 {
