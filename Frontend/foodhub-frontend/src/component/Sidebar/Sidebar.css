@@ -1,0 +1,49 @@
+.sidebar {
+  width: 250px;
+  background: #f8f9fa;
+  padding: 20px;
+  height: 100vh;
+  position: fixed;
+  z-index: 10;
+  /* Hapus satu baris align-items yang ganda */
+  display: flex;
+  flex-direction: column; /* Pastikan sidebar bersifat vertikal */
+  justify-content: flex-start; /* Atur konten dari atas */
+}
+
+.sidebar h2 {
+  color: black;
+}
+
+.sidebar .highlight {
+  color: blue;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li {
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center; /* Menyelaraskan ikon dan teks secara vertikal */
+  gap: 0.5rem; /* Jarak antara ikon dan teks */
+}
+
+.sidebar ul .active 
+{
+  border-radius: 10px;
+  background: blue;
+  color: white;
+  font-weight: bold;
+}
+
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain; /* Pastikan gambar tetap proporsional */
+  margin-right: 0.5rem; /* Jarak antara ikon dan teks */
+}
