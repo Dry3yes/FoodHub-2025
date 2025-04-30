@@ -37,4 +37,5 @@ html, body, #root, .App {
   flex-direction: row;
   flex: 1; /* This makes it expand to fill available space */
   overflow: hidden; /* Prevents scrollbars if content is too large */
+  flex-direction: column;
 }
