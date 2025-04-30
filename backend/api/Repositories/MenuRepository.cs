@@ -68,5 +68,45 @@ namespace api.Repositories
             }
             throw new Exception("Menu not found");
         }
+
+        public async Task<IEnumerable<Menu>> SearchMenusAsync(string searchTerm, string? category = null, 
+            double? minPrice = null, double? maxPrice = null)
+        {
+            try
+            {
+                var query = _firestoreDb.Collection("Menus");
+                var snapshot = await query.GetSnapshotAsync();
+                
+                var results = snapshot.Documents
+                    .Where(u => u.Exists && u.Id != "init")
+                    .Select(u => u.ConvertTo<Menu>())
+                    .Where(menu => 
+                        menu.ItemName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        menu.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+                // Apply additional filters
+                if (!string.IsNullOrEmpty(category))
+                {
+                    results = results.Where(m => 
+                        m.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (minPrice.HasValue)
+                {
+                    results = results.Where(m => m.Price >= minPrice.Value);
+                }
+
+                if (maxPrice.HasValue)
+                {
+                    results = results.Where(m => m.Price <= maxPrice.Value);
+                }
+
+                return results.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

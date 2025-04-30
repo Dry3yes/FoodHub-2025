@@ -117,5 +117,44 @@ namespace api.Controllers
 
             return Ok(new { success = true, data = menuDtos });
         }
+
+        [HttpGet]
+        [Route("search-menus")]
+        [AllowAnonymous]
+        [ResponseCache(Duration = 30)]  // Cache for 30 seconds
+        public async Task<IActionResult> SearchMenus(
+            [FromQuery] string searchTerm,
+            [FromQuery] string? category = null,
+            [FromQuery] double? minPrice = null,
+            [FromQuery] double? maxPrice = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    return BadRequest(new { success = false, message = "Search term is required" });
+                }
+
+                var menus = await _menuRepository.SearchMenusAsync(searchTerm, category, minPrice, maxPrice);
+                
+                if (!menus.Any())
+                {
+                    return NotFound(new { success = false, message = "No menus found matching your criteria" });
+                }
+
+                var menuDtos = menus.Select(m => m.ToMenuDto());
+                
+                return Ok(new 
+                { 
+                    success = true, 
+                    data = menuDtos,
+                    totalResults = menuDtos.Count()
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error searching menus", error = ex.Message });
+            }
+        }
     }
 }

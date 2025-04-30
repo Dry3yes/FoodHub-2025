@@ -14,5 +14,7 @@ namespace api.Interfaces
         Task<Menu> UpdateMenuAsync(Menu menu);
         Task<bool> DeleteMenuAsync(int id);
         Task<IEnumerable<Menu>> GetMenusByCategoryAsync(string category);
+        Task<IEnumerable<Menu>> SearchMenusAsync(string searchTerm, string? category = null, 
+            double? minPrice = null, double? maxPrice = null);
     }
 }
