@@ -1,0 +1,20 @@
+{
+  "Version": 1,
+  "Hash": "FEOrIZDJZobrqWc0C3X5GvV4WaI0bTRMN4HBcvwR9Ic=",
+  "Source": "FoodHub Project",
+  "BasePath": "_content/FoodHub Project",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "FoodHub Project\\wwwroot",
+      "Source": "FoodHub Project",
+      "ContentRoot": "C:\\Users\\fendi\\source\\repos\\FoodHub Project\\FoodHub Project\\wwwroot\\",
+      "BasePath": "_content/FoodHub Project",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [],
+  "Endpoints": []
+}

@@ -1,0 +1,83 @@
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 200px; /* lebih kecil sedikit */
+  height: 250px; /* TETAP 250px */
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  background-color: white;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* biar kalo ada lebih gak ngacak */
+}
+
+.menu-item img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+
+.menu-item h3 {
+  font-size: 1rem;
+  margin: 4px 0;
+}
+
+.menu-item p {
+  font-size: 0.9rem;
+  margin: 2px 0;
+}
+
+.menu-item .price {
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+.menu-item .buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.menu-item button {
+  background: blue;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  border-radius: 4px;
+}
+
+.button-container {
+  margin-top: auto; /* ✅ Dorong tombol ke paling bawah */
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Jarak antar tombol */
+  margin-top: 20px; /* Biar ada jarak dari atas */
+}
+
+.update-button, .save-button {
+  background-color: blue;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.delete-button, .cancel-button {
+  background-color: red;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.menu-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
