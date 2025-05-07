@@ -12,8 +12,7 @@ namespace api.Validators
                 .Length(2, 100).WithMessage("Item name must be between 2 and 100 characters");
 
             RuleFor(x => x.Price)
-                .GreaterThan(0).WithMessage("Price must be greater than 0")
-                .LessThan(10000).WithMessage("Price must be less than 10000");
+                .GreaterThan(0).WithMessage("Price must be greater than 0");
 
             RuleFor(x => x.ImageURL)
                 .NotEmpty().WithMessage("Image URL is required")
@@ -22,12 +21,11 @@ namespace api.Validators
 
             RuleFor(x => x.Category)
                 .NotEmpty().WithMessage("Category is required")
-                .Must(category => new[] { "Appetizer", "Main Course", "Dessert", "Beverage" }.Contains(category))
-                .WithMessage("Category must be one of: Appetizer, Main Course, Dessert, Beverage");
+                .Must(category => new[] { "Makanan", "Minuman" }.Contains(category))
+                .WithMessage("Category must be one of: Makanan, Minuman");
 
             RuleFor(x => x.Stock)
-                .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative")
-                .LessThan(1000).WithMessage("Stock must be less than 1000");
+                .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative");
         }
     }
 
@@ -40,8 +38,7 @@ namespace api.Validators
                 .Length(2, 100).WithMessage("Item name must be between 2 and 100 characters");
 
             RuleFor(x => x.Price)
-                .GreaterThan(0).WithMessage("Price must be greater than 0")
-                .LessThan(10000).WithMessage("Price must be less than 10000");
+                .GreaterThan(0).WithMessage("Price must be greater than 0");
 
             RuleFor(x => x.ImageURL)
                 .NotEmpty().WithMessage("Image URL is required")
@@ -50,12 +47,11 @@ namespace api.Validators
 
             RuleFor(x => x.Category)
                 .NotEmpty().WithMessage("Category is required")
-                .Must(category => new[] { "Appetizer", "Main Course", "Dessert", "Beverage" }.Contains(category))
-                .WithMessage("Category must be one of: Appetizer, Main Course, Dessert, Beverage");
+                .Must(category => new[] { "Makanan", "Minuman" }.Contains(category))
+                .WithMessage("Category must be one of: Makanan, Minuman");
 
             RuleFor(x => x.Stock)
-                .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative")
-                .LessThan(1000).WithMessage("Stock must be less than 1000");
+                .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative");
         }
     }
 }

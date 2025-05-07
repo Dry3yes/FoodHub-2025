@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using api.Dtos.User;
 using api.Models;
 using System.Security.Cryptography;
@@ -15,11 +11,9 @@ namespace api.Mappers
         {
             return new UserDto
             {
-                UserId = userModel.UserId,
                 Name = userModel.Name,
                 Email = userModel.Email,
                 Role = userModel.Role,
-                CreatedAt = userModel.CreatedAt
             };
         }
 

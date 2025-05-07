@@ -7,6 +7,7 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var credentialPath = Path.Combine(Directory.GetCurrentDirectory(), "serviceAccountKey.json");
@@ -15,6 +16,7 @@ Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialP
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddEndpointsApiExplorer();
 
 // Add Response Compression
@@ -167,6 +169,15 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<ISellerApplicationRepository, SellerApplicationRepository>();
 
+builder.Services.AddSingleton<CloudflareClient>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var accountId = config["R2:ACCOUNT_ID"] ?? throw new ArgumentNullException("R2:ACCOUNT_ID", "R2:ACCOUNT_ID cannot be null");
+    var accessKey = config["R2:ACCESS_KEY"] ?? throw new ArgumentNullException("R2:ACCESS_KEY cannot be null");
+    var accessSecret = config["R2:SECRET_KEY"] ?? throw new ArgumentNullException("R2:SECRET_KEY cannot be null");
+    return new CloudflareClient(accountId, accessKey, accessSecret);
+});
+
 // Configure CORS
 builder.Services.AddCors(options =>
 {
@@ -174,7 +185,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
-                new[] { "http://localhost:3000", "http://localhost:5000" }
+                new[] { "http://localhost:3000", "http://localhost:5173" }
             )
             .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .WithHeaders("Authorization", "Content-Type")
@@ -199,10 +210,10 @@ app.UseMiddleware<RequestValidationMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseIpRateLimiting();
 
+app.UseCors("DefaultPolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors("DefaultPolicy");
 
 app.UseMiddleware<RequestLoggingMiddleware>();
 

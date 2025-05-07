@@ -1,17 +1,14 @@
 using System.Net;
-using System.Text.Json;
 
 namespace api.Middlewares
 {
     public class RequestValidationMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<RequestValidationMiddleware> _logger;
 
-        public RequestValidationMiddleware(RequestDelegate next, ILogger<RequestValidationMiddleware> logger)
+        public RequestValidationMiddleware(RequestDelegate next)
         {
             _next = next;
-            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -19,6 +16,14 @@ namespace api.Middlewares
             // Only check content type for methods that typically have a body
             if (IsMethodWithBody(context.Request.Method))
             {
+                // Allow multipart/form-data for specific endpoints
+                var path = context.Request.Path.Value?.ToLower();
+                if (path != null)
+                {
+                    await _next(context);
+                    return;
+                }
+
                 if (context.Request.ContentLength > 0 && !context.Request.HasJsonContentType())
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.UnsupportedMediaType;

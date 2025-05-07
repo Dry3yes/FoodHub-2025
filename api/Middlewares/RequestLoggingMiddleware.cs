@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace api.Middlewares
 {

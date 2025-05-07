@@ -1,6 +1,4 @@
-using Microsoft.Extensions.Configuration;
 using FirebaseAuth = Firebase.Auth;
-using FirebaseAdmin.Auth;
 
 namespace api.Services
 {

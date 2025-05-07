@@ -1,5 +1,3 @@
-using System;
-using System.ComponentModel.DataAnnotations;
 using Google.Cloud.Firestore;
 
 namespace api.Models
@@ -14,12 +12,9 @@ namespace api.Models
         public string FirebaseUid { get; set; } = string.Empty;
 
         [FirestoreProperty("name")]
-        [Required]
         public string Name { get; set; } = string.Empty;
 
         [FirestoreProperty("email")]
-        [Required]
-        [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
         [FirestoreProperty("passwordHash")]

@@ -1,6 +1,7 @@
 using api.Dtos.Menu;
 using api.Interfaces;
 using api.Mappers;
+using api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -13,9 +14,17 @@ namespace api.Controllers
     public class MenuController : ControllerBase
     {
         private readonly IMenuRepository _menuRepository;
-        public MenuController(IMenuRepository menuRepository)
+        private readonly CloudflareClient _cloudflareClient;
+        private readonly ILogger<MenuController> _logger;
+
+        public MenuController(
+            IMenuRepository menuRepository,
+            CloudflareClient cloudflareClient,
+            ILogger<MenuController> logger)
         {
             _menuRepository = menuRepository;
+            _cloudflareClient = cloudflareClient;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -117,5 +126,84 @@ namespace api.Controllers
 
             return Ok(new { success = true, data = menuDtos });
         }
+
+        [HttpPost]
+        [Route("upload-image")]
+        [Authorize(Roles = "Admin,Seller")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest(new { success = false, message = "No file uploaded" });
+                }
+
+                // Validate file type
+                var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                if (!allowedTypes.Contains(file.ContentType.ToLower()))
+                {
+                    return BadRequest(new { success = false, message = "Invalid file type. Only JPEG, PNG, and GIF are allowed." });
+                }
+
+                // Generate unique filename
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+
+                using (var stream = file.OpenReadStream())
+                {
+                    await _cloudflareClient.UploadImage(stream, fileName, file.ContentType);
+                }
+
+                // Construct the full URL for the uploaded image
+                var imageUrl = $"https://pub-660f0d3867ae4ac3ad910f4e67f967cd.r2.dev/{fileName}";
+
+                _logger.LogInformation("Image uploaded successfully: {FileName}", fileName);
+
+                return Ok(new { success = true, data = new { url = imageUrl } });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading image");
+                return StatusCode(500, new { success = false, message = "Error uploading image" });
+            }
+        }
+
+        [HttpDelete]
+        [Route("delete-image/{imageName}")]
+        [Authorize(Roles = "Admin,Seller")]
+        public async Task<IActionResult> DeleteImage(string imageName)
+        {
+            try
+            {
+                await _cloudflareClient.DeleteImage(imageName);
+                return Ok(new { success = true, message = "Image deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting image: {ImageName}", imageName);
+                return StatusCode(500, new { success = false, message = "Error deleting image" });
+            }
+        }
+
+        [HttpGet]
+        [Route("get-image-url/{imageName}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetImageUrl(string imageName)
+        {
+            try
+            {
+                var imageUrl = await _cloudflareClient.GetImageUrl(imageName);
+                return Ok(new { success = true, data = new { url = imageUrl } });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving image URL: {ImageName}", imageName);
+                return StatusCode(500, new { success = false, message = "Error retrieving image URL" });
+            }
+        }
+
+        
     }
 }
