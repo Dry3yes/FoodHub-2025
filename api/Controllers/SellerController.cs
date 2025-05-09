@@ -1,6 +1,8 @@
 using api.Dtos.Seller;
 using api.Interfaces;
 using api.Models;
+using api.Services;
+using api.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -12,24 +14,27 @@ namespace api.Controllers
     [ApiController]
     public class SellerController : ControllerBase
     {
-        private readonly ISellerApplicationRepository _sellerRepo;
+        private readonly ISellerRepository _sellerRepo;
         private readonly IUserRepository _userRepo;
+        private readonly IImageService _imageService;
         private readonly ILogger<SellerController> _logger;
 
         public SellerController(
-            ISellerApplicationRepository sellerRepo,
+            ISellerRepository sellerRepo,
             IUserRepository userRepo,
+            IImageService imageService,
             ILogger<SellerController> logger)
         {
             _sellerRepo = sellerRepo;
             _userRepo = userRepo;
+            _imageService = imageService;
             _logger = logger;
         }
 
         [HttpPost]
         [Route("seller-application")]
         [Authorize]
-        public async Task<IActionResult> ApplyForSeller([FromBody] CreateSellerApplicationDto dto)
+        public async Task<IActionResult> ApplyForSeller([FromForm] CreateSellerApplicationDto sellerDto, IFormFile image)
         {
             try
             {
@@ -56,12 +61,18 @@ namespace api.Controllers
                     return BadRequest(new { success = false, message = "User already has a pending application" });
                 }
 
+                string? imageUrl = null;
+                if (image != null)
+                {
+                    imageUrl = await _imageService.UploadImageAsync(image);
+                }
+
                 var application = new SellerApplication
                 {
                     UserId = user.UserId,
-                    StoreName = dto.StoreName,
-                    StoreDescription = dto.StoreDescription,
-                    IdentificationUrl = dto.IdentificationUrl,
+                    StoreName = sellerDto.StoreName,
+                    UserIdentificationNumber = SellerMappers.HashIdentificationNumber(sellerDto.UserIdentificationNumber),
+                    IdentificationUrl = imageUrl ?? string.Empty,
                     Status = "Pending",
                     CreatedAt = DateTime.UtcNow
                 };
@@ -102,7 +113,7 @@ namespace api.Controllers
         [HttpPut]
         [Route("seller-applications/{id}/process")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ProcessApplication(string id, [FromBody] ProcessApplicationDto dto)
+        public async Task<IActionResult> ProcessApplication(string id, [FromBody] ProcessApplicationDto sellerDto)
         {
             try
             {
@@ -117,12 +128,12 @@ namespace api.Controllers
                     return BadRequest(new { success = false, message = "Application already processed" });
                 }
 
-                application.Status = dto.Status;
-                application.AdminMessage = dto.Message;
+                application.Status = sellerDto.Status;
+                application.AdminMessage = sellerDto.Message;
                 application.ProcessedAt = DateTime.UtcNow;
 
-                // If approved, update user role to Seller
-                if (dto.Status == "Approved")
+                // If approved, update user role to Seller and delete the identification image
+                if (sellerDto.Status == "Approved")
                 {
                     var user = await _userRepo.GetByIdAsync(application.UserId);
                     if (user != null)
@@ -130,11 +141,37 @@ namespace api.Controllers
                         user.Role = "Seller";
                         await _userRepo.UpdateUserAsync(user);
                     }
+
+                    // Create a new seller document in the Sellers collection
+                    var seller = new SellerApplication
+                    {
+                        UserId = application.UserId,
+                        StoreName = application.StoreName,
+                        UserIdentificationNumber = application.UserIdentificationNumber,
+                        Status = "Active",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await _sellerRepo.CreateAsync(seller.ToFirestoreDto());
+
+                    // Delete the identification image if it exists
+                    if (!string.IsNullOrEmpty(application.IdentificationUrl))
+                    {
+                        try
+                        {
+                            var imageName = Path.GetFileName(application.IdentificationUrl);
+                            await _imageService.DeleteImageAsync(imageName);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error deleting identification image for application {Id}", id);
+                            // Continue with the approval process even if image deletion fails
+                        }
+                    }
                 }
 
                 await _sellerRepo.UpdateApplicationAsync(application);
 
-                return Ok(new { success = true, message = $"Application {dto.Status.ToLower()}" });
+                return Ok(new { success = true, message = $"Application {sellerDto.Status.ToLower()}" });
             }
             catch (Exception ex)
             {

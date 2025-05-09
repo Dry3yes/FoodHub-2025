@@ -15,9 +15,9 @@ namespace api.Validators
                 .GreaterThan(0).WithMessage("Price must be greater than 0");
 
             RuleFor(x => x.ImageURL)
-                .NotEmpty().WithMessage("Image URL is required")
-                .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
-                .WithMessage("Image URL must be a valid URL");
+                .Must(uri => string.IsNullOrEmpty(uri) || Uri.TryCreate(uri, UriKind.Absolute, out _))
+                .WithMessage("Image URL must be a valid URL")
+                .When(x => !string.IsNullOrEmpty(x.ImageURL));
 
             RuleFor(x => x.Category)
                 .NotEmpty().WithMessage("Category is required")

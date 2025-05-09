@@ -14,34 +14,50 @@ namespace api.Controllers
     public class MenuController : ControllerBase
     {
         private readonly IMenuRepository _menuRepository;
-        private readonly CloudflareClient _cloudflareClient;
+        private readonly IImageService _imageService;
         private readonly ILogger<MenuController> _logger;
 
         public MenuController(
             IMenuRepository menuRepository,
-            CloudflareClient cloudflareClient,
+            IImageService imageService,
             ILogger<MenuController> logger)
         {
             _menuRepository = menuRepository;
-            _cloudflareClient = cloudflareClient;
+            _imageService = imageService;
             _logger = logger;
         }
 
         [HttpPost]
         [Route("create-menu")]
         [Authorize(Roles = "Admin,Seller")]
-        public async Task<IActionResult> Create([FromBody] CreateMenuRequestDto menuDto)
+        public async Task<IActionResult> Create([FromForm] CreateMenuRequestDto menuDto, IFormFile image)
         {
-            var items = await _menuRepository.GetAllMenusAsync();
-            int newItemId = items.Any() ? items.Max(m => m.ItemId) + 1 : 1;
+            try
+            {
+                // Upload image first
+                string? imageUrl = null;
+                if (image != null)
+                {
+                    imageUrl = await _imageService.UploadImageAsync(image);
+                }
 
-            var menuModel = menuDto.ToMenuFromCreateDto();
-            menuModel.CreatedAt = menuModel.CreatedAt.ToUniversalTime();
-            menuModel.ItemId = newItemId;
+                var menuModel = menuDto.ToMenuFromCreateDto();
+                menuModel.CreatedAt = menuModel.CreatedAt.ToUniversalTime();
+                menuModel.ImageURL = imageUrl ?? string.Empty;
 
-            await _menuRepository.CreateMenuAsync(menuModel);
+                await _menuRepository.CreateMenuAsync(menuModel);
 
-            return Ok(new { success = true, message = "Menu created successfully", itemId = newItemId });
+                return Ok(new { success = true, message = "Menu created successfully", data = new { imageUrl } });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating menu");
+                return StatusCode(500, new { success = false, message = "Error creating menu" });
+            }
         }
 
         [HttpGet]
@@ -87,7 +103,6 @@ namespace api.Controllers
             }
 
             var updatedMenu = menuDto.ToMenuFromUpdateDto();
-            updatedMenu.ItemId = id;
             updatedMenu.CreatedAt = menu.CreatedAt.ToUniversalTime();
 
             await _menuRepository.UpdateMenuAsync(updatedMenu);
@@ -127,66 +142,6 @@ namespace api.Controllers
             return Ok(new { success = true, data = menuDtos });
         }
 
-        [HttpPost]
-        [Route("upload-image")]
-        [Authorize(Roles = "Admin,Seller")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UploadImage(IFormFile file)
-        {
-            try
-            {
-                if (file == null || file.Length == 0)
-                {
-                    return BadRequest(new { success = false, message = "No file uploaded" });
-                }
-
-                // Validate file type
-                var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
-                if (!allowedTypes.Contains(file.ContentType.ToLower()))
-                {
-                    return BadRequest(new { success = false, message = "Invalid file type. Only JPEG, PNG, and GIF are allowed." });
-                }
-
-                // Generate unique filename
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-
-                using (var stream = file.OpenReadStream())
-                {
-                    await _cloudflareClient.UploadImage(stream, fileName, file.ContentType);
-                }
-
-                // Construct the full URL for the uploaded image
-                var imageUrl = $"https://pub-660f0d3867ae4ac3ad910f4e67f967cd.r2.dev/{fileName}";
-
-                _logger.LogInformation("Image uploaded successfully: {FileName}", fileName);
-
-                return Ok(new { success = true, data = new { url = imageUrl } });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error uploading image");
-                return StatusCode(500, new { success = false, message = "Error uploading image" });
-            }
-        }
-
-        [HttpDelete]
-        [Route("delete-image/{imageName}")]
-        [Authorize(Roles = "Admin,Seller")]
-        public async Task<IActionResult> DeleteImage(string imageName)
-        {
-            try
-            {
-                await _cloudflareClient.DeleteImage(imageName);
-                return Ok(new { success = true, message = "Image deleted successfully" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting image: {ImageName}", imageName);
-                return StatusCode(500, new { success = false, message = "Error deleting image" });
-            }
-        }
-
         [HttpGet]
         [Route("get-image-url/{imageName}")]
         [AllowAnonymous]
@@ -194,7 +149,7 @@ namespace api.Controllers
         {
             try
             {
-                var imageUrl = await _cloudflareClient.GetImageUrl(imageName);
+                var imageUrl = await _imageService.GetImageUrlAsync(imageName);
                 return Ok(new { success = true, data = new { url = imageUrl } });
             }
             catch (Exception ex)
@@ -203,7 +158,5 @@ namespace api.Controllers
                 return StatusCode(500, new { success = false, message = "Error retrieving image URL" });
             }
         }
-
-        
     }
 }

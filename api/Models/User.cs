@@ -24,7 +24,7 @@ namespace api.Models
         public string Password { get; set; } = string.Empty;
 
         [FirestoreProperty("role")]
-        public string Role { get; set; } = "User";
+        public string Role { get; set; } = string.Empty;
 
         [FirestoreProperty("refreshToken")]
         public string RefreshToken { get; set; } = string.Empty;

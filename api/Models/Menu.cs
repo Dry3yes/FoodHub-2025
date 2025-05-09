@@ -5,8 +5,8 @@ namespace api.Models
     [FirestoreData]
     public class Menu
     {
-        [FirestoreProperty]
-        public int ItemId { get; set; }
+        [FirestoreDocumentId]
+        public string Id { get; set; } = string.Empty;
 
         [FirestoreProperty]
         public string ItemName { get; set; } = string.Empty;

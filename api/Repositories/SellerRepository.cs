@@ -4,30 +4,47 @@ using Google.Cloud.Firestore;
 
 namespace api.Repositories
 {
-    public class SellerApplicationRepository : ISellerApplicationRepository
+    public class SellerRepository : ISellerRepository
     {
         private readonly FirestoreDb _firestoreDb;
-        private readonly ILogger<SellerApplicationRepository> _logger;
+        private readonly ILogger<SellerRepository> _logger;
 
-        public SellerApplicationRepository(FirestoreDb firestoreDb, ILogger<SellerApplicationRepository> logger)
+        public SellerRepository(FirestoreDb firestoreDb, ILogger<SellerRepository> logger)
         {
             _firestoreDb = firestoreDb;
             _logger = logger;
         }
 
-        public async Task<SellerApplication> CreateApplicationAsync(SellerApplication application)
+        public async Task<SellerApplication> CreateApplicationAsync(SellerApplication seller)
         {
             try
             {
-                application.ApplicationId = Guid.NewGuid().ToString();
+                seller.ApplicationId = Guid.NewGuid().ToString();
                 await _firestoreDb.Collection("SellerApplications")
-                    .Document(application.ApplicationId)
-                    .SetAsync(application);
-                return application;
+                    .Document(seller.ApplicationId)
+                    .SetAsync(seller);
+                return seller;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating seller application for user: {UserId}", application.UserId);
+                _logger.LogError(ex, "Error creating seller application for user: {UserId}", seller.UserId);
+                throw;
+            }
+        }
+
+        public async Task<Seller> CreateAsync(Seller seller)
+        {
+            try
+            {
+                seller.SellerId = DateTime.UtcNow.Ticks.ToString() + "-" + Guid.NewGuid().ToString("N").Substring(0, 8);
+                await _firestoreDb.Collection("Sellers")
+                    .Document(seller.SellerId)
+                    .SetAsync(seller);
+                return seller;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating seller: {UserId}", seller.UserId);
                 throw;
             }
         }
@@ -83,19 +100,37 @@ namespace api.Repositories
             }
         }
 
-        public async Task<bool> UpdateApplicationAsync(SellerApplication application)
+        public async Task<bool> UpdateApplicationAsync(SellerApplication seller)
         {
             try
             {
                 await _firestoreDb.Collection("SellerApplications")
-                    .Document(application.ApplicationId)
-                    .SetAsync(application, SetOptions.MergeAll);
+                    .Document(seller.ApplicationId)
+                    .SetAsync(seller, SetOptions.MergeAll);
+                await DeleteFieldAsync("SellerApplications", seller.ApplicationId, "IdentificationUrl");
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating seller application: {Id}", application.ApplicationId);
+                _logger.LogError(ex, "Error updating seller application: {Id}", seller.ApplicationId);
                 throw;
+            }
+        }
+
+        public async Task<bool> DeleteFieldAsync(string collection, string document, string field)
+        {
+            try
+            {
+                await _firestoreDb.Collection(collection).Document(document).UpdateAsync(new Dictionary<string, object>
+                {
+                    { field, FieldValue.Delete }
+                });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting field: {Collection} {Document} {Field}", collection, document, field);
+                return false;
             }
         }
     }

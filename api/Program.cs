@@ -167,7 +167,8 @@ builder.Services.AddSingleton<FirebaseAuthService>();
 // Register repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
-builder.Services.AddScoped<ISellerApplicationRepository, SellerApplicationRepository>();
+builder.Services.AddScoped<ISellerRepository, SellerRepository>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddSingleton<CloudflareClient>(sp =>
 {

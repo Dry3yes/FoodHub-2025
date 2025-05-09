@@ -6,6 +6,9 @@ namespace api.Models
     public class SellerApplication
     {
         [FirestoreDocumentId]
+        public string SellerId { get; set; } = string.Empty;
+
+        [FirestoreDocumentId]
         public string ApplicationId { get; set; } = string.Empty;
 
         [FirestoreProperty]
@@ -15,7 +18,7 @@ namespace api.Models
         public string StoreName { get; set; } = string.Empty;
 
         [FirestoreProperty]
-        public string StoreDescription { get; set; } = string.Empty;
+        public string UserIdentificationNumber { get; set; } = string.Empty;
 
         [FirestoreProperty]
         public string IdentificationUrl { get; set; } = string.Empty;
@@ -31,5 +34,27 @@ namespace api.Models
 
         [FirestoreProperty]
         public DateTime? ProcessedAt { get; set; }
+    }
+
+    [FirestoreData]
+    public class Seller
+    {
+        [FirestoreDocumentId]
+        public string SellerId { get; set; } = string.Empty;
+
+        [FirestoreProperty]
+        public string UserId { get; set; } = string.Empty;
+
+        [FirestoreProperty]
+        public string StoreName { get; set; } = string.Empty;
+
+        [FirestoreProperty]
+        public string UserIdentificationNumber { get; set; } = string.Empty;
+
+        [FirestoreProperty]
+        public string Status { get; set; } = string.Empty;
+
+        [FirestoreProperty]
+        public DateTime CreatedAt { get; set; }
     }
 }

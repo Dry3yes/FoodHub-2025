@@ -14,7 +14,9 @@ namespace api.Repositories
 
         public async Task<Menu> CreateMenuAsync(Menu menu)
         {
-            await _firestoreDb.Collection("Menus").Document(menu.ItemId.ToString()).SetAsync(menu);
+            var docRef = _firestoreDb.Collection("Menus").Document();
+            menu.Id = docRef.Id;
+            await docRef.SetAsync(menu);
             return menu;
         }
 
@@ -59,7 +61,7 @@ namespace api.Repositories
 
         public async Task<Menu> UpdateMenuAsync(Menu menu)
         {
-            var menuRef = _firestoreDb.Collection("Menus").Document(menu.ItemId.ToString());
+            var menuRef = _firestoreDb.Collection("Menus").Document(menu.Id);
             var snapshot = await menuRef.GetSnapshotAsync();
             if (snapshot.Exists)
             {
