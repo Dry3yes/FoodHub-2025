@@ -18,17 +18,20 @@ namespace api.Controllers
         private readonly IUserRepository _userRepo;
         private readonly IImageService _imageService;
         private readonly ILogger<SellerController> _logger;
+        private readonly FirebaseAuthService _firebaseAuthService;
 
         public SellerController(
             ISellerRepository sellerRepo,
             IUserRepository userRepo,
             IImageService imageService,
-            ILogger<SellerController> logger)
+            ILogger<SellerController> logger,
+            FirebaseAuthService firebaseAuthService)
         {
             _sellerRepo = sellerRepo;
             _userRepo = userRepo;
             _imageService = imageService;
             _logger = logger;
+            _firebaseAuthService = firebaseAuthService;
         }
 
         [HttpPost]
@@ -140,6 +143,9 @@ namespace api.Controllers
                     {
                         user.Role = "Seller";
                         await _userRepo.UpdateUserAsync(user);
+                        
+                        // Update Firebase Authentication custom claims
+                        await _firebaseAuthService.SetUserRoleAsync(user.FirebaseUid, "Seller");
                     }
 
                     // Create a new seller document in the Sellers collection

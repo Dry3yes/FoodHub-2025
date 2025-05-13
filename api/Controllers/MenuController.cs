@@ -29,7 +29,7 @@ namespace api.Controllers
 
         [HttpPost]
         [Route("create-menu")]
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         public async Task<IActionResult> Create([FromForm] CreateMenuRequestDto menuDto, IFormFile image)
         {
             try
@@ -93,7 +93,7 @@ namespace api.Controllers
 
         [HttpPut]
         [Route("update-menu/{id}")]
-        [Authorize(Roles = "Admin,Seller")]
+        [Authorize(Roles = "Seller")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateMenuRequestDto menuDto)
         {
             var menu = await _menuRepository.GetMenuByIdAsync(id);
@@ -112,7 +112,7 @@ namespace api.Controllers
 
         [HttpDelete]
         [Route("delete-menu/{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Seller")]
         public async Task<IActionResult> Delete(int id)
         {
             var menu = await _menuRepository.GetMenuByIdAsync(id);
