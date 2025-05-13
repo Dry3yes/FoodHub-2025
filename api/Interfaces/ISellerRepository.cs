@@ -11,5 +11,8 @@ namespace api.Interfaces
         Task<IEnumerable<SellerApplication>> GetAllApplicationsAsync(string status = "");
         Task<bool> UpdateApplicationAsync(SellerApplication seller);
         Task<bool> DeleteFieldAsync(string collection, string document, string field);
+        Task<IEnumerable<Seller>> GetAllAsync();
+        Task<IEnumerable<object>> GetStoreNamesAsync();
+        Task<bool> UpdateSellerAsync(Seller seller);
     }
 }

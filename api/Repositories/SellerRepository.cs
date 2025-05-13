@@ -133,5 +133,55 @@ namespace api.Repositories
                 return false;
             }
         }
+
+        public async Task<IEnumerable<Seller>> GetAllAsync()
+        {
+            try
+            {
+                var query = _firestoreDb.Collection("Sellers");
+                var snapshot = await query.GetSnapshotAsync();
+                return snapshot.Documents.Select(d => d.ConvertTo<Seller>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting sellers");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<object>> GetStoreNamesAsync()
+        {
+            try
+            {
+                var query = _firestoreDb.Collection("Sellers");
+                var snapshot = await query.GetSnapshotAsync();
+                return snapshot.Documents.Select(d => new { 
+                    SellerId = d.Id, 
+                    StoreName = d.GetValue<string>("StoreName"),
+                    StoreImageUrl = d.GetValue<string>("StoreImageUrl") 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting store names");
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateSellerAsync(Seller seller)
+        {
+            try
+            {
+                await _firestoreDb.Collection("Sellers")
+                    .Document(seller.SellerId)
+                    .SetAsync(seller, SetOptions.MergeAll);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating seller: {Id}", seller.SellerId);
+                throw;
+            }
+        }
     }
 }

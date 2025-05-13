@@ -154,6 +154,7 @@ namespace api.Controllers
                         UserId = application.UserId,
                         StoreName = application.StoreName,
                         UserIdentificationNumber = application.UserIdentificationNumber,
+                        StoreImageUrl = string.Empty, // Initialize with empty string
                         Status = "Active",
                         CreatedAt = DateTime.UtcNow
                     };
@@ -183,6 +184,81 @@ namespace api.Controllers
             {
                 _logger.LogError(ex, "Error processing seller application: {Id}", id);
                 return StatusCode(500, new { success = false, message = "Error processing application" });
+            }
+        }
+
+        [HttpGet]
+        [Route("get-stores")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetStores()
+        {
+            try
+            {
+                var stores = await _sellerRepo.GetStoreNamesAsync();
+                return Ok(new { success = true, data = stores });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving stores");
+                return StatusCode(500, new { success = false, message = "Error retrieving stores" });
+            }
+        }
+
+        [HttpPost]
+        [Route("upload-store-image")]
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> UploadStoreImage(IFormFile image)
+        {
+            try
+            {
+                // Get Firebase UID from claims
+                var firebaseUid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(firebaseUid))
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated" });
+                }
+
+                // Get the actual user with DocumentId from Firestore
+                var users = await _userRepo.GetAllAsync();
+                var user = users.FirstOrDefault(u => u.FirebaseUid == firebaseUid);
+
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                // Get seller record
+                var sellers = await _sellerRepo.GetAllAsync();
+                var seller = sellers.FirstOrDefault(s => s.UserId == user.UserId);
+
+                if (seller == null)
+                {
+                    return NotFound(new { success = false, message = "Seller not found" });
+                }
+
+                if (image == null)
+                {
+                    return BadRequest(new { success = false, message = "No image provided" });
+                }
+
+                // Upload the image
+                string imageUrl = await _imageService.UploadImageAsync(image);
+
+                // Update seller with image URL
+                seller.StoreImageUrl = imageUrl;
+                await _sellerRepo.UpdateSellerAsync(seller);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Store image uploaded successfully",
+                    imageUrl = imageUrl
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading store image");
+                return StatusCode(500, new { success = false, message = "Error uploading store image" });
             }
         }
     }

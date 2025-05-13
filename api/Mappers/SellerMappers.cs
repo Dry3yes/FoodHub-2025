@@ -31,6 +31,7 @@ namespace api.Mappers
                 UserId = seller.UserId,
                 StoreName = seller.StoreName,
                 UserIdentificationNumber = seller.UserIdentificationNumber,
+                StoreImageUrl = seller.StoreImageUrl ?? string.Empty,
                 Status = seller.Status,
                 CreatedAt = seller.CreatedAt
             };

@@ -24,6 +24,9 @@ namespace api.Models
         public string IdentificationUrl { get; set; } = string.Empty;
 
         [FirestoreProperty]
+        public string StoreImageUrl { get; set; } = string.Empty;
+
+        [FirestoreProperty]
         public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected
 
         [FirestoreProperty]
@@ -50,6 +53,9 @@ namespace api.Models
 
         [FirestoreProperty]
         public string UserIdentificationNumber { get; set; } = string.Empty;
+
+        [FirestoreProperty]
+        public string StoreImageUrl { get; set; } = string.Empty;
 
         [FirestoreProperty]
         public string Status { get; set; } = string.Empty;
