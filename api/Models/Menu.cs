@@ -9,6 +9,12 @@ namespace api.Models
         public string Id { get; set; } = string.Empty;
 
         [FirestoreProperty]
+        public string SellerId { get; set; } = string.Empty;
+
+        [FirestoreProperty]
+        public string StoreName { get; set; } = string.Empty;
+
+        [FirestoreProperty]
         public string ItemName { get; set; } = string.Empty;
 
         [FirestoreProperty]

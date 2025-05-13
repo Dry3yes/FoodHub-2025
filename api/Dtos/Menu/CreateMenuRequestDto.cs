@@ -8,5 +8,6 @@ namespace api.Dtos.Menu
         public string Category { get; set; } = string.Empty;
         public int Stock { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        // SellerId and StoreName will be set by the controller based on the authenticated seller
     }
 }

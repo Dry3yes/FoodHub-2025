@@ -20,9 +20,9 @@ namespace api.Repositories
             return menu;
         }
 
-        public async Task<bool> DeleteMenuAsync(int id)
+        public async Task<bool> DeleteMenuAsync(string id)
         {
-            var menuRef = _firestoreDb.Collection("Menus").Document(id.ToString());
+            var menuRef = _firestoreDb.Collection("Menus").Document(id);
             var snapshot = await menuRef.GetSnapshotAsync();
             if (snapshot.Exists)
             {
@@ -41,9 +41,9 @@ namespace api.Repositories
                 .ToList();
         }
 
-        public async Task<Menu?> GetMenuByIdAsync(int id)
+        public async Task<Menu?> GetMenuByIdAsync(string id)
         {
-            var menuRef = _firestoreDb.Collection("Menus").Document(id.ToString());
+            var menuRef = _firestoreDb.Collection("Menus").Document(id);
             var snapshot = await menuRef.GetSnapshotAsync();
             if (snapshot.Exists)
             {
@@ -55,6 +55,13 @@ namespace api.Repositories
         public async Task<IEnumerable<Menu>> GetMenusByCategoryAsync(string category)
         {
             var query = _firestoreDb.Collection("Menus").WhereEqualTo("Category", category);
+            var snapshot = await query.GetSnapshotAsync();
+            return snapshot.Documents.Select(doc => doc.ConvertTo<Menu>()).ToList();
+        }
+        
+        public async Task<IEnumerable<Menu>> GetMenusBySellerIdAsync(string sellerId)
+        {
+            var query = _firestoreDb.Collection("Menus").WhereEqualTo("SellerId", sellerId);
             var snapshot = await query.GetSnapshotAsync();
             return snapshot.Documents.Select(doc => doc.ConvertTo<Menu>()).ToList();
         }
