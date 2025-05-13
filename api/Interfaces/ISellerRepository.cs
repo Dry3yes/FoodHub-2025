@@ -14,5 +14,7 @@ namespace api.Interfaces
         Task<IEnumerable<Seller>> GetAllAsync();
         Task<IEnumerable<object>> GetStoreNamesAsync();
         Task<bool> UpdateSellerAsync(Seller seller);
+        Task<object?> GetStoreByIdAsync(string sellerId);
+        Task<Seller?> GetSellerByUserIdAsync(string userId);
     }
 }

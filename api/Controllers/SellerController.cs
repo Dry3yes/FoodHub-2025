@@ -204,6 +204,31 @@ namespace api.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("get-store/{sellerId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetStoreById(string sellerId)
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving store details for sellerId: {SellerId}", sellerId);
+                var store = await _sellerRepo.GetStoreByIdAsync(sellerId);
+                
+                if (store == null)
+                {
+                    _logger.LogWarning("Store not found for sellerId: {SellerId}", sellerId);
+                    return NotFound(new { success = false, message = "Store not found" });
+                }
+                
+                return Ok(new { success = true, data = store });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving store with ID {SellerId}", sellerId);
+                return StatusCode(500, new { success = false, message = "Error retrieving store details" });
+            }
+        }
+
         [HttpPost]
         [Route("upload-store-image")]
         [Authorize(Roles = "Seller")]

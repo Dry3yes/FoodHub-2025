@@ -56,11 +56,11 @@ namespace api.Controllers
                     return NotFound(new { success = false, message = "User not found" });
                 }
 
-                // Get seller application information
-                var sellerApplication = await _sellerRepository.GetApplicationByUserIdAsync(user.UserId);
-                if (sellerApplication == null || sellerApplication.Status != "Approved")
+                // Get seller information based on the UserId
+                var sellerEntity = await _sellerRepository.GetSellerByUserIdAsync(user.UserId);
+                if (sellerEntity == null)
                 {
-                    return NotFound(new { success = false, message = "Seller not found or not yet approved. You may need to apply to become a seller first." });
+                    return NotFound(new { success = false, message = "Seller not found for this user. You may need to apply to become a seller first." });
                 }
 
                 // Upload image first
@@ -74,9 +74,9 @@ namespace api.Controllers
                 menuModel.CreatedAt = menuModel.CreatedAt.ToUniversalTime();
                 menuModel.ImageURL = imageUrl ?? string.Empty;
                 
-                // Set seller information
-                menuModel.SellerId = sellerApplication.ApplicationId; // Using ApplicationId as SellerId
-                menuModel.StoreName = sellerApplication.StoreName;
+                // Set seller information directly from the seller entity
+                menuModel.SellerId = sellerEntity.SellerId;
+                menuModel.StoreName = sellerEntity.StoreName;
 
                 await _menuRepository.CreateMenuAsync(menuModel);
 
@@ -264,6 +264,32 @@ namespace api.Controllers
             {
                 _logger.LogError(ex, "Error retrieving image URL: {ImageName}", imageName);
                 return StatusCode(500, new { success = false, message = "Error retrieving image URL" });
+            }
+        }
+
+        [HttpGet]
+        [Route("get-menus-by-store/{sellerId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetMenuItemsByStore(string sellerId)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching menus for seller ID: {SellerId}", sellerId);
+                var storeMenus = await _menuRepository.GetMenusBySellerIdAsync(sellerId);
+                if (!storeMenus.Any())
+                {
+                    _logger.LogInformation("No menus found for seller ID: {SellerId}", sellerId);
+                    return NotFound(new { success = false, message = "No menus found for this store" });
+                }
+                var menuDtos = storeMenus.Select(m => m.ToMenuDto()).ToList();
+                _logger.LogInformation("Successfully retrieved {Count} menus for seller ID: {SellerId}", 
+                                     menuDtos.Count, sellerId);
+                return Ok(new { success = true, data = menuDtos });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving menus for store {SellerId}", sellerId);
+                return StatusCode(500, new { success = false, message = "Error retrieving menus for store" });
             }
         }
     }

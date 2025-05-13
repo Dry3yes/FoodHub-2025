@@ -183,5 +183,62 @@ namespace api.Repositories
                 throw;
             }
         }
+
+        public async Task<object?> GetStoreByIdAsync(string sellerId)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching store details for sellerId: {SellerId}", sellerId);
+                var snapshot = await _firestoreDb.Collection("Sellers")
+                    .Document(sellerId)
+                    .GetSnapshotAsync();
+                
+                if (!snapshot.Exists)
+                {
+                    _logger.LogWarning("Store not found for sellerId: {SellerId}", sellerId);
+                    return null;
+                }
+
+                var storeData = snapshot.ConvertTo<Seller>();
+                
+                return new 
+                { 
+                    SellerId = sellerId,
+                    StoreName = storeData.StoreName,
+                    StoreImageUrl = storeData.StoreImageUrl,
+                    Status = storeData.Status,
+                    CreatedAt = storeData.CreatedAt
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching store details for sellerId: {SellerId}", sellerId);
+                throw;
+            }
+        }
+
+        public async Task<Seller?> GetSellerByUserIdAsync(string userId)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching seller by userId: {UserId}", userId);
+                var query = _firestoreDb.Collection("Sellers")
+                    .WhereEqualTo("UserId", userId);
+                var snapshot = await query.GetSnapshotAsync();
+                
+                var seller = snapshot.Documents.FirstOrDefault()?.ConvertTo<Seller>();
+                if (seller == null)
+                {
+                    _logger.LogWarning("Seller not found for userId: {UserId}", userId);
+                }
+                
+                return seller;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching seller for userId: {UserId}", userId);
+                throw;
+            }
+        }
     }
 }
