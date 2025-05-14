@@ -1,0 +1,40 @@
+.navbar {
+  margin-bottom: 75px;
+  display: flex;
+  justify-content: flex-end; /* Biar profile ada di kanan */
+  align-items: center;
+  padding: 10px 20px;
+  background: white; /* Sesuaikan warna background */
+  border-bottom: none; /* Hilangkan border bawah */
+  box-shadow: none; /* Jika ada shadow, hapus */
+}
+
+.profile-container {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Jarak antara foto dan teks */
+  cursor: pointer;
+}
+
+.profile-img {
+  width: 40px; /* Ukuran gambar */
+  height: 40px;
+  border-radius: 50%; /* Biar bulat */
+  object-fit: cover;
+}
+
+.welcome-text {
+  font-size: 14px;
+  color: black;
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Jarak antara teks dan icon */
+}
+
+.dropdown-icon {
+  width: 20px; 
+  height: 20px;
+  font-size: 12px; /* Ukuran icon dropdown */
+  color: black;
+}
+

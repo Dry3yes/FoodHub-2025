@@ -8,8 +8,10 @@ import HomePage from './HomePage/HomePage';
 import Footer from './Footer/Footer';
 import AboutUs from './AboutuUsPage/Aboutus';
 import Menu from './FindStorePage/FindStorePage';
-import Settings from './SettingsPage/Settings'; // Import the new combined Settings component
+import Settings from './SettingsPage/Settings';
 import StorePage from './StorePage/StorePage';
+import SellerDashboard from './SellerPage/SellerProductView/SellerProduct';
+import SellerAnalytics from './AdminPage/AdminDashboard';
 
 function App() {
   return (
@@ -86,7 +88,29 @@ function App() {
             </div>
           } />
 
+          {/* Redirect to HomePage for any unknown routes */}
+          <Route path="/Seller/Dashboard" element={
+            <div className="page-container">
+              <Header />
+              <div className="content-container">
+                <SellerDashboard />
+              </div>
+              <Footer />
+            </div>
+          } />
+          
+          <Route path="/Admin/Dashboard" element={
+            
+            <div className="page-container">
+              <Header />
+              <div className="content-container">
+                <SellerAnalytics />
+              </div>
+              <Footer />
+            </div>
+          } />
           {/* Default settings route */}
+          <Route path="/Seller" element={<Navigate to="/Seller/Dashboard" />} />
           <Route path="/settings" element={<Navigate to="/settings/user" />} />
         </Routes>
       </div>

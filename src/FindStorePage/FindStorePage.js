@@ -3,10 +3,10 @@ import './FindStorePage.css';
 
 const FindStorePage = () => {
   // Category data
-  const categories = [
-    'Hot Picks', 'Fast Food', 'Indonesian', 'Japanese', 
-    'Chinese', 'Western', 'Drinks', 'Desserts'
-  ];
+                      // const categories = [
+                      //   'Hot Picks', 'Fast Food', 'Indonesian', 'Japanese', 
+                      //   'Chinese', 'Western', 'Drinks', 'Desserts'
+                      // ];
   
   // State to track selected category
   const [selectedCategory, setSelectedCategory] = useState('Hot Picks');
@@ -123,19 +123,19 @@ const FindStorePage = () => {
   return (
     <div className="find-store-page">
       {/* 1️⃣ Category Filter (Top Section) */}
-      <div className="category-filter">
-        <div className="category-scrollable">
-          {categories.map((category) => (
-            <button
-              key={category}
-              className={`category-button ${selectedCategory === category ? 'selected' : 'unselected'}`}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
+                          {/* <div className="category-filter">
+                            <div className="category-scrollable">
+                              {categories.map((category) => (
+                                <button
+                                  key={category}
+                                  className={`category-button ${selectedCategory === category ? 'selected' : 'unselected'}`}
+                                  onClick={() => setSelectedCategory(category)}
+                                >
+                                  {category}
+                                </button>
+                              ))}
+                            </div>
+                          </div> */}
 
       {/* 2️⃣ Food Grid Section - Now Blank with Add Button */}
       <div className="food-grid-container">

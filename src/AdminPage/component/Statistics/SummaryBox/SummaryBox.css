@@ -1,0 +1,32 @@
+.summary-box {
+    border: 2px solid #ccc;
+    height: 100px;
+    display: flex;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    flex: 1;
+  }
+  
+  .summary-item {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .summary-item p {
+    margin: 0;
+    color: #777;
+  }
+  
+  .summary-item h3 {
+    margin-top: 8px;
+    color: #2357f5;
+  }
+  
+  .divider {
+    width: 1px;
+    background-color: #e0e0e0;
+    margin: 0 16px;
+  }
+  

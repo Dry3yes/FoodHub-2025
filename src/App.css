@@ -29,6 +29,7 @@ html, body, #root, .App {
 /* Main content wrapper */
 .content-container {
   flex: 1;
+  box-sizing: border-box;
 }
 
 /* Make container take full remaining height */
@@ -37,5 +38,4 @@ html, body, #root, .App {
   flex-direction: row;
   flex: 1; /* This makes it expand to fill available space */
   overflow: hidden; /* Prevents scrollbars if content is too large */
-  flex-direction: column;
 }

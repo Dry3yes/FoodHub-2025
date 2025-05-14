@@ -24,6 +24,8 @@ const Header = () => {
                     <Link to="/AboutUs" className="nav-link">About Us</Link>
                     <Link to="/settings" className="nav-link">Settings</Link>
                     <Link to="/StorePage" className="nav-link">Store</Link>
+                    <Link to="/Seller/Dashboard" className="nav-link">Seller Dashboard</Link>
+                    <Link to="/Admin/Dashboard" className="nav-link">Seller Dashboard</Link>
                 </div>
 
                 {/* Right side - Icons and Buttons */}
