@@ -1,0 +1,31 @@
+.statistics-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  /* Bagian atas terdiri dari summary + active member */
+  .top-row {
+    display: flex;
+    gap: 20px;
+  }
+  
+  /* Bungkus SummaryBox supaya bisa disejajarkan dengan Chart */
+  .summary-section {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  /* Active Member tetap di samping */
+  .active-member-section {
+    flex: 1;
+  }
+  
+  /* Chart akan berada di bawah summary box */
+  .bottom-row {
+    width: 100%;
+  }
+  

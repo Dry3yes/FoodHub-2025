@@ -1,0 +1,17 @@
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+}
+
+.main-content {
+  margin-left: 300px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
