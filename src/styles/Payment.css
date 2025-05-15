@@ -1,0 +1,115 @@
+.payment-selection-container {
+  border: 2px solid #2196f3;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.payment-selection-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.payment-step-number {
+  background-color: #e41e26;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+.payment-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.payment-section {
+  margin-bottom: 20px;
+}
+
+.payment-section-title {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.payment-option {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-option:hover {
+  border-color: #2196f3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.payment-option.selected {
+  border-color: #2196f3;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.payment-option-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.payment-icon {
+  font-size: 18px;
+  font-weight: bold;
+  background-color: black;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-name {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.bank-logos {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bank-logo {
+  font-weight: bold;
+}
+
+.bca-logo {
+  color: #0066ae;
+}
+
+.bni-logo {
+  color: #f15a23;
+}
+
+.mandiri-logo {
+  color: #003d79;
+}
+
+.qris-logo {
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.maintenance-text {
+  color: #e41e26;
+  font-size: 14px;
+}

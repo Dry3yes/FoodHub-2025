@@ -1,0 +1,49 @@
+.food-categories {
+  margin-bottom: 1.5rem;
+}
+
+.categories-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.categories-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.category-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  height: 2.5rem;
+}
+
+.category-button:hover {
+  background-color: #f9fafb;
+}
+
+.category-button.active {
+  background-color: #111827;
+  color: white;
+  border-color: #111827;
+}
+
+.category-button.active .category-icon {
+  color: white;
+}
+
+.category-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
