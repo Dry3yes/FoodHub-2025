@@ -184,14 +184,28 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("DefaultPolicy", policy =>
     {
-        policy.WithOrigins(
-                builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
-                new[] { "http://localhost:3000", "http://localhost:5173" }
-            )
-            .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            .WithHeaders("Authorization", "Content-Type")
-            .AllowCredentials()
-            .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+        // More permissive CORS policy for development
+        if (builder.Environment.IsDevelopment())
+        {
+            policy
+                .SetIsOriginAllowed(_ => true) // Allow any origin in development
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+        }
+        else
+        {
+            // Production CORS policy
+            policy.WithOrigins(
+                    builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
+                    new[] { "http://localhost:3000" }
+                )
+                .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .WithHeaders("Authorization", "Content-Type")
+                .AllowCredentials()
+                .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+        }
     });
 });
 
@@ -201,7 +215,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+    app.UseSwaggerUI(c => {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+        // Enable Swagger UI at both HTTP and HTTPS endpoints
+        c.RoutePrefix = "swagger";
+    });
 }
 
 app.UseHttpsRedirection();

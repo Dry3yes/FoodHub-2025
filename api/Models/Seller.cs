@@ -6,9 +6,6 @@ namespace api.Models
     public class SellerApplication
     {
         [FirestoreDocumentId]
-        public string SellerId { get; set; } = string.Empty;
-
-        [FirestoreDocumentId]
         public string ApplicationId { get; set; } = string.Empty;
 
         [FirestoreProperty]
@@ -25,6 +22,12 @@ namespace api.Models
 
         [FirestoreProperty]
         public string StoreImageUrl { get; set; } = string.Empty;
+        
+        [FirestoreProperty]
+        public string Description { get; set; } = string.Empty;
+        
+        [FirestoreProperty]
+        public string DeliveryTimeEstimate { get; set; } = string.Empty;
 
         [FirestoreProperty]
         public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected
@@ -59,6 +62,12 @@ namespace api.Models
 
         [FirestoreProperty]
         public string Status { get; set; } = string.Empty;
+        
+        [FirestoreProperty]
+        public string Description { get; set; } = string.Empty;
+        
+        [FirestoreProperty]
+        public string DeliveryTimeEstimate { get; set; } = string.Empty;
 
         [FirestoreProperty]
         public DateTime CreatedAt { get; set; }

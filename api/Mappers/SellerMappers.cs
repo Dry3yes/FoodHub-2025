@@ -27,11 +27,12 @@ namespace api.Mappers
         {
             return new Seller
             {
-                SellerId = seller.SellerId,
                 UserId = seller.UserId,
                 StoreName = seller.StoreName,
                 UserIdentificationNumber = seller.UserIdentificationNumber,
                 StoreImageUrl = seller.StoreImageUrl ?? string.Empty,
+                Description = seller.Description ?? string.Empty,
+                DeliveryTimeEstimate = seller.DeliveryTimeEstimate ?? string.Empty,
                 Status = seller.Status,
                 CreatedAt = seller.CreatedAt
             };

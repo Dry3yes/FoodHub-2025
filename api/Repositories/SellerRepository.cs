@@ -156,9 +156,11 @@ namespace api.Repositories
                 var query = _firestoreDb.Collection("Sellers");
                 var snapshot = await query.GetSnapshotAsync();
                 return snapshot.Documents.Select(d => new { 
-                    SellerId = d.Id, 
-                    StoreName = d.GetValue<string>("StoreName"),
-                    StoreImageUrl = d.GetValue<string>("StoreImageUrl") 
+                    sellerId = d.Id, 
+                    storeName = d.GetValue<string>("StoreName"),
+                    storeImageUrl = d.GetValue<string>("StoreImageUrl"),
+                    description = d.GetValue<string>("Description") ?? string.Empty,
+                    deliveryTimeEstimate = d.GetValue<string>("DeliveryTimeEstimate") ?? string.Empty
                 });
             }
             catch (Exception ex)
@@ -203,11 +205,13 @@ namespace api.Repositories
                 
                 return new 
                 { 
-                    SellerId = sellerId,
-                    StoreName = storeData.StoreName,
-                    StoreImageUrl = storeData.StoreImageUrl,
-                    Status = storeData.Status,
-                    CreatedAt = storeData.CreatedAt
+                    sellerId = sellerId,
+                    storeName = storeData.StoreName,
+                    storeImageUrl = storeData.StoreImageUrl,
+                    status = storeData.Status,
+                    description = storeData.Description,
+                    deliveryTimeEstimate = storeData.DeliveryTimeEstimate,
+                    createdAt = storeData.CreatedAt
                 };
             }
             catch (Exception ex)

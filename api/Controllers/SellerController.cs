@@ -76,6 +76,8 @@ namespace api.Controllers
                     StoreName = sellerDto.StoreName,
                     UserIdentificationNumber = SellerMappers.HashIdentificationNumber(sellerDto.UserIdentificationNumber),
                     IdentificationUrl = imageUrl ?? string.Empty,
+                    Description = sellerDto.Description,
+                    DeliveryTimeEstimate = sellerDto.DeliveryTimeEstimate,
                     Status = "Pending",
                     CreatedAt = DateTime.UtcNow
                 };
@@ -155,6 +157,8 @@ namespace api.Controllers
                         StoreName = application.StoreName,
                         UserIdentificationNumber = application.UserIdentificationNumber,
                         StoreImageUrl = string.Empty, // Initialize with empty string
+                        Description = application.Description,
+                        DeliveryTimeEstimate = application.DeliveryTimeEstimate,
                         Status = "Active",
                         CreatedAt = DateTime.UtcNow
                     };
