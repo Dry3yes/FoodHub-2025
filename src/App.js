@@ -7,6 +7,7 @@ import "./styles/global.css"
 import LoginPage from "./pages/LoginPage"
 import LoginRegis_RightSide from "./components/LoginRegis_RightSide"
 import RegisterPage from "./pages/RegisterPage"
+import SellerDashboard from "./pages/SellerDashboard"
 
 // Auth layout wrapper
 const AuthLayout = ({ children, rightSide }) => {
@@ -38,6 +39,7 @@ function App() {
               rightSide={<LoginRegis_RightSide />} 
             />
           } />
+          <Route path="/seller" element={<SellerDashboard />} />
         </Routes>
       </Router>
     </CartProvider>
