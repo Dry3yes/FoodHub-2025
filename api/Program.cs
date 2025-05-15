@@ -168,6 +168,8 @@ builder.Services.AddSingleton<FirebaseAuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<ISellerApplicationRepository, SellerApplicationRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 builder.Services.AddSingleton<CloudflareClient>(sp =>
 {
