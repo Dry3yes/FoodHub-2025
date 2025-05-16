@@ -38,6 +38,7 @@ function Home() {
           return {
             id: store.sellerId,
             name: store.storeName,
+            slug: store.storeName.toLowerCase().replace(/\s+/g, ''),
             image: store.storeImageUrl || "/placeholder.svg?height=200&width=300",
             deliveryTime: store.deliveryTimeEstimate + " min",
             ...randomData
@@ -79,7 +80,7 @@ function Home() {
               ) : (
               <div className="restaurant-grid">
                 {restaurants.map((restaurant) => (
-                  <Link to={`/store/${restaurant.id}`} key={restaurant.id} className="restaurant-card-link">
+                  <Link to={`/store/${restaurant.slug}`} key={restaurant.id} className="restaurant-card-link">
                     <div className="restaurant-card">
                       <div className="restaurant-image-container">
                         <img

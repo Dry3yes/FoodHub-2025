@@ -156,7 +156,7 @@ function FoodItems() {
               <span className="info-separator">•</span>
               <span>{item.restaurant}</span>
             </div>
-            <div className="food-item-price">${item.price.toFixed(2)}</div>
+            <div className="food-item-price">Rp {item.price.toLocaleString('id-ID')}</div>
           </div>
           <div className="food-item-footer">
             <button

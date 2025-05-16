@@ -38,8 +38,22 @@ const LoginPage = () => {
                 localStorage.setItem('refreshToken', response.data.refreshToken);
                 localStorage.setItem('user', JSON.stringify(response.data.user));
                 localStorage.setItem('expiresIn', response.data.expiresIn);
+                
+                // Store seller information if available
+                if (response.data.seller) {
+                    localStorage.setItem('sellerInfo', JSON.stringify(response.data.seller));
+                }
+                
+                // Check if user is a seller and redirect accordingly
+                const user = response.data.user;
+                if (user && user.role === 'Seller') {
+                    navigate('/seller');
+                } else {
+                    navigate('/');
+                }
+            } else {
+                navigate('/');
             }
-            navigate('/');
         } catch (err) {
             setError('Login failed. Please check your credentials.');
         } finally {

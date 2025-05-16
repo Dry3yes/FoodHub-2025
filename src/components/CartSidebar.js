@@ -73,7 +73,10 @@ function CartSidebar() {
                     <span className="sr-only">Remove</span>
                   </button>
                 </div>
-                <div className="cart-item-price">${item.price.toFixed(2)}</div>
+                <div className="cart-item-info">
+                  <div className="cart-item-name">{item.name}</div>
+                  <div className="cart-item-price">Rp {item.price.toLocaleString('id-ID')}</div>
+                </div>
                 <div className="cart-item-quantity">
                   <button
                     className="quantity-button"
@@ -120,15 +123,15 @@ function CartSidebar() {
         <div className="cart-summary">
           <div className="summary-row">
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>Rp {subtotal.toLocaleString('id-ID')}</span>
           </div>
           <div className="summary-row">
             <span>Shipping</span>
-            <span>${shipping.toFixed(2)}</span>
+            <span>Rp {shipping.toLocaleString('id-ID')}</span>
           </div>
           <div className="summary-row total">
             <span>Total</span>
-            <span>${total.toFixed(2)}</span>
+            <span>Rp {total.toLocaleString('id-ID')}</span>
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom"
 import FoodHubHeader from "../components/FoodHubHeader"
 import CartSidebar from "../components/CartSidebar"
 import { useCart } from "../hooks/useCart"
-import { fetchStoreById, fetchMenusByStore } from "../services/Api"
+import { fetchStoreBySlug, fetchMenusByStore } from "../services/Api"
 import "../styles/StorePage.css"
 
 // Generate random additional data for store display if missing from backend
@@ -137,7 +137,7 @@ const fallbackStoreData = [
 ]
 
 function StorePage() {
-  const { id } = useParams()
+  const { id: slug } = useParams()
   const { addToCart } = useCart()
   
   const [store, setStore] = useState(null)
@@ -151,7 +151,7 @@ function StorePage() {
         setLoading(true)
         
         // Fetch store details
-        const storeData = await fetchStoreById(id)
+        const storeData = await fetchStoreBySlug(slug)
         
         if (!storeData) {
           setError("Store not found")
@@ -175,7 +175,7 @@ function StorePage() {
         setStore(completeStoreData)
         
         // Fetch menu items
-        const menuData = await fetchMenusByStore(id)
+        const menuData = await fetchMenusByStore(storeData.sellerId)
         
         // Organize menu items by category
         const categorizedMenu = organizeMenuByCategory(menuData)
@@ -190,7 +190,7 @@ function StorePage() {
     }
     
     fetchStoreData()
-  }, [id])
+  }, [slug])
   
   // Function to organize menu items by category
   const organizeMenuByCategory = (menuItems) => {
@@ -334,7 +334,7 @@ function StorePage() {
                             <p className="menu-item-description">{item.description}</p>
                           </div>
                           <div className="menu-item-actions">
-                            <span className="menu-item-price">${item.price.toFixed(2)}</span>
+                            <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>
                             <button
                               className="add-to-cart-button"
                               onClick={() =>

@@ -81,7 +81,7 @@ function CartPage() {
                               <span className="sr-only">Remove</span>
                             </button>
                           </div>
-                          <div className="cart-item-price">${item.price.toFixed(2)}</div>
+                          <div className="cart-item-price">Rp {item.price.toLocaleString('id-ID')}</div>
                           <div className="cart-item-actions">
                             <button
                               className="quantity-button"
@@ -120,7 +120,7 @@ function CartPage() {
                               </svg>
                               <span className="sr-only">Increase quantity</span>
                             </button>
-                            <div className="cart-item-total">${(item.price * item.quantity).toFixed(2)}</div>
+                            <div className="cart-item-total">Rp {(item.price * item.quantity).toLocaleString('id-ID')}</div>
                           </div>
                         </div>
                       </div>
@@ -147,16 +147,16 @@ function CartPage() {
                   <div className="order-summary-details">
                     <div className="summary-row">
                       <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>Rp {subtotal.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="summary-row">
                       <span>Shipping</span>
-                      <span>${shipping.toFixed(2)}</span>
+                      <span>Rp {shipping.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="summary-divider"></div>
                     <div className="summary-row total">
                       <span>Total</span>
-                      <span>${total.toFixed(2)}</span>
+                      <span>Rp {total.toLocaleString('id-ID')}</span>
                     </div>
                   </div>
                 </div>

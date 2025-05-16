@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import FoodHubHeader from "../components/FoodHubHeader";
 import "../styles/SellerDashboard.css";
-import { fetchStoreById, fetchMenusByStore, fetchSellerByUserId } from "../services/Api";
 
 function SellerDashboard() {
   const location = useLocation();
-  const navigate = useNavigate();
-  
-  // State for store data
-  const [store, setStore] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const storeName = "My Food Store";
+  const storeRating = 4.5;
   
   // Menu category tabs
   const [activeTab, setActiveTab] = useState("all");
@@ -26,16 +21,14 @@ function SellerDashboard() {
 
   // Initialize with an empty array instead of dummy data
   const [menuData, setMenuData] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
-  const [editName, setEditName] = useState("");
-  const [editPrice, setEditPrice] = useState("");
-  
-  // New menu item state
   const [newMenuName, setNewMenuName] = useState("");
   const [newMenuPrice, setNewMenuPrice] = useState("");
   const [tempImage, setTempImage] = useState(null);
 
-  // Handle image upload for new menu items
+  const [editIndex, setEditIndex] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+
   const handleImageUpload = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -49,107 +42,30 @@ function SellerDashboard() {
     input.click();
   };
 
-  // Add a new menu item
   const addMenu = () => {
     if (newMenuName.trim() === "" || newMenuPrice.trim() === "" || !tempImage) return;
     const newMenu = {
-      itemName: newMenuName,
+      name: newMenuName,
       price: newMenuPrice || "0",
       rating: 0,
-      imageURL: tempImage,
+      image: tempImage,
       reviewsCount: 0,
     };
     setMenuData([...menuData, newMenu]);
     setNewMenuName("");
     setNewMenuPrice("");
     setTempImage(null);
-    
-    // Hide the add form after adding
-    document.querySelector('.add-new-form').style.display = 'none';
   };
-  
-  // Check if user is authenticated and has seller role
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      const token = localStorage.getItem('token');
-      const userString = localStorage.getItem('user');
-      const sellerInfoString = localStorage.getItem('sellerInfo');
-      
-      if (!token || !userString) {
-        // User is not logged in
-        navigate('/login');
-        return;
-      }
-      
-      try {
-        const user = JSON.parse(userString);
-        
-        if (user.role !== 'Seller') {
-          // User is not a seller
-          setError("You don't have seller privileges.");
-          setTimeout(() => navigate('/'), 2000);
-          return;
-        }
-        
-        setLoading(true);
-        
-        // If we have seller info in localStorage, use it
-        if (sellerInfoString) {
-          const sellerInfo = JSON.parse(sellerInfoString);
-          
-          // Fetch store data using the sellerId from localStorage
-          const storeData = await fetchStoreById(sellerInfo.sellerId);
-          if (storeData) {
-            setStore(storeData);
-            // Fetch menu items for this seller
-            const menus = await fetchMenusByStore(sellerInfo.sellerId);
-            setMenuData(menus || []);
-          } else {
-            setError("Could not fetch store data.");
-          }
-        } else {
-          // Fallback to the API call if sellerInfo is not in localStorage
-          const sellerInfo = await fetchSellerByUserId(user.id);
-          
-          if (!sellerInfo || !sellerInfo.sellerId) {
-            setError("Could not find seller information. Please contact support.");
-            setLoading(false);
-            return;
-          }
-          
-          // Now use the sellerId to fetch store data
-          const storeData = await fetchStoreById(sellerInfo.sellerId);
-          if (storeData) {
-            setStore(storeData);
-            // Fetch menu items for this seller
-            const menus = await fetchMenusByStore(sellerInfo.sellerId);
-            setMenuData(menus || []);
-          } else {
-            setError("Could not fetch store data.");
-          }
-        }
-      } catch (err) {
-        console.error("Error loading seller data:", err);
-        setError("An error occurred while loading your store data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    checkAuthentication();
-  }, [navigate]);
-
-
 
   const startEdit = (index) => {
     setEditIndex(index);
-    setEditName(menuData[index].itemName);
+    setEditName(menuData[index].name);
     setEditPrice(menuData[index].price);
   };
 
   const saveEdit = (index) => {
     const updatedMenu = [...menuData];
-    updatedMenu[index] = { ...updatedMenu[index], itemName: editName, price: editPrice };
+    updatedMenu[index] = { ...updatedMenu[index], name: editName, price: editPrice };
     setMenuData(updatedMenu);
     setEditIndex(null);
     setEditName("");
@@ -161,42 +77,6 @@ function SellerDashboard() {
     setMenuData(updatedMenu);
   };
 
-  // Show loading or error states
-  if (loading) {
-    return (
-      <div className="seller-dashboard-container">
-        <FoodHubHeader />
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading your store data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="seller-dashboard-container">
-        <FoodHubHeader />
-        <div className="error-container">
-          <p className="error-message">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If no store data is available
-  if (!store) {
-    return (
-      <div className="seller-dashboard-container">
-        <FoodHubHeader />
-        <div className="error-container">
-          <p>No store data available. Please contact support.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="seller-dashboard-container">
       <FoodHubHeader />
@@ -207,10 +87,10 @@ function SellerDashboard() {
             {/* Store Header Card */}
             <div className="store-header-card">
               <div className="store-cover-image-container">
-                <img src={store.storeImageUrl || "/placeholder.svg?height=300&width=900"} alt="Store Cover" className="store-cover-image" />
+                <img src="/placeholder.svg?height=300&width=900" alt="Store Cover" className="store-cover-image" />
               </div>
               <div className="store-header-content">
-                <h1 className="store-title">{store.storeName}</h1>
+                <h1 className="store-title">{storeName}</h1>
                 <div className="store-info">
                   <div className="store-rating">
                     <svg
@@ -224,14 +104,14 @@ function SellerDashboard() {
                     >
                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                     </svg>
-                    <span>{store.rating || "N/A"}</span>
+                    <span>{storeRating}</span>
                   </div>
                   <span className="info-separator">•</span>
-                  <span>{store.cuisine || "Various"}</span>
+                  <span>Italian</span>
                   <span className="info-separator">•</span>
-                  <span>{store.deliveryTimeEstimate + " min" || "20-30 min"}</span>
+                  <span>20-30 min</span>
                 </div>
-                <p className="store-description">{store.description || "Manage your store, edit menu items and view orders all in one place."}</p>
+                <p className="store-description">Manage your store, edit menu items and view orders all in one place.</p>
               </div>
             </div>
             
@@ -254,13 +134,14 @@ function SellerDashboard() {
                 <h2 className="menu-title">Menu Management</h2>
                 <button className="primary-button" onClick={() => {
                   // Show the add new form when this button is clicked
+                  // This is a placeholder for actual functionality
                   document.querySelector('.add-new-form').style.display = 'flex';
                 }}>Add New Item</button>
               </div>
               
               <div className="menu-items">
                 {/* Add Menu Form (hidden by default, show when clicking 'Add New Item') */}
-                <div className="menu-item add-new-form" style={{ display: 'none' }}>
+                <div className="menu-item add-new-form">
                   <div className="menu-item-image-container">
                     <button onClick={handleImageUpload} className="image-upload-button">+</button>
                     {tempImage && <img src={tempImage} alt="Preview" className="menu-item-image" />}
@@ -281,7 +162,7 @@ function SellerDashboard() {
                     </div>
                     <div className="menu-item-actions">
                       <div className="price-input-wrapper">
-                        <span>Rp</span>
+                        <span>Rp.</span>
                         <input
                           type="number"
                           className="price-input"
@@ -324,11 +205,11 @@ function SellerDashboard() {
                   menuData.map((item, index) => (
                     <div key={index} className="menu-item">
                       <div className="menu-item-image-container">
-                        <img src={item.imageURL} alt={item.itemName} className="menu-item-image" />
+                        <img src={item.image} alt={item.name} className="menu-item-image" />
                       </div>
                       <div className="menu-item-content">
                         <div>
-                          <h4 className="menu-item-name">{item.itemName}</h4>
+                          <h4 className="menu-item-name">{item.name}</h4>
                           <div className="menu-item-details">
                             <svg
                               className="star-icon filled"
@@ -346,38 +227,13 @@ function SellerDashboard() {
                           </div>
                         </div>
                         <div className="menu-item-actions">
-                          <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>
+                          <span className="menu-item-price">Rp. {item.price}</span>
                           <div className="menu-item-buttons">
                             <button onClick={() => startEdit(index)} className="edit-button">Edit</button>
                             <button onClick={() => deleteMenu(index)} className="delete-button">Delete</button>
                           </div>
                         </div>
                       </div>
-                      {editIndex === index && (
-                        <div className="edit-form">
-                          <input
-                            type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            className="edit-input"
-                            placeholder="Menu name"
-                          />
-                          <div className="price-input-wrapper">
-                            <span>Rp</span>
-                            <input
-                              type="number"
-                              value={editPrice}
-                              onChange={(e) => setEditPrice(e.target.value)}
-                              className="price-input"
-                              placeholder="Price"
-                            />
-                          </div>
-                          <div className="edit-buttons">
-                            <button onClick={() => saveEdit(index)} className="save-button">Save</button>
-                            <button onClick={() => setEditIndex(null)} className="cancel-button">Cancel</button>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))
                 )}
@@ -400,7 +256,7 @@ function SellerDashboard() {
                   <div className="stat-icon revenue">💰</div>
                   <div className="stat-content">
                     <h3 className="stat-title">Revenue</h3>
-                    <p className="stat-value">Rp 3.450.000</p>
+                    <p className="stat-value">Rp. 3,450,000</p>
                     <p className="stat-subtitle">This month</p>
                   </div>
                 </div>
@@ -450,7 +306,7 @@ function SellerDashboard() {
                       <p className="order-id">#1234</p>
                       <p className="order-customer">John D.</p>
                     </div>
-                    <p className="order-amount">Rp 125.000</p>
+                    <p className="order-amount">Rp. 125,000</p>
                     <span className="order-status completed">Completed</span>
                   </div>
                   <div className="order-item">
@@ -458,7 +314,7 @@ function SellerDashboard() {
                       <p className="order-id">#1235</p>
                       <p className="order-customer">Sarah M.</p>
                     </div>
-                    <p className="order-amount">Rp 85.000</p>
+                    <p className="order-amount">Rp. 85,000</p>
                     <span className="order-status pending">Pending</span>
                   </div>
                   <div className="order-item">
@@ -466,7 +322,7 @@ function SellerDashboard() {
                       <p className="order-id">#1236</p>
                       <p className="order-customer">Mike R.</p>
                     </div>
-                    <p className="order-amount">Rp 150.000</p>
+                    <p className="order-amount">Rp. 150,000</p>
                     <span className="order-status processing">Processing</span>
                   </div>
                 </div>
