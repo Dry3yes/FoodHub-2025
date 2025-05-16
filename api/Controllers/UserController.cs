@@ -13,11 +13,13 @@ namespace api.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
+        private readonly ISellerRepository _sellerRepository;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserRepository userRepository, ILogger<UserController> logger)
+        public UserController(IUserRepository userRepository, ISellerRepository sellerRepository, ILogger<UserController> logger)
         {
             _userRepository = userRepository;
+            _sellerRepository = sellerRepository;
             _logger = logger;
         }
 
@@ -87,6 +89,23 @@ namespace api.Controllers
                 _logger.LogInformation("User logged in successfully: {Email}", userDto.Email);
                 var userResponse = user.ToUserDto();
 
+                // If the user is a seller, get seller information
+                object sellerInfo = null;
+                if (user.Role == "Seller")
+                {
+                    var seller = await _sellerRepository.GetSellerByUserIdAsync(user.UserId);
+                    if (seller != null)
+                    {
+                        sellerInfo = new
+                        {
+                            sellerId = seller.SellerId,
+                            storeName = seller.StoreName,
+                            storeImageUrl = seller.StoreImageUrl,
+                            description = seller.Description
+                        };
+                    }
+                }
+
                 return Ok(new
                 {
                     success = true,
@@ -94,6 +113,7 @@ namespace api.Controllers
                     data = new
                     {
                         user = userResponse,
+                        seller = sellerInfo,
                         token = token,
                         refreshToken = user.RefreshToken,
                         expiresIn = 3600 // Token expiration in seconds

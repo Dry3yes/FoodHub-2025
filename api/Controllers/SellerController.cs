@@ -145,7 +145,7 @@ namespace api.Controllers
                     {
                         user.Role = "Seller";
                         await _userRepo.UpdateUserAsync(user);
-                        
+
                         // Update Firebase Authentication custom claims
                         await _firebaseAuthService.SetUserRoleAsync(user.FirebaseUid, "Seller");
                     }
@@ -217,19 +217,44 @@ namespace api.Controllers
             {
                 _logger.LogInformation("Retrieving store details for sellerId: {SellerId}", sellerId);
                 var store = await _sellerRepo.GetStoreByIdAsync(sellerId);
-                
+
                 if (store == null)
                 {
                     _logger.LogWarning("Store not found for sellerId: {SellerId}", sellerId);
                     return NotFound(new { success = false, message = "Store not found" });
                 }
-                
+
                 return Ok(new { success = true, data = store });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving store with ID {SellerId}", sellerId);
                 return StatusCode(500, new { success = false, message = "Error retrieving store details" });
+            }
+        }
+
+        [HttpGet]
+        [Route("get-seller-by-userid/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> GetSellerByUserId(string userId)
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving seller details for userId: {UserId}", userId);
+                var seller = await _sellerRepo.GetSellerByUserIdAsync(userId);
+
+                if (seller == null)
+                {
+                    _logger.LogWarning("Seller not found for userId: {UserId}", userId);
+                    return NotFound(new { success = false, message = "Seller not found" });
+                }
+
+                return Ok(new { success = true, data = seller });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving seller with userId {UserId}", userId);
+                return StatusCode(500, new { success = false, message = "Error retrieving seller details" });
             }
         }
 
