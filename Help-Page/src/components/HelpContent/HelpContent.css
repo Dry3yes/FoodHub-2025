@@ -1,0 +1,92 @@
+
+
+.help-wrapper {
+  max-width: 600px;
+  margin: 60px auto;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+.help-form h2 {
+  text-align: left;  
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+.help-form label {
+  text-align: left ;  
+  font-size: 16px;
+  margin-bottom: 20px;
+  display: block;
+}
+
+select {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.desc-label {  
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+textarea {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: vertical;
+  margin-bottom: 20px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancel {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.submit {
+  background-color: #000;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancel:hover,
+.submit:hover {
+  opacity: 0.9;
+}
+
+.help-thankyou {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.help-thankyou p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.home-button {
+  background-color: black;
+  color: white;
+  padding: 10px 24px;
+  text-decoration: none;
+  border-radius: 6px;
+}

@@ -1,0 +1,83 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 30px;
+  background-color: white;
+  font-family: sans-serif;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 60px;
+  margin-right: 10px;
+}
+
+.logo-text {
+  font-size: 20px;
+  color: #000;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 40px;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: black;
+  font-weight: 500;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cart-icon-wrapper {
+    margin-right: 10px;
+  position: relative;
+}
+
+.cart-icon {
+  height: 24px;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: red;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+.profile-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-img {
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+}
+
+.welcome-text {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  gap: 4px;
+}
+
+.dropdown-icon {
+  height: 10px;
+}
