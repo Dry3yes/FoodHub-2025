@@ -144,7 +144,7 @@ const LoginPage = () => {
                 {loading ? 'Signing In...' : 'Sign In'}
               </button>
 
-              <button type="button" className="google-signin-button" disabled={loading}>
+              {/* <button type="button" className="google-signin-button" disabled={loading}>
                 <span className="google-icon">
                   <svg viewBox="0 0 24 24" width="18" height="18">
                     <path
@@ -166,7 +166,7 @@ const LoginPage = () => {
                   </svg>
                 </span>
                 Sign In with Google
-              </button>
+              </button> */}
             </form>
 
             <p className="signup-link">

@@ -21,7 +21,20 @@ function Header() {
           <Link to="/landing" className="nav-link">
             Home
           </Link>
-          <Link to="/landing#about" className="nav-link">
+          <Link 
+            to="/landing#about" 
+            className="nav-link"
+            onClick={(e) => {
+              if (window.location.pathname === '/landing') {
+                e.preventDefault();
+                window.history.pushState({}, '', '#about');
+                const aboutSection = document.getElementById('about');
+                if (aboutSection) {
+                  aboutSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }
+            }}
+          >
             About Us
           </Link>
           <Link to="/" className="nav-link">

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Stats from '../components/Stats';
@@ -9,6 +10,17 @@ import Footer from '../components/Footer';
 import '../styles/LandingPage.css';
 
 function LandingPage() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === '#about') {
+      const aboutSection = document.getElementById('about');
+      if (aboutSection) {
+        aboutSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location]);
+
   return (
     <div className="app">
       <Header />
@@ -16,7 +28,9 @@ function LandingPage() {
         <Hero />
         <Stats />
         <HowItWorks />
-        <AboutUs />
+        <div id="about">
+          <AboutUs />
+        </div>
         <Testimonials />
       </main>
       <Footer />
