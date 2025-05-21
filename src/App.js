@@ -12,12 +12,21 @@ import Settings from './SettingsPage/Settings';
 import StorePage from './StorePage/StorePage';
 import SellerDashboard from './SellerPage/SellerProductView/SellerProduct';
 import SellerAnalytics from './AdminPage/AdminDashboard';
+import TestLogin from './LoginPage/LoginPage';
+import TestRegister from './RegisterPage/RegisterPage';
 
 function App() {
   return (
     <BrowserRouter>
       <div className="App">
         <Routes>
+          <Route path="/Test/Login" element={
+            <TestLogin/>
+          }/>
+          <Route path="/Test/Register" element={
+            <TestRegister />
+          } />
+
           <Route path="/" element={<Navigate to="/HomePage" />} />
           <Route path="/HomePage" element={
             <div className="page-container">
@@ -59,7 +68,6 @@ function App() {
             </div>
           } />
           
-          {/* Both settings routes now use the same component */}
           <Route path="/settings/user" element={
             <div className="page-container">
               <Header />
@@ -88,7 +96,6 @@ function App() {
             </div>
           } />
 
-          {/* Redirect to HomePage for any unknown routes */}
           <Route path="/Seller/Dashboard" element={
             <div className="page-container">
               <Header />
