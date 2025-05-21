@@ -54,10 +54,10 @@ const LoginPage = () => {
               if (user && user.role === 'Seller') {
                   navigate('/seller');
               } else {
-                  navigate('/');
+                  navigate('/landing');
               }
           } else {
-              navigate('/');
+              navigate('/landing');
           }
       } catch (err) {
           setError('Login failed. Please check your credentials.');

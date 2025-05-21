@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import FoodHubHeader from "../components/FoodHubHeader"
+import Header from "../components/Header"
 import FoodCategories from "../components/FoodCategories"
 import FoodItems from "../components/FoodItems"
 import CartSidebar from "../components/CartSidebar"
@@ -58,7 +58,7 @@ function Home() {
   }, [])
   return (
     <div className="home-container">
-      <FoodHubHeader />
+      <Header />
 
       <main className="main-content">
         <div className="grid-layout">

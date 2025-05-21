@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
-import FoodHubHeader from "../components/FoodHubHeader";
+import Header from "../components/Header";
 import "../styles/SellerDashboard.css";
 import { fetchStoreById, fetchMenusByStore, fetchSellerByUserId } from "../services/Api";
 
@@ -165,7 +165,7 @@ function SellerDashboard() {
   if (loading) {
     return (
       <div className="seller-dashboard-container">
-        <FoodHubHeader />
+        <Header />
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading your store data...</p>
@@ -177,7 +177,7 @@ function SellerDashboard() {
   if (error) {
     return (
       <div className="seller-dashboard-container">
-        <FoodHubHeader />
+        <Header />
         <div className="error-container">
           <p className="error-message">{error}</p>
         </div>
@@ -189,7 +189,7 @@ function SellerDashboard() {
   if (!store) {
     return (
       <div className="seller-dashboard-container">
-        <FoodHubHeader />
+        <Header />
         <div className="error-container">
           <p>No store data available. Please contact support.</p>
         </div>
@@ -199,7 +199,7 @@ function SellerDashboard() {
 
   return (
     <div className="seller-dashboard-container">
-      <FoodHubHeader />
+      <Header />
       
       <main className="main-content">
         <div className="grid-layout">

@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
-import FoodHubHeader from "../components/FoodHubHeader"
+import Header from "../components/Header"
 import CartSidebar from "../components/CartSidebar"
 import { useCart } from "../hooks/useCart"
 import { fetchStoreBySlug, fetchMenusByStore } from "../services/Api"
@@ -225,7 +225,7 @@ function StorePage() {
   if (loading) {
     return (
       <div className="store-page-container">
-        <FoodHubHeader />
+        <Header />
         <main className="store-main-content">
           <div className="loading-container">
             <p>Loading store information...</p>
@@ -238,7 +238,7 @@ function StorePage() {
   if (error || !store) {
     return (
       <div className="store-page-container">
-        <FoodHubHeader />
+        <Header />
         <main className="store-main-content">
           <Link to="/" className="back-link">
             <svg
@@ -265,7 +265,7 @@ function StorePage() {
   
   return (
     <div className="store-page-container">
-      <FoodHubHeader />
+      <Header />
 
       <main className="store-main-content">
         <Link to="/" className="back-link">

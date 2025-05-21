@@ -1,6 +1,6 @@
 "use client"
 import { Link } from "react-router-dom"
-import FoodHubHeader from "../components/FoodHubHeader"
+import Header from "../components/Header"
 import { useCart } from "../hooks/useCart"
 import "../styles/CartPage.css"
 
@@ -13,7 +13,7 @@ function CartPage() {
 
   return (
     <div className="cart-page-container">
-      <FoodHubHeader />
+      <Header />
 
       <main className="cart-main-content">
         <div className="cart-header">
