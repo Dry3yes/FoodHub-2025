@@ -5,19 +5,9 @@ import CartPage from "./pages/CartPage"
 import { CartProvider } from "./hooks/useCart"
 import "./styles/global.css"
 import LoginPage from "./pages/LoginPage"
-import LoginRegis_RightSide from "./components/LoginRegis_RightSide"
 import RegisterPage from "./pages/RegisterPage"
 import SellerDashboard from "./pages/SellerDashboard"
-
-// Auth layout wrapper
-const AuthLayout = ({ children, rightSide }) => {
-  return (
-    <div style={{ display: 'flex', width: '100%', height: '100vh' }}>
-      {children}
-      {rightSide}
-    </div>
-  );
-};
+import LandingPage from "./pages/LandingPage"
 
 function App() {
   return (
@@ -25,20 +15,11 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/store/:id" element={<StorePage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/login" element={
-            <AuthLayout 
-              children={<LoginPage />} 
-              rightSide={<LoginRegis_RightSide />} 
-            />
-          } />
-          <Route path="/register" element={
-            <AuthLayout 
-              children={<RegisterPage />} 
-              rightSide={<LoginRegis_RightSide />} 
-            />
-          } />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/seller" element={<SellerDashboard />} />
         </Routes>
       </Router>
