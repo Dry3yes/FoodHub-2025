@@ -152,7 +152,7 @@ export const applyForSeller = async (sellerData, imageFile) => {
         formData.append('image', imageFile);
       }
       
-      const response = await fetch(`${apiEndpoint}/v1/seller-application`, {
+      const response = await fetch(`${apiEndpoint}/api/v1/seller-application`, {
         method: 'POST',
         headers: {
           ...getAuthHeader(),

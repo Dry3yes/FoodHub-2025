@@ -30,7 +30,7 @@ const Settings = () => {
   const toggleMode = () => {
     const newMode = !isSellerMode;
     setIsSellerMode(newMode);
-    navigate(newMode ? '/settings/seller' : '/settings/user', { replace: true });
+    navigate(newMode ? '/settings/seller' : '/settings', { replace: true });
   };
   
   // Update mode based on URL when location changes
@@ -136,28 +136,18 @@ const Settings = () => {
       <div className="settings-page">
       {/* Left Sidebar */}
       <div className="settings-sidebar">
-        <div className="user-profile">
+        {/* <div className="user-profile">
           <div className="profile-picture">
             <img src="/Images/User_Profile_Picture.png" alt="User" />
           </div>
           <button className="change-profile-btn">Change Profile</button>
-        </div>
+        </div> */}
 
         <nav className="sidebar-nav">
           <ul>
             <label>My Account</label>
-            <li className={`nav-item account-item ${!isSellerMode ? 'active' : ''}`} 
-                onClick={() => isSellerMode && toggleMode()}>
-              Profile
-            </li>
-            <li className="nav-item">My Orders</li>
-            {isSellerMode && <li className="nav-item product-item">My Products</li>}
-            <li 
-              className={`nav-item seller-toggle ${isSellerMode ? 'active' : ''}`}
-              onClick={toggleMode}
-            >
-              {isSellerMode ? 'Switch to User' : 'Switch to Seller'}
-            </li>
+            <li className={`nav-item account-item active`} onClick={() => navigate('/settings')}>Profile</li>
+            <li className={`nav-item seller-toggle`} onClick={toggleMode}>Apply for Seller</li>
           </ul>
         </nav>
       </div>

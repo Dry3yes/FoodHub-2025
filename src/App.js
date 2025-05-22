@@ -9,6 +9,7 @@ import RegisterPage from "./pages/RegisterPage"
 import SellerDashboard from "./pages/SellerDashboard"
 import LandingPage from "./pages/LandingPage"
 import Settings from "./pages/Settings"
+import Chat from "./components/Chat"
 
 function App() {
   return (
@@ -23,7 +24,10 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/seller" element={<SellerDashboard />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/settings/seller" element={<Settings />} />
         </Routes>
+        {/* Chat component that appears on all pages */}
+        <Chat />
       </Router>
     </CartProvider>
   )

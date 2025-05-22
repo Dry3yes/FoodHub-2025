@@ -44,6 +44,10 @@
   margin-top: 10px;
 }
 
+.sidebar-nav {
+  margin-top: 1rem;
+}
+
 .sidebar-nav label {
   text-align: center;
 }
@@ -164,11 +168,15 @@
   align-items: center;
   justify-content: center;
   background-color: #f7fafc;
+  cursor: pointer;
 }
 
 .plus-icon {
-  font-size: 32px;
+  font-size: 24px;
   color: #a0aec0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .image-upload img {
@@ -263,11 +271,15 @@
 }
 
 .apply-button:hover {
-  background-color: #2779bd;
+  background-color: white;
+  color: #111827;
+  border: 1px solid #111827;
 }
 
 .apply-button:disabled {
-  background-color: #90CDF4;
+  background-color: white;
+  color: #111827;
+  border: 1px solid #111827;
   cursor: not-allowed;
 }
 
