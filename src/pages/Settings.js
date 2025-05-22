@@ -8,12 +8,10 @@ const Settings = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Determine if we're in seller mode based on the URL
-  const [isSellerMode, setIsSellerMode] = useState(location.pathname === '/settings/seller');
-  
   // Common state
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [isSellerMode, setIsSellerMode] = useState(false);
   
   // User profile specific state
   const [gender, setGender] = useState('');
@@ -25,18 +23,24 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [isUserSeller, setIsUserSeller] = useState(false);
 
-  // Update the URL and mode state when toggling between views
-  const toggleMode = () => {
-    const newMode = !isSellerMode;
-    setIsSellerMode(newMode);
-    navigate(newMode ? '/settings/seller' : '/settings', { replace: true });
-  };
-  
-  // Update mode based on URL when location changes
+  // Check if the user is already a seller
   useEffect(() => {
-    setIsSellerMode(location.pathname === '/settings/seller');
-  }, [location.pathname]);
+    // Check both user role and sellerInfo
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const sellerInfo = localStorage.getItem('sellerInfo');
+    
+    // User is a seller if either role is 'Seller' or sellerInfo exists
+    const isSeller = user?.role === 'Seller' || !!sellerInfo;
+    
+    setIsUserSeller(isSeller);
+    
+    // If user is a seller and currently in seller mode, redirect to profile
+    if (isSeller && location.pathname === '/settings/seller') {
+      navigate('/settings', { replace: true });
+    }
+  }, [navigate, location.pathname]);
 
   // Handle face image upload for seller mode
   const handleImageUpload = (index, e) => {
@@ -130,6 +134,11 @@ const Settings = () => {
     return new File([blob], fileName, { type: blob.type });
   };
 
+  // Toggle between user profile and seller registration modes
+  const toggleMode = () => {
+    setIsSellerMode(!isSellerMode);
+  };
+
   return (
     <>
       <Header />
@@ -147,7 +156,9 @@ const Settings = () => {
           <ul>
             <label>My Account</label>
             <li className={`nav-item account-item active`} onClick={() => navigate('/settings')}>Profile</li>
-            <li className={`nav-item seller-toggle`} onClick={toggleMode}>Apply for Seller</li>
+            {!isUserSeller && (
+              <li className={`nav-item seller-toggle`} onClick={toggleMode}>Apply for Seller</li>
+            )}
           </ul>
         </nav>
       </div>
