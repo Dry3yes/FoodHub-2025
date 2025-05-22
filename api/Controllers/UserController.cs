@@ -90,7 +90,7 @@ namespace api.Controllers
                 var userResponse = user.ToUserDto();
 
                 // If the user is a seller, get seller information
-                object sellerInfo = null;
+                object? sellerInfo = null;
                 if (user.Role == "Seller")
                 {
                     var seller = await _sellerRepository.GetSellerByUserIdAsync(user.UserId);
