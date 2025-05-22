@@ -1,0 +1,34 @@
+.document-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #f8f8f8;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.document-left {
+  margin-right: 15px;
+}
+
+.document-icon {
+  background-color: #d4edff;
+  border-color: #3498db;
+}
+
+.document-title {
+  flex-grow: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.document-right {
+  margin-left: 10px;
+}
+
+.document-action {
+  width: 40px;
+  height: 40px;
+  background-color: #e6e6e6;
+}

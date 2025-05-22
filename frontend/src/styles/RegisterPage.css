@@ -1,0 +1,228 @@
+/* Wrapper with background image and padding */
+.register-page-wrapper {
+  background-image: url("/public/Images/Login_Background.png");
+  background-size: cover;
+  background-position: center;
+  padding: 2rem;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Container styling */
+.register-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  max-width: 1100px;
+  background-color: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+}
+
+/* Left panel styling */
+.register-left-panel {
+  flex: 1;
+  background-image: url("/public/Images/Login_SKYIMAGE.png");
+  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem;
+}
+
+.register-left-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.register-moment {
+  font-size: 1rem;
+  font-weight: 400;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+}
+
+/* White line next to "A Moment of Happy" */
+.register-line {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 1rem;
+  width: 180px;
+  height: 1px;
+  background-color: white;
+  opacity: 0.7;
+}
+
+.register-tagline {
+  display: flex;
+  flex-direction: column;
+  margin-top: calc(100% - 1.5rem);
+}
+
+.register-tagline h2 {
+  line-height: normal;
+  margin-bottom: 0.5rem;
+}
+
+.register-description {
+  font-size: 0.7rem;
+  width: calc(100% - 5rem);
+}
+
+/* Right panel styling */
+.register-right-panel {
+  flex: 1;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.register-form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.register-logo {
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-icon {
+  font-size: 1.4rem;
+}
+
+.register-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  text-align: center;
+  color: #111;
+}
+
+.register-subtitle {
+  color: #555;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Form styling */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #000;
+}
+
+.password-input-container {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.register-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s;
+}
+
+.register-button:hover {
+  background-color: #333;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 1rem;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.login-link a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .register-container {
+    flex-direction: column;
+  }
+
+  .register-left-panel {
+    display: none;
+  }
+
+  .register-right-panel {
+    padding: 1.5rem;
+  }
+}

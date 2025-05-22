@@ -1,0 +1,115 @@
+/* Import Playfair Display font */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
+.hero {
+  padding: 60px 20px;
+  background-color: #fff;
+  font-family: 'Playfair Display', serif; /* Apply to all */
+}
+
+.hero-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 40px;
+}
+
+.hero-text {
+  flex: 1;
+}
+
+.hero-text h2 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+.hero-text p {
+  font-size: 1.25rem;
+  color: #555;
+  margin-bottom: 30px;
+  line-height: 1.8;
+  font-weight: 400;
+}
+
+.btn-order-now {
+  background-color: #000;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* spacing between text and image */
+}
+
+.btn-order-now img.btn-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+.btn-order-now:hover {
+  background-color: #333;
+}
+
+.join-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #black;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  top: -35px;
+  left: 250px
+}
+
+
+.hero-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+
+
+.hero-image img {
+  max-width: 80%;
+  height: auto;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    flex-direction: column-reverse;
+    text-align: center;
+  }
+
+  .hero-text h2 {
+    font-size: 2.5rem;
+  }
+
+  .hero-text p {
+    font-size: 1.1rem;
+  }
+}
+
+.join-container {
+  display: flex;
+  justify-content: space-between; /* Membuat elemen di kiri dan kanan */
+  width: 1%; /* Pastikan container cukup lebar */
+}
+
+@media (max-width: 768px) {
+  .join-text {
+    margin-left: -268px;
+    margin-right: auto; /* pushes it left if in a flex row */
+  }
+}

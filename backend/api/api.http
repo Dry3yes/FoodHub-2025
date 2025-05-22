@@ -1,0 +1,64 @@
+@api_HostAddress = http://localhost:5000/api/v1
+@baseUrl = https://localhost:5001/api/v1
+@token = YOUR_FIREBASE_TOKEN_HERE
+
+### Create new user
+POST {{baseUrl}}/user
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "StrongP@ssw0rd",
+    "displayName": "Test User"
+}
+
+### Login user
+# This endpoint is handled by Firebase directly in the frontend
+# Included here for documentation purposes
+POST https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "StrongP@ssw0rd",
+    "returnSecureToken": true
+}
+
+### Get all users (admin only)
+GET {{baseUrl}}/user
+Authorization: Bearer {{token}}
+
+### Get user by ID
+GET {{baseUrl}}/user/USER_ID
+Authorization: Bearer {{token}}
+
+### Update user
+PUT {{baseUrl}}/user/USER_ID
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "displayName": "Updated Name"
+}
+
+### Update user role (admin only)
+PUT {{baseUrl}}/user/USER_ID/role
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+"admin"
+
+### Delete user (admin only)
+DELETE {{baseUrl}}/user/USER_ID
+Authorization: Bearer {{token}}
+
+### Health check
+GET {{baseUrl}}/health
+
+### Readiness probe
+GET {{baseUrl}}/health/ready
+
+### Liveness probe
+GET {{baseUrl}}/health/live
+
+###
