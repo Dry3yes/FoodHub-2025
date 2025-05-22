@@ -172,3 +172,40 @@ export const applyForSeller = async (sellerData, imageFile) => {
       throw error;
     }
 }
+
+// Fetch order status by orderId
+export const fetchOrderStatus = async (orderId) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/orders/${orderId}/status`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        const data = await response.json();
+        return data.success ? data.data : null;
+    } catch (error) {
+        console.error(`Error fetching order status for ${orderId}:`, error);
+        return null;
+    }
+};
+
+// Update order status (for sellers/admins)
+export const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        const data = await response.json();
+        return data.success;
+    } catch (error) {
+        console.error(`Error updating order status for ${orderId}:`, error);
+        return false;
+    }
+};

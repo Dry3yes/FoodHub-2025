@@ -1,0 +1,100 @@
+.status-page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.content-container {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.status-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.status-container {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+}
+
+.status-text {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.status-preparing {
+  color: #ffa500;
+  font-weight: bold;
+}
+
+.status-done {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.order-items {
+  margin-top: 20px;
+}
+
+.order-items ul {
+  list-style: none;
+  padding: 0;
+}
+
+.order-items li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.total-price {
+  margin-top: 15px;
+  text-align: right;
+  font-size: 18px;
+}
+
+.map-container {
+  margin-top: 20px;
+  height: 350px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.back-button {
+  background-color: #ff5a5f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s;
+}
+
+.back-button:hover {
+  background-color: #e74c3c;
+}
+
+.loading, .error {
+  text-align: center;
+  margin: 50px 0;
+  font-size: 18px;
+}
+
+.error {
+  color: #dc3545;
+}
