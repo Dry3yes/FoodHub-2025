@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import SellerDashboard from "./pages/SellerDashboard"
 import LandingPage from "./pages/LandingPage"
+import Settings from "./pages/Settings"
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/seller" element={<SellerDashboard />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </Router>
     </CartProvider>

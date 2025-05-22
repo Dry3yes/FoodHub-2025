@@ -140,3 +140,35 @@ export const fetchSellerByUserId = async (userId) => {
         return null;
     }
 };
+
+export const applyForSeller = async (sellerData, imageFile) => {
+    try {
+      // Create form data for file upload
+      const formData = new FormData();
+      formData.append('StoreName', sellerData.storeName);
+      formData.append('UserIdentificationNumber', sellerData.nik);
+      
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+      
+      const response = await fetch(`${apiEndpoint}/v1/seller-application`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeader(),
+          // Don't set Content-Type for multipart/form-data, browser will set it with boundary
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Network response was not ok');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error applying for seller:', error);
+      throw error;
+    }
+}

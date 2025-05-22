@@ -137,6 +137,27 @@
   padding: 0;
 }
 
+.settings-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: none;
+  border: none;
+  border-radius: 0.375rem;
+  margin-left: -0.3rem;
+}
+
+.settings-button:hover {
+  background-color: #f3f4f6;
+}
+
+.settings-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 .login-button {
   background-color: #111827;
   color: white;
