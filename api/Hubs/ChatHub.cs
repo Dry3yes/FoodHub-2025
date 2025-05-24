@@ -133,7 +133,8 @@ namespace api.Hubs
             }
 
             await Clients.Caller.SendAsync("LeftChat", chatId);
-        }        public async Task SendMessage(SendMessageDto sendMessageDto)
+        }
+        public async Task SendMessage(SendMessageDto sendMessageDto)
         {
             var userId = GetUserId();
             var userName = await GetUserNameAsync();
@@ -248,7 +249,8 @@ namespace api.Hubs
             {
                 await Clients.Caller.SendAsync("Error", $"Failed to mark chat as read: {ex.Message}");
             }
-        }        public async Task StartTyping(string chatId)
+        }
+        public async Task StartTyping(string chatId)
         {
             var userId = GetUserId();
             var userName = await GetUserNameAsync();
@@ -308,7 +310,8 @@ namespace api.Hubs
             {
                 return string.Empty;
             }
-        }        private string GetUserName()
+        }
+        private string GetUserName()
         {
             return Context.User?.FindFirst("name")?.Value ??
                    Context.User?.Identity?.Name ??

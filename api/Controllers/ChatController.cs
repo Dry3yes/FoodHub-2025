@@ -246,7 +246,8 @@ namespace api.Controllers
         public async Task<ActionResult<MessageDto>> SendMessage(string chatId, [FromBody] SendMessageDto sendMessageDto)
         {
             try
-            {                var userId = GetCurrentUserId();
+            {
+                var userId = GetCurrentUserId();
                 var userName = await GetCurrentUserNameAsync();
 
                 if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userName))
@@ -399,7 +400,8 @@ namespace api.Controllers
             var user = users.FirstOrDefault(u => u.FirebaseUid == firebaseUid);
 
             return user?.UserId ?? string.Empty;
-        }        private string GetCurrentUserName()
+        }
+        private string GetCurrentUserName()
         {
             return User.FindFirst("name")?.Value ??
                    User.Identity?.Name ??
