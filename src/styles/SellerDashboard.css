@@ -185,7 +185,7 @@
 .menu-item {
   display: flex;
   gap: 1rem;
-  padding-bottom: 1.5rem;
+  padding-left: 1rem;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -229,6 +229,11 @@
   justify-content: space-between;
   margin-top: 0.5rem;
 }
+
+.menu-item-info {
+  height: 50px;
+}
+
 .menu-item-name {
   font-size: 1rem;
   font-weight: 600;
@@ -239,14 +244,18 @@
 .menu-item-details {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.875rem;
-  color: #6b7280;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .menu-rating {
   font-weight: 500;
   color: #1f2937;
+}
+
+.menu-stock {
+  align-self: self-start;
+  margin-top: 0.2rem;
 }
 
 .menu-reviews {
@@ -387,8 +396,12 @@
 }
 
 .error-message {
-  color: #ef4444;
-  font-weight: 500;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   margin-bottom: 1rem;
 }
 
@@ -702,4 +715,184 @@
   text-align: center;
   font-size: 0.875rem;
   color: #9ca3af;
+}
+
+/* Menu form modal styles */
+.menu-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.menu-form {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  border-radius: 0.25rem;
+}
+
+.close-button:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.image-preview {
+  margin-top: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.form-actions button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.form-actions button:first-child {
+  background-color: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.form-actions button:first-child:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.form-actions .primary-button {
+  background-color: #3b82f6;
+  border: 1px solid #3b82f6;
+  color: white;
+}
+
+.form-actions .primary-button:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Menu item improvements */
+.menu-category {
+  background-color: #f3f4f6;
+  color: #374151;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.menu-stock {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-left: 0.5rem;
+}
+
+.menu-item-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Responsive adjustments for form */
+@media (max-width: 768px) {
+  .menu-form-overlay {
+    padding: 0.5rem;
+  }
+  
+  .menu-form {
+    padding: 1rem;
+    max-height: 95vh;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
 }

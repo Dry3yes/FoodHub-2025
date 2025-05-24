@@ -316,7 +316,7 @@ function StorePage() {
             </div>
 
             <div className="menu-card">
-              <h2 className="menu-title">Menu</h2>
+              <h2 className="store-menu-title">Menu</h2>
 
               {store.menuCategories && store.menuCategories.length > 0 ? (
                 store.menuCategories.map((category) => (
@@ -333,7 +333,7 @@ function StorePage() {
                             <h4 className="menu-item-name">{item.name}</h4>
                             <p className="menu-item-description">{item.description}</p>
                           </div>
-                          <div className="menu-item-actions">
+                          <div className="store-menu-item-actions">
                             <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>
                             <button
                               className="add-to-cart-button"

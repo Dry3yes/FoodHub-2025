@@ -209,3 +209,149 @@ export const updateOrderStatus = async (orderId, newStatus) => {
         return false;
     }
 };
+
+// ===== MENU CRUD OPERATIONS =====
+
+// Create a new menu item
+export const createMenu = async (menuData, imageFile) => {
+    try {
+        const formData = new FormData();
+        formData.append('ItemName', menuData.itemName);
+        formData.append('Price', menuData.price.toString());
+        formData.append('Category', menuData.category);
+        formData.append('Stock', menuData.stock.toString());
+        
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+        
+        const response = await fetch(`${apiEndpoint}/api/v1/create-menu`, {
+            method: 'POST',
+            headers: {
+                ...getAuthHeader(),
+                // Don't set Content-Type for multipart/form-data
+            },
+            body: formData,
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to create menu item');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating menu item:', error);
+        throw error;
+    }
+};
+
+// Update an existing menu item
+export const updateMenu = async (menuId, menuData) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/update-menu/${menuId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify({
+                itemName: menuData.itemName,
+                price: menuData.price,
+                category: menuData.category,
+                stock: menuData.stock,
+                imageURL: menuData.imageURL || ""
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update menu item');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating menu item:', error);
+        throw error;
+    }
+};
+
+// Delete a menu item
+export const deleteMenu = async (menuId) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/delete-menu/${menuId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete menu item');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error deleting menu item:', error);
+        throw error;
+    }
+};
+
+// Get a single menu item by ID
+export const getMenuById = async (menuId) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/get-menu/${menuId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        
+        const data = await response.json();
+        return data.success ? data.data : null;
+    } catch (error) {
+        console.error(`Error fetching menu item ${menuId}:`, error);
+        return null;
+    }
+};
+
+// Get all menus (for admin or general use)
+export const getAllMenus = async () => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/get-menus`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        
+        const data = await response.json();
+        return data.success ? data.data : [];
+    } catch (error) {
+        console.error('Error fetching all menus:', error);
+        return [];
+    }
+};
+
+// Get menus by category
+export const getMenusByCategory = async (category) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/get-menus-by-category/${category}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        
+        const data = await response.json();
+        return data.success ? data.data : [];
+    } catch (error) {
+        console.error(`Error fetching menus for category ${category}:`, error);
+        return [];
+    }
+};

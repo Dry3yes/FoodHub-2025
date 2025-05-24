@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import "../styles/SellerDashboard.css";
-import { fetchStoreById, fetchMenusByStore, fetchSellerByUserId } from "../services/Api";
+import { 
+  fetchStoreById, 
+  fetchMenusByStore, 
+  fetchSellerByUserId,
+  createMenu,
+  updateMenu,
+  deleteMenu
+} from "../services/Api";
 
 function SellerDashboard() {
-  const location = useLocation();
   const navigate = useNavigate();
   
   // State for store data
@@ -18,54 +24,178 @@ function SellerDashboard() {
   
   const sellerTabs = [
     { id: "all", name: "All Items" },
-    { id: "popular", name: "Popular" },
     { id: "appetizers", name: "Appetizers" },
     { id: "main", name: "Main Courses" },
     { id: "desserts", name: "Desserts" },
+    { id: "beverages", name: "Beverages" },
   ];
 
-  // Initialize with an empty array instead of dummy data
+  // Menu state
   const [menuData, setMenuData] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
-  const [editName, setEditName] = useState("");
-  const [editPrice, setEditPrice] = useState("");
+  const [editingItem, setEditingItem] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
   
-  // New menu item state
-  const [newMenuName, setNewMenuName] = useState("");
-  const [newMenuPrice, setNewMenuPrice] = useState("");
-  const [tempImage, setTempImage] = useState(null);
+  // Form states
+  const [formData, setFormData] = useState({
+    itemName: "",
+    price: "",
+    category: "Makanan",
+    stock: "",
+    imageURL: ""
+  });
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handle image upload for new menu items
-  const handleImageUpload = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      if (e.target.files.length > 0) {
-        const file = e.target.files[0];
-        setTempImage(URL.createObjectURL(file));
-      }
-    };
-    input.click();
+  // Form handling functions
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    console.log(`Form field changed: ${name} = ${value}`); // Debug log
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  // Add a new menu item
-  const addMenu = () => {
-    if (newMenuName.trim() === "" || newMenuPrice.trim() === "" || !tempImage) return;
-    const newMenu = {
-      itemName: newMenuName,
-      price: newMenuPrice || "0",
-      rating: 0,
-      imageURL: tempImage,
-      reviewsCount: 0,
-    };
-    setMenuData([...menuData, newMenu]);
-    setNewMenuName("");
-    setNewMenuPrice("");
-    setTempImage(null);
-    
-    // Hide the add form after adding
-    document.querySelector('.add-new-form').style.display = 'none';
+  // Handle image selection
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setFormData(prev => ({ ...prev, imageURL: previewUrl }));
+    }
+  };
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      itemName: "",
+      price: "",
+      category: "Makanan",
+      stock: "",
+      imageURL: ""
+    });
+    setSelectedImage(null);
+    setEditingItem(null);
+    setShowAddForm(false);
+  };
+
+  // Create new menu item
+  const handleCreateMenu = async (e) => {
+    e.preventDefault();
+    if (!formData.itemName || !formData.price || !formData.stock || !formData.category) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const menuData = {
+        itemName: formData.itemName,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        stock: parseInt(formData.stock)
+      };
+
+      console.log("Submitting menu data:", menuData); // Debug log
+      const response = await createMenu(menuData, selectedImage);
+      
+      if (response.success) {
+        // Refresh the menu list
+        await loadMenuData();
+        resetForm();
+        setError("");
+      } else {
+        setError(response.message || "Failed to create menu item");
+      }
+    } catch (err) {
+      console.error("Error creating menu:", err);
+      setError(err.message || "Failed to create menu item");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Update menu item
+  const handleUpdateMenu = async (e) => {
+    e.preventDefault();
+    if (!editingItem || !formData.itemName || !formData.price || !formData.stock) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const menuData = {
+        itemName: formData.itemName,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        stock: parseInt(formData.stock),
+        imageURL: formData.imageURL
+      };
+
+      const response = await updateMenu(editingItem.id, menuData);
+      
+      if (response.success) {
+        // Refresh the menu list
+        await loadMenuData();
+        resetForm();
+        setError("");
+      } else {
+        setError(response.message || "Failed to update menu item");
+      }
+    } catch (err) {
+      console.error("Error updating menu:", err);
+      setError(err.message || "Failed to update menu item");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Delete menu item
+  const handleDeleteMenu = async (menuItem) => {
+    if (!window.confirm(`Are you sure you want to delete "${menuItem.itemName}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await deleteMenu(menuItem.id);
+      
+      if (response.success) {
+        // Refresh the menu list
+        await loadMenuData();
+        setError("");
+      } else {
+        setError(response.message || "Failed to delete menu item");
+      }
+    } catch (err) {
+      console.error("Error deleting menu:", err);
+      setError(err.message || "Failed to delete menu item");
+    }
+  };
+
+  // Start editing
+  const startEdit = (menuItem) => {
+    setEditingItem(menuItem);
+    setFormData({
+      itemName: menuItem.itemName,
+      price: menuItem.price.toString(),
+      category: menuItem.category,
+      stock: menuItem.stock.toString(),
+      imageURL: menuItem.imageURL
+    });
+    setShowAddForm(true);
+  };
+
+  // Load menu data
+  const loadMenuData = async () => {
+    const sellerInfoString = localStorage.getItem('sellerInfo');
+    if (sellerInfoString) {
+      const sellerInfo = JSON.parse(sellerInfoString);
+      const menus = await fetchMenusByStore(sellerInfo.sellerId);
+      setMenuData(menus || []);
+    }
   };
   
   // Check if user is authenticated and has seller role
@@ -138,28 +268,6 @@ function SellerDashboard() {
     
     checkAuthentication();
   }, [navigate]);
-
-
-
-  const startEdit = (index) => {
-    setEditIndex(index);
-    setEditName(menuData[index].itemName);
-    setEditPrice(menuData[index].price);
-  };
-
-  const saveEdit = (index) => {
-    const updatedMenu = [...menuData];
-    updatedMenu[index] = { ...updatedMenu[index], itemName: editName, price: editPrice };
-    setMenuData(updatedMenu);
-    setEditIndex(null);
-    setEditName("");
-    setEditPrice("");
-  };
-
-  const deleteMenu = (index) => {
-    const updatedMenu = menuData.filter((_, i) => i !== index);
-    setMenuData(updatedMenu);
-  };
 
   // Show loading or error states
   if (loading) {
@@ -252,49 +360,126 @@ function SellerDashboard() {
             <div className="menu-card">
               <div className="menu-header">
                 <h2 className="menu-title">Menu Management</h2>
-                <button className="primary-button" onClick={() => {
-                  // Show the add new form when this button is clicked
-                  document.querySelector('.add-new-form').style.display = 'flex';
-                }}>Add New Item</button>
+                <button 
+                  className="primary-button" 
+                  onClick={() => setShowAddForm(true)}
+                  disabled={isSubmitting}
+                >
+                  Add New Item
+                </button>
               </div>
               
-              <div className="menu-items">
-                {/* Add Menu Form (hidden by default, show when clicking 'Add New Item') */}
-                <div className="menu-item add-new-form" style={{ display: 'none' }}>
-                  <div className="menu-item-image-container">
-                    <button onClick={handleImageUpload} className="image-upload-button">+</button>
-                    {tempImage && <img src={tempImage} alt="Preview" className="menu-item-image" />}
-                  </div>
-                  <div className="menu-item-content">
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="Menu Item Name"
-                        value={newMenuName}
-                        onChange={(e) => setNewMenuName(e.target.value)}
-                        className="menu-item-input"
-                      />
-                      <textarea
-                        placeholder="Item description"
-                        className="menu-item-textarea"
-                      ></textarea>
+              {/* Error Display */}
+              {error && (
+                <div className="error-message" style={{ color: 'red', margin: '10px 0', padding: '10px', backgroundColor: '#ffebee', borderRadius: '4px' }}>
+                  {error}
+                </div>
+              )}
+              
+              {/* Add/Edit Menu Form */}
+              {showAddForm && (
+                <div className="menu-form-overlay">
+                  <div className="menu-form">
+                    <div className="form-header">
+                      <h3>{editingItem ? 'Edit Menu Item' : 'Add New Menu Item'}</h3>
+                      <button 
+                        className="close-button" 
+                        onClick={resetForm}
+                        disabled={isSubmitting}
+                      >
+                        ×
+                      </button>
                     </div>
-                    <div className="menu-item-actions">
-                      <div className="price-input-wrapper">
-                        <span>Rp</span>
+                    
+                    <form onSubmit={editingItem ? handleUpdateMenu : handleCreateMenu}>
+                      <div className="form-group">
+                        <label>Item Name *</label>
                         <input
-                          type="number"
-                          className="price-input"
-                          placeholder="0"
-                          value={newMenuPrice}
-                          onChange={(e) => setNewMenuPrice(e.target.value)}
+                          type="text"
+                          name="itemName"
+                          value={formData.itemName}
+                          onChange={handleInputChange}
+                          placeholder="Enter item name"
+                          required
                         />
                       </div>
-                      <button onClick={addMenu} className="primary-button">Save</button>
-                    </div>
+                      
+                      <div className="form-group">
+                        <label>Price (Rp) *</label>
+                        <input
+                          type="number"
+                          name="price"
+                          value={formData.price}
+                          onChange={handleInputChange}
+                          placeholder="Enter price"
+                          min="0"
+                          step="0.01"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label>Category *</label>
+                        <select
+                          name="category"
+                          value={formData.category}
+                          onChange={handleInputChange}
+                          required
+                        >
+                          <option value="Makanan">Makanan</option>
+                          <option value="Minuman">Minuman</option>
+                        </select>
+                      </div>
+                      
+                      <div className="form-group">
+                        <label>Stock *</label>
+                        <input
+                          type="number"
+                          name="stock"
+                          value={formData.stock}
+                          onChange={handleInputChange}
+                          placeholder="Enter stock quantity"
+                          min="0"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label>Image {!editingItem && '*'}</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageSelect}
+                        />
+                        {formData.imageURL && (
+                          <div className="image-preview">
+                            <img src={formData.imageURL} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px' }} />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="form-actions">
+                        <button 
+                          type="button" 
+                          onClick={resetForm}
+                          disabled={isSubmitting}
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          type="submit" 
+                          className="primary-button"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? 'Saving...' : (editingItem ? 'Update Item' : 'Add Item')}
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </div>
-                
+              )}
+              
+              <div className="menu-items">
                 {/* No Menu Items Message */}
                 {menuData.length === 0 ? (
                   <div className="no-menu-items">
@@ -321,63 +506,43 @@ function SellerDashboard() {
                   </div>
                 ) : (
                   /* Menu Items */
-                  menuData.map((item, index) => (
-                    <div key={index} className="menu-item">
+                  menuData
+                    .filter(item => activeTab === "all" || item.category === activeTab)
+                    .map((item) => (
+                    <div key={item.id} className="menu-item">
                       <div className="menu-item-image-container">
-                        <img src={item.imageURL} alt={item.itemName} className="menu-item-image" />
+                        <img 
+                          src={item.imageURL || '/placeholder.jpg'} 
+                          alt={item.itemName} 
+                          className="menu-item-image" 
+                        />
                       </div>
                       <div className="menu-item-content">
-                        <div>
+                        <div className="menu-item-info">
                           <h4 className="menu-item-name">{item.itemName}</h4>
                           <div className="menu-item-details">
-                            <svg
-                              className="star-icon filled"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
-                            <span className="menu-rating">{item.rating}</span>
-                            <span className="menu-reviews">{item.reviewsCount}+ reviews</span>
+                            <span className="menu-category">{item.category}</span>
+                            <span className="menu-stock">Stock: {item.stock}</span>
                           </div>
                         </div>
                         <div className="menu-item-actions">
                           <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>
                           <div className="menu-item-buttons">
-                            <button onClick={() => startEdit(index)} className="edit-button">Edit</button>
-                            <button onClick={() => deleteMenu(index)} className="delete-button">Delete</button>
+                            <button 
+                              onClick={() => startEdit(item)} 
+                              className="edit-button"
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteMenu(item)} 
+                              className="delete-button"
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       </div>
-                      {editIndex === index && (
-                        <div className="edit-form">
-                          <input
-                            type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            className="edit-input"
-                            placeholder="Menu name"
-                          />
-                          <div className="price-input-wrapper">
-                            <span>Rp</span>
-                            <input
-                              type="number"
-                              value={editPrice}
-                              onChange={(e) => setEditPrice(e.target.value)}
-                              className="price-input"
-                              placeholder="Price"
-                            />
-                          </div>
-                          <div className="edit-buttons">
-                            <button onClick={() => saveEdit(index)} className="save-button">Save</button>
-                            <button onClick={() => setEditIndex(null)} className="cancel-button">Cancel</button>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))
                 )}

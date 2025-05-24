@@ -124,7 +124,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.menu-title {
+.store-menu-title {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
@@ -141,7 +141,8 @@
 .category-title {
   font-size: 1.125rem;
   font-weight: 500;
-  margin-bottom: 1rem;
+  margin-bottom: -0.5rem;
+  padding: 1rem 0 0 1rem;
 }
 
 .menu-items {
@@ -192,16 +193,17 @@
   line-height: 1.4;
 }
 
-.menu-item-actions {
+.store-menu-item-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
 .menu-item-price {
   font-weight: 500;
   margin-right: 0.75rem; /* Added margin to separate price from button */
+  font-size: 1rem;
 }
 
 .add-to-cart-button {
