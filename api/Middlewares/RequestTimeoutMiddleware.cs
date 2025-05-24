@@ -11,10 +11,18 @@ namespace api.Middlewares
         {
             _next = next;
             _logger = logger;
-        }
-
-        public async Task InvokeAsync(HttpContext context)
+        }        public async Task InvokeAsync(HttpContext context)
         {
+            // Skip timeout for SignalR hubs, Swagger, and static files
+            if (context.Request.Path.StartsWithSegments("/chathub") ||
+                context.Request.Path.StartsWithSegments("/swagger") ||
+                context.Request.Path.StartsWithSegments("/health") ||
+                context.WebSockets.IsWebSocketRequest)
+            {
+                await _next(context);
+                return;
+            }
+
             using var cts = new CancellationTokenSource();
             var timeoutTask = Task.Delay(_timeout, cts.Token);
             var processRequest = ProcessRequestAsync(context, cts.Token);
@@ -23,12 +31,17 @@ namespace api.Middlewares
             if (completedTask == timeoutTask)
             {
                 cts.Cancel();
-                context.Response.StatusCode = StatusCodes.Status408RequestTimeout;
-                await context.Response.WriteAsJsonAsync(new
+                
+                // Only set status code if response hasn't started
+                if (!context.Response.HasStarted)
                 {
-                    success = false,
-                    message = "Request timed out"
-                });
+                    context.Response.StatusCode = StatusCodes.Status408RequestTimeout;
+                    await context.Response.WriteAsJsonAsync(new
+                    {
+                        success = false,
+                        message = "Request timed out"
+                    });
+                }
 
                 _logger.LogWarning("Request to {Path} timed out after {Timeout} seconds",
                     context.Request.Path, _timeout.TotalSeconds);
