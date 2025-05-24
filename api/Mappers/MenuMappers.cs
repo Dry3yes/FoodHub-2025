@@ -9,6 +9,9 @@ namespace api.Mappers
         {
             return new MenuDto
             {
+                Id = menuModel.Id,
+                SellerId = menuModel.SellerId,
+                StoreName = menuModel.StoreName,
                 ItemName = menuModel.ItemName,
                 Price = menuModel.Price,
                 ImageURL = menuModel.ImageURL,

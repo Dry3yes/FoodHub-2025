@@ -30,7 +30,7 @@ namespace api.Middlewares
                     await context.Response.WriteAsJsonAsync(new
                     {
                         success = false,
-                        message = "Request content type must be application/json"
+                        message = "Request content type must be application/json or multipart/form-data"
                     });
                     return;
                 }

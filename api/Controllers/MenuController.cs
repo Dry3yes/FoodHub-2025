@@ -73,7 +73,7 @@ namespace api.Controllers
                 var menuModel = menuDto.ToMenuFromCreateDto();
                 menuModel.CreatedAt = menuModel.CreatedAt.ToUniversalTime();
                 menuModel.ImageURL = imageUrl ?? string.Empty;
-                
+
                 // Set seller information directly from the seller entity
                 menuModel.SellerId = sellerEntity.SellerId;
                 menuModel.StoreName = sellerEntity.StoreName;
@@ -146,11 +146,11 @@ namespace api.Controllers
                     return NotFound(new { success = false, message = "User not found" });
                 }
 
-                // Get seller application information
-                var sellerApplication = await _sellerRepository.GetApplicationByUserIdAsync(user.UserId);
-                if (sellerApplication == null || sellerApplication.Status != "Approved")
+                // Get seller information based on the UserId
+                var sellerEntity = await _sellerRepository.GetSellerByUserIdAsync(user.UserId);
+                if (sellerEntity == null)
                 {
-                    return NotFound(new { success = false, message = "Seller not found or not yet approved" });
+                    return NotFound(new { success = false, message = "Seller not found for this user. You may need to apply to become a seller first." });
                 }
 
                 var menu = await _menuRepository.GetMenuByIdAsync(id);
@@ -160,7 +160,7 @@ namespace api.Controllers
                 }
 
                 // Verify that the authenticated seller owns this menu
-                if (menu.SellerId != sellerApplication.ApplicationId)
+                if (menu.SellerId != sellerEntity.SellerId)
                 {
                     return Forbid();
                 }
@@ -204,11 +204,11 @@ namespace api.Controllers
                     return NotFound(new { success = false, message = "User not found" });
                 }
 
-                // Get seller application information
-                var sellerApplication = await _sellerRepository.GetApplicationByUserIdAsync(user.UserId);
-                if (sellerApplication == null || sellerApplication.Status != "Approved")
+                // Get seller information based on the UserId
+                var sellerEntity = await _sellerRepository.GetSellerByUserIdAsync(user.UserId);
+                if (sellerEntity == null)
                 {
-                    return NotFound(new { success = false, message = "Seller not found or not yet approved" });
+                    return NotFound(new { success = false, message = "Seller not found for this user. You may need to apply to become a seller first." });
                 }
 
                 var menu = await _menuRepository.GetMenuByIdAsync(id);
@@ -218,7 +218,7 @@ namespace api.Controllers
                 }
 
                 // Verify that the authenticated seller owns this menu
-                if (menu.SellerId != sellerApplication.ApplicationId)
+                if (menu.SellerId != sellerEntity.SellerId)
                 {
                     return Forbid();
                 }
@@ -282,7 +282,7 @@ namespace api.Controllers
                     return NotFound(new { success = false, message = "No menus found for this store" });
                 }
                 var menuDtos = storeMenus.Select(m => m.ToMenuDto()).ToList();
-                _logger.LogInformation("Successfully retrieved {Count} menus for seller ID: {SellerId}", 
+                _logger.LogInformation("Successfully retrieved {Count} menus for seller ID: {SellerId}",
                                      menuDtos.Count, sellerId);
                 return Ok(new { success = true, data = menuDtos });
             }
