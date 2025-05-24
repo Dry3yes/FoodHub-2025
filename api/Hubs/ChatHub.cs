@@ -133,12 +133,10 @@ namespace api.Hubs
             }
 
             await Clients.Caller.SendAsync("LeftChat", chatId);
-        }
-
-        public async Task SendMessage(SendMessageDto sendMessageDto)
+        }        public async Task SendMessage(SendMessageDto sendMessageDto)
         {
             var userId = GetUserId();
-            var userName = GetUserName();
+            var userName = await GetUserNameAsync();
 
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userName))
                 return;
@@ -250,12 +248,10 @@ namespace api.Hubs
             {
                 await Clients.Caller.SendAsync("Error", $"Failed to mark chat as read: {ex.Message}");
             }
-        }
-
-        public async Task StartTyping(string chatId)
+        }        public async Task StartTyping(string chatId)
         {
             var userId = GetUserId();
-            var userName = GetUserName();
+            var userName = await GetUserNameAsync();
 
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userName))
                 return;
@@ -312,13 +308,28 @@ namespace api.Hubs
             {
                 return string.Empty;
             }
-        }
-
-        private string GetUserName()
+        }        private string GetUserName()
         {
             return Context.User?.FindFirst("name")?.Value ??
                    Context.User?.Identity?.Name ??
                    "Unknown User";
+        }
+
+        private async Task<string> GetUserNameAsync()
+        {
+            var userId = GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return "Unknown User";
+
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId);
+                return user?.Name ?? "Unknown User";
+            }
+            catch
+            {
+                return "Unknown User";
+            }
         }
 
         private async Task NotifyOfflineUsers(string chatId, Message message, string senderId)
