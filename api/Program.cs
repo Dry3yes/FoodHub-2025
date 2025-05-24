@@ -137,7 +137,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = projectId,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
-    };    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    }; options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
     {
         OnTokenValidated = context =>
         {
@@ -162,12 +162,12 @@ builder.Services.AddAuthentication(options =>
             // For SignalR connections, get token from query string
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
-            
+
             if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
             {
                 context.Token = accessToken;
             }
-            
+
             return Task.CompletedTask;
         }
     };

@@ -19,7 +19,8 @@ namespace api.Hubs
         {
             _chatRepository = chatRepository;
             _userRepository = userRepository;
-        }        public override async Task OnConnectedAsync()
+        }
+        public override async Task OnConnectedAsync()
         {
             try
             {
@@ -53,7 +54,8 @@ namespace api.Hubs
                 // Still call base method
                 await base.OnConnectedAsync();
             }
-        }        public override async Task OnDisconnectedAsync(Exception? exception)
+        }
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             try
             {

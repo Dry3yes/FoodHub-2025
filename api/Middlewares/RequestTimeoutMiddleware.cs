@@ -11,7 +11,8 @@ namespace api.Middlewares
         {
             _next = next;
             _logger = logger;
-        }        public async Task InvokeAsync(HttpContext context)
+        }
+        public async Task InvokeAsync(HttpContext context)
         {
             // Skip timeout for SignalR hubs, Swagger, and static files
             if (context.Request.Path.StartsWithSegments("/chathub") ||
@@ -31,7 +32,7 @@ namespace api.Middlewares
             if (completedTask == timeoutTask)
             {
                 cts.Cancel();
-                
+
                 // Only set status code if response hasn't started
                 if (!context.Response.HasStarted)
                 {
