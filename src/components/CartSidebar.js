@@ -34,17 +34,8 @@ function CartSidebar() {
                 <path d="M3 3h18v13H3z" />
               </svg>
             </div>
-            { localStorage.getItem('token') ? (
-                <>
-                  <h3 className="empty-cart-title">Your cart is empty</h3>
-                  <p className="empty-cart-text">Add items to your cart to see them here.</p>
-                </>
-            ) : (
-                <>
-                  <h3 className="empty-cart-title">Login to see your cart</h3>
-                  <p className="empty-cart-text">Login to see your cart items.</p>
-                </>
-            )}  
+            <h3 className="empty-cart-title">Your cart is empty</h3>
+            <p className="empty-cart-text">Add items to your cart to see them here.</p>
           </div>
         </div>
       </div>
