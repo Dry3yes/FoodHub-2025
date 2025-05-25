@@ -50,7 +50,7 @@
 
 .food-item-name {
   font-weight: 500;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;

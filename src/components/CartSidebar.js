@@ -89,7 +89,6 @@ function CartSidebar() {
                   </button>
                 </div>
                 <div className="cart-item-info">
-                  <div className="cart-item-name">{item.name}</div>
                   <div className="cart-item-price">Rp {item.price.toLocaleString('id-ID')}</div>
                 </div>
                 <div className="cart-item-quantity">
