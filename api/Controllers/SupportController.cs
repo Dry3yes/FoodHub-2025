@@ -1,4 +1,5 @@
 using api.Dtos.Support;
+using api.Dtos.Chat;
 using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Authorization;
@@ -14,15 +15,16 @@ namespace api.Controllers
     {
         private readonly ISupportTicketRepository _supportTicketRepository;
         private readonly IUserRepository _userRepository;
-        private readonly ILogger<SupportController> _logger;
-
-        public SupportController(
+        private readonly IChatRepository _chatRepository;
+        private readonly ILogger<SupportController> _logger; public SupportController(
             ISupportTicketRepository supportTicketRepository,
             IUserRepository userRepository,
+            IChatRepository chatRepository,
             ILogger<SupportController> logger)
         {
             _supportTicketRepository = supportTicketRepository;
             _userRepository = userRepository;
+            _chatRepository = chatRepository;
             _logger = logger;
         }
 
@@ -185,7 +187,6 @@ namespace api.Controllers
                 return StatusCode(500, new { success = false, message = "Error retrieving your tickets" });
             }
         }
-
         [HttpPut]
         [Route("tickets/{ticketId}/status")]
         [Authorize(Roles = "Admin")]
@@ -204,6 +205,44 @@ namespace api.Controllers
                 ticket.UpdatedAt = DateTime.UtcNow;
 
                 await _supportTicketRepository.UpdateTicketAsync(ticket);
+
+                // If admin provided a response and ticket has a user, send a chat message
+                if (!string.IsNullOrEmpty(statusDto.AdminResponse) && !string.IsNullOrEmpty(ticket.UserId))
+                {
+                    try
+                    {
+                        // Get admin user
+                        var adminFirebaseUid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        var allUsers = await _userRepository.GetAllAsync();
+                        var adminUser = allUsers.FirstOrDefault(u => u.FirebaseUid == adminFirebaseUid);
+                        if (adminUser != null)
+                        {
+                            // Get or create chat between admin and user
+                            var participants = new List<string> { adminUser.UserId, ticket.UserId };
+                            var chat = await _chatRepository.GetOrCreateChatAsync(participants, "support");
+
+                            if (chat != null)
+                            {
+                                // Send message with support ticket context
+                                var messageContent = $"Support Ticket Response:\n\nSubject: {ticket.Subject}\nTicket ID: {ticket.TicketId}\nStatus: {ticket.Status}\n\nResponse: {statusDto.AdminResponse}";
+
+                                var sendMessageDto = new SendMessageDto
+                                {
+                                    ChatId = chat.ChatId,
+                                    Content = messageContent,
+                                    MessageType = "text"
+                                };
+
+                                await _chatRepository.SendMessageAsync(sendMessageDto, adminUser.UserId, adminUser.Name);
+                            }
+                        }
+                    }
+                    catch (Exception chatEx)
+                    {
+                        _logger.LogWarning(chatEx, "Failed to send chat notification for support ticket {TicketId}", ticketId);
+                        // Continue with the response even if chat fails
+                    }
+                }
 
                 _logger.LogInformation("Support ticket {TicketId} status updated to {Status}", ticketId, statusDto.Status);
 

@@ -106,7 +106,29 @@ namespace api.Controllers
             try
             {
                 var applications = await _sellerRepo.GetAllApplicationsAsync(status);
-                return Ok(new { success = true, data = applications });
+
+                // Enrich applications with user information
+                var enrichedApplications = new List<object>();
+                foreach (var app in applications)
+                {
+                    var user = await _userRepo.GetByIdAsync(app.UserId);
+                    enrichedApplications.Add(new
+                    {
+                        applicationId = app.ApplicationId,
+                        userId = app.UserId,
+                        userName = user?.Name ?? "Unknown User",
+                        userEmail = user?.Email ?? "No email",
+                        storeName = app.StoreName,
+                        description = app.Description,
+                        deliveryTimeEstimate = app.DeliveryTimeEstimate,
+                        status = app.Status,
+                        adminMessage = app.AdminMessage,
+                        createdAt = app.CreatedAt,
+                        processedAt = app.ProcessedAt
+                    });
+                }
+
+                return Ok(new { success = true, data = enrichedApplications });
             }
             catch (Exception ex)
             {
