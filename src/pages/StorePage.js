@@ -134,12 +134,37 @@ const fallbackStoreData = [
 
 function StorePage() {
   const { id: slug } = useParams()
-  const { addToCart } = useCart()
+  const { addToCart, clearCartAndAddItem } = useCart()
   
   const [store, setStore] = useState(null)
   const [menuItems, setMenuItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const handleAddToCart = async (item) => {
+    const cartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      quantity: 1,
+      sellerId: store?.id,
+      storeName: store?.name,
+    }
+
+    const result = await addToCart(cartItem)
+    
+    if (!result.success && result.errorCode === "DIFFERENT_STORE") {
+      // Show confirmation dialog for store conflict
+      const confirmClear = window.confirm(
+        `${result.message}\n\nDo you want to continue and clear your current cart?`
+      )
+      
+      if (confirmClear) {
+        await clearCartAndAddItem(cartItem)
+      }
+    }
+  }
   
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -330,20 +355,9 @@ function StorePage() {
                             <p className="menu-item-description">{item.description}</p>
                           </div>
                           <div className="store-menu-item-actions">
-                            <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>
-                            <button
+                            <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>                            <button
                               className="add-to-cart-button"
-                              onClick={() =>
-                                addToCart({
-                                  id: item.id,
-                                  name: item.name,
-                                  price: item.price,
-                                  image: item.image,
-                                  quantity: 1,
-                                  sellerId: store?.id,
-                                  storeName: store?.name,
-                                })
-                              }
+                              onClick={() => handleAddToCart(item)}
                             >
                               Add to Cart
                             </button>

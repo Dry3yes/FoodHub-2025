@@ -57,10 +57,35 @@ const fallbackFoodItems = [
 ]
 
 function FoodItems() {
-  const { addToCart } = useCart()
+  const { addToCart, clearCartAndAddItem } = useCart()
   const [foodItems, setFoodItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const handleAddToCart = async (item) => {
+    const cartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      quantity: 1,
+      sellerId: item.sellerId,
+      storeName: item.storeName,
+    }
+
+    const result = await addToCart(cartItem)
+    
+    if (!result.success && result.errorCode === "DIFFERENT_STORE") {
+      // Show confirmation dialog for store conflict
+      const confirmClear = window.confirm(
+        `${result.message}\n\nDo you want to continue and clear your current cart?`
+      )
+      
+      if (confirmClear) {
+        await clearCartAndAddItem(cartItem)
+      }
+    }
+  }
 
   useEffect(() => {
     const fetchFeaturedMenuItems = async () => {
@@ -98,7 +123,9 @@ function FoodItems() {
               restaurant: item.storeName || 'Restaurant',
               rating: parseFloat((4 + Math.random()).toFixed(1)), // Random rating between 4.0-5.0
               price: item.price,
-              image: item.imageURL || "/placeholder.svg?height=200&width=300"
+              image: item.imageURL || "/placeholder.svg?height=200&width=300",
+              sellerId: item.sellerId,
+              storeName: item.storeName
             }))
             // Take random items or all if less than 6
             .slice(0, Math.min(6, allMenuItems.length))
@@ -164,15 +191,7 @@ function FoodItems() {
           <div className="food-item-footer">
             <button
               className="add-to-cart-button"
-              onClick={() =>
-                addToCart({
-                  id: item.id,
-                  name: item.name,
-                  price: item.price,
-                  image: item.image,
-                  quantity: 1,
-                })
-              }
+              onClick={() => handleAddToCart(item)}
             >
               Add to Cart
             </button>

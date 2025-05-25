@@ -104,11 +104,26 @@ export function CartProvider({ children }) {
       localStorage.setItem("foodhub-cart", JSON.stringify(items))
     }
   }, [items])
-
   const addToCart = async (newItem) => {
     if (!newItem || !newItem.id) {
       console.error("Invalid item data for addToCart")
-      return
+      return { success: false, message: "Invalid item data" }
+    }
+
+    // Check for single-store restriction
+    if (items.length > 0) {
+      const existingStore = items[0].sellerId
+      if (newItem.sellerId && existingStore && existingStore !== newItem.sellerId) {
+        const existingStoreName = items[0].storeName || "Unknown Store"
+        const newStoreName = newItem.storeName || "Unknown Store"
+        return {
+          success: false,
+          message: `You can only order from one store at a time. Your cart contains items from ${existingStoreName}. Would you like to clear your cart and add items from ${newStoreName}?`,
+          errorCode: "DIFFERENT_STORE",
+          existingStoreName,
+          newStoreName
+        }
+      }
     }
 
     if (isAuthenticated() && isOnline) {
@@ -124,22 +139,50 @@ export function CartProvider({ children }) {
           const transformedItems = transformBackendItems(cartData.items)
           setItems(transformedItems)
         }
+        return { success: true }
       } catch (error) {
-        console.error("Failed to add to cart via API, using local storage", error)
+        console.error("Failed to add to cart via API:", error)
+        
+        // Check if the error is a store validation error from backend
+        if (error.response?.data?.errorCode === "DIFFERENT_STORE") {
+          return {
+            success: false,
+            message: error.response.data.message,
+            errorCode: "DIFFERENT_STORE",
+            existingStoreName: error.response.data.existingStoreName,
+            newStoreName: error.response.data.newStoreName
+          }
+        }
+        
         setIsOnline(false)
         setError("Failed to sync with server")
         // Fallback to local storage
-        addToCartLocal(newItem)
+        return addToCartLocal(newItem)
       } finally {
         setIsLoading(false)
       }
     } else {
       // Not authenticated or offline, use local storage
-      addToCartLocal(newItem)
+      return addToCartLocal(newItem)
     }
   }
-
   const addToCartLocal = (newItem) => {
+    // Check for single-store restriction for local cart
+    if (items.length > 0) {
+      const existingStore = items[0].sellerId
+      if (newItem.sellerId && existingStore && existingStore !== newItem.sellerId) {
+        const existingStoreName = items[0].storeName || "Unknown Store"
+        const newStoreName = newItem.storeName || "Unknown Store"
+        return {
+          success: false,
+          message: `You can only order from one store at a time. Your cart contains items from ${existingStoreName}. Would you like to clear your cart and add items from ${newStoreName}?`,
+          errorCode: "DIFFERENT_STORE",
+          existingStoreName,
+          newStoreName
+        }
+      }
+    }
+
     setItems((prevItems) => {
       const existingItemIndex = prevItems.findIndex((item) => item.id === newItem.id)
 
@@ -156,6 +199,7 @@ export function CartProvider({ children }) {
         return [...prevItems, { ...newItem, quantity: newItem.quantity || 1 }]
       }
     })
+    return { success: true }
   }
 
   const updateQuantity = async (id, quantity) => {
@@ -244,7 +288,6 @@ export function CartProvider({ children }) {
   const removeFromCartLocal = (id) => {
     setItems((prevItems) => prevItems.filter((item) => item.id !== id))
   }
-
   const clearCart = async () => {
     if (isAuthenticated() && isOnline) {
       try {
@@ -266,6 +309,12 @@ export function CartProvider({ children }) {
       // Not authenticated or offline, use local storage
       setItems([])
     }
+  }
+
+  // Function to clear cart and add item from different store
+  const clearCartAndAddItem = async (newItem) => {
+    await clearCart()
+    return await addToCart(newItem)
   }
 
   // Sync local cart with backend when user logs in
@@ -313,14 +362,14 @@ export function CartProvider({ children }) {
   
   // Calculate total item count
   const itemCount = items.reduce((count, item) => count + item.quantity, 0)
-
   return (
     <CartContext.Provider value={{ 
       items, 
       addToCart, 
       updateQuantity, 
       removeFromCart, 
-      clearCart, 
+      clearCart,
+      clearCartAndAddItem, 
       isLoading,
       isOnline,
       error,
