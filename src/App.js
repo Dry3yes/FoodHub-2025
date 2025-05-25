@@ -7,6 +7,8 @@ import "./styles/global.css"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import SellerDashboard from "./pages/SellerDashboard"
+import AdminDashboard from "./components/AdminDashboard"
+import ProtectedRoute from "./components/ProtectedRoute"
 import LandingPage from "./pages/LandingPage"
 import Settings from "./pages/Settings"
 import StatusPage from "./pages/StatusPage"
@@ -17,9 +19,8 @@ import Chat from "./components/Chat"
 const AppContent = () => {
   const location = useLocation();
   const currentPath = location.pathname;
-  
-  // Exclude Chat from login and register pages
-  const shouldShowChat = !["/login", "/register"].includes(currentPath);
+    // Exclude Chat from login and register pages
+  const shouldShowChat = !["/login", "/register", "/admin"].includes(currentPath);
   
   return (
     <>
@@ -27,9 +28,24 @@ const AppContent = () => {
         <Route path="/" element={<Home />} />
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/store/:id" element={<StorePage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />        <Route path="/seller" element={<SellerDashboard />} />
+        <Route path="/cart" element={<CartPage />} />        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />        
+        <Route 
+          path="/seller" 
+          element={
+            <ProtectedRoute requiredRole="Seller">
+              <SellerDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/seller" element={<Settings />} />
         <Route path="/support" element={<SupportPage />} />

@@ -58,10 +58,11 @@ const LoginPage = () => {
                   console.error('Failed to sync cart after login:', cartError);
                   // Don't fail login if cart sync fails
               }
-              
-              // Check if user is a seller and redirect accordingly
+                // Check if user is a seller and redirect accordingly
               const user = response.data.user;
-              if (user && user.role === 'Seller') {
+              if (user && user.role === 'Admin') {
+                  navigate('/admin');
+              } else if (user && user.role === 'Seller') {
                   navigate('/seller');
               } else {
                   navigate('/');

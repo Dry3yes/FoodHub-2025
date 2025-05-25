@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { submitSupportTicket } from '../services/Api';
-import './SupportPage.css';
+import '../styles/SupportPage.css';
 
 const SupportPage = () => {
   const navigate = useNavigate();

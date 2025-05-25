@@ -509,3 +509,130 @@ export const submitSupportTicket = async (ticketData) => {
         throw error;
     }
 };
+
+// Admin Dashboard APIs
+export const getAnalytics = async () => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/users/analytics`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch analytics');
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching analytics:', error);
+        throw error;
+    }
+};
+
+// Support Tickets APIs
+export const getAllSupportTickets = async (status = '', category = '', priority = '', page = 1, pageSize = 10) => {
+    try {
+        const params = new URLSearchParams({
+            ...(status && { status }),
+            ...(category && { category }),
+            ...(priority && { priority }),
+            page: page.toString(),
+            pageSize: pageSize.toString()
+        });
+
+        const response = await fetch(`${apiEndpoint}/api/v1/tickets?${params}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch support tickets');
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching support tickets:', error);
+        throw error;
+    }
+};
+
+export const updateSupportTicketStatus = async (ticketId, statusData) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/tickets/${ticketId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(statusData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update support ticket status');
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error updating support ticket status:', error);
+        throw error;
+    }
+};
+
+// Seller Applications APIs
+export const getAllSellerApplications = async (status = '') => {
+    try {
+        const params = new URLSearchParams({
+            ...(status && { status })
+        });
+
+        const response = await fetch(`${apiEndpoint}/api/v1/seller-applications?${params}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch seller applications');
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching seller applications:', error);
+        throw error;
+    }
+};
+
+export const processSellerApplication = async (applicationId, processData) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/seller-applications/${applicationId}/process`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(processData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to process seller application');
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error processing seller application:', error);
+        throw error;
+    }
+};
