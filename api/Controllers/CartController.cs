@@ -95,12 +95,27 @@ namespace api.Controllers
                 if (menu == null)
                 {
                     return NotFound(new { success = false, message = "Menu item not found" });
-                }
-
-                // Check if sufficient stock is available
+                }                // Check if sufficient stock is available
                 if (menu.Stock < request.Quantity)
                 {
                     return BadRequest(new { success = false, message = "Insufficient stock available" });
+                }                // Check for single-store restriction
+                var existingCart = await _cartRepository.GetCartByUserIdAsync(userId);
+                if (existingCart != null && existingCart.Items.Count > 0)
+                {
+                    var existingSellerId = existingCart.Items.First().SellerId;
+                    if (!string.IsNullOrEmpty(existingSellerId) && existingSellerId != menu.SellerId)
+                    {
+                        var existingStoreName = existingCart.Items.First().StoreName;
+                        return BadRequest(new
+                        {
+                            success = false,
+                            message = "You can only order from one store at a time. Your cart contains items from a different store.",
+                            errorCode = "DIFFERENT_STORE",
+                            existingStoreName = existingStoreName,
+                            newStoreName = menu.StoreName ?? "Unknown Store"
+                        });
+                    }
                 }
 
                 // Create cart item from menu
