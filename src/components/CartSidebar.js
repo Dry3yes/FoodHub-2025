@@ -1,13 +1,25 @@
 "use client"
+import { useNavigate } from "react-router-dom"
 import { useCart } from "../hooks/useCart"
 import "../styles/CartSidebar.css"
 
 function CartSidebar() {
-  const { items, updateQuantity, removeFromCart, clearCart, isLoading, error, isOnline } = useCart()
+  const { items, updateQuantity, removeFromCart, clearCart, isLoading, error, isOnline, isAuthenticated } = useCart()
+  const navigate = useNavigate()
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
   const feeservice = 2000
   const total = subtotal + feeservice
+
+  const handleCheckout = () => {
+    if (!isAuthenticated()) {
+      // Redirect to login page if not authenticated
+      navigate('/login')
+      return
+    }
+    // TODO: Implement actual checkout logic for authenticated users
+    console.log('Proceeding to checkout for authenticated user')
+  }
 
   if (items.length === 0) {
     return (
@@ -147,11 +159,11 @@ function CartSidebar() {
             <span>Total</span>
             <span>Rp {total.toLocaleString('id-ID')}</span>
           </div>
-        </div>
-
-        {/* Moved checkout button here, directly below the summary */}
+        </div>        {/* Moved checkout button here, directly below the summary */}
         <div className="cart-sidebar-footer">
-          <button className="checkout-button">Complete your purchase</button>
+          <button className="checkout-button" onClick={handleCheckout}>
+            Complete your purchase
+          </button>
         </div>
       </div>
     </div>

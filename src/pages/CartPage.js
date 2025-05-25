@@ -1,15 +1,26 @@
 "use client"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Header from "../components/Header"
 import { useCart } from "../hooks/useCart"
 import "../styles/CartPage.css"
 
 function CartPage() {
-  const { items, updateQuantity, removeFromCart, clearCart } = useCart()
+  const { items, updateQuantity, removeFromCart, clearCart, isAuthenticated } = useCart()
+  const navigate = useNavigate()
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
   const feeservice = 2000
   const total = subtotal + feeservice
+
+  const handleCheckout = () => {
+    if (!isAuthenticated()) {
+      // Redirect to login page if not authenticated
+      navigate('/login')
+      return
+    }
+    // TODO: Implement actual checkout logic for authenticated users
+    console.log('Proceeding to checkout for authenticated user')
+  }
 
   return (
     <div className="cart-page-container">
@@ -159,9 +170,10 @@ function CartPage() {
                       <span>Rp {total.toLocaleString('id-ID')}</span>
                     </div>
                   </div>
-                </div>
-                <div className="order-summary-footer">
-                  <button className="checkout-button">Proceed to Checkout</button>
+                </div>                <div className="order-summary-footer">
+                  <button className="checkout-button" onClick={handleCheckout}>
+                    Proceed to Checkout
+                  </button>
                 </div>
               </div>
             </div>

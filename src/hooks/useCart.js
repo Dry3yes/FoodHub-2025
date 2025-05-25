@@ -359,9 +359,9 @@ export function CartProvider({ children }) {
 
   // Calculate cart total
   const cartTotal = items.reduce((total, item) => total + (item.price * item.quantity), 0)
-  
-  // Calculate total item count
+    // Calculate total item count
   const itemCount = items.reduce((count, item) => count + item.quantity, 0)
+  
   return (
     <CartContext.Provider value={{ 
       items, 
@@ -377,6 +377,7 @@ export function CartProvider({ children }) {
       clearLocalCart,
       cartTotal,
       itemCount,
+      isAuthenticated,
       transformBackendItems,
       transformFrontendItems
     }}>
