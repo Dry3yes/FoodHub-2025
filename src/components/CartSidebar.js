@@ -6,8 +6,8 @@ function CartSidebar() {
   const { items, updateQuantity, removeFromCart, clearCart, isLoading, error, isOnline } = useCart()
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
-  const shipping = items.length > 0 ? 5 : 0
-  const total = subtotal + shipping
+  const feeservice = 2000
+  const total = subtotal + feeservice
 
   if (items.length === 0) {
     return (
@@ -150,8 +150,8 @@ function CartSidebar() {
             <span>Rp {subtotal.toLocaleString('id-ID')}</span>
           </div>
           <div className="summary-row">
-            <span>Shipping</span>
-            <span>Rp {shipping.toLocaleString('id-ID')}</span>
+            <span>Fee Service</span>
+            <span>Rp {feeservice.toLocaleString('id-ID')}</span>
           </div>
           <div className="summary-row total">
             <span>Total</span>

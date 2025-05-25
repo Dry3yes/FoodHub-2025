@@ -16,7 +16,7 @@ class ChatService {
       .withUrl('https://localhost:5001/chathub', {
         accessTokenFactory: () => token,
         transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
-        withServerTimeoutInMilliseconds: 60000, // Increase the server timeout to 60 seconds
+        withServerTimeoutInMilliseconds: 600000, // Increase the server timeout to 600 seconds
         skipNegotiation: false,
         withCredentials: false
       })

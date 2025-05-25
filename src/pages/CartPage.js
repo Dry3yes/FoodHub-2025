@@ -8,8 +8,8 @@ function CartPage() {
   const { items, updateQuantity, removeFromCart, clearCart } = useCart()
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
-  const shipping = items.length > 0 ? 5 : 0
-  const total = subtotal + shipping
+  const feeservice = 2000
+  const total = subtotal + feeservice
 
   return (
     <div className="cart-page-container">
@@ -150,8 +150,8 @@ function CartPage() {
                       <span>Rp {subtotal.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="summary-row">
-                      <span>Shipping</span>
-                      <span>Rp {shipping.toLocaleString('id-ID')}</span>
+                      <span>Fee Service</span>
+                      <span>Rp {feeservice.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="summary-divider"></div>
                     <div className="summary-row total">
