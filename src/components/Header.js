@@ -4,8 +4,17 @@ import "../styles/Header.css"
 import logo from "../assets/logo.png";
 
 function Header() {
-  const { items } = useCart()
+  const { items, clearLocalCart } = useCart()
   const itemCount = items.reduce((total, item) => total + item.quantity, 0)
+
+  const handleLogout = () => {
+    // Clear local cart first
+    clearLocalCart()
+    // Clear all localStorage
+    localStorage.clear()
+    // Redirect to login
+    window.location.href = '/login'
+  }
 
   return (
     <header className="header">
@@ -83,10 +92,7 @@ function Header() {
               </Link>
               <button
                 className="logout-btn"
-                onClick={() => {
-                  localStorage.clear();
-                  window.location.href = '/login';
-                }}
+                onClick={handleLogout}
               >
                 Logout
               </button>

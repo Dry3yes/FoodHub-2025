@@ -3,7 +3,7 @@ import { useCart } from "../hooks/useCart"
 import "../styles/CartSidebar.css"
 
 function CartSidebar() {
-  const { items, updateQuantity, removeFromCart, clearCart } = useCart()
+  const { items, updateQuantity, removeFromCart, clearCart, isLoading, error, isOnline } = useCart()
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
   const shipping = items.length > 0 ? 5 : 0
@@ -55,8 +55,23 @@ function CartSidebar() {
     <div className="cart-sidebar-card">
       <div className="cart-sidebar-header">
         <h2 className="cart-sidebar-title">Order Summary</h2>
+        {!isOnline && (
+          <div className="cart-status-indicator offline">
+            <span>Offline Mode</span>
+          </div>
+        )}
+        {error && (
+          <div className="cart-error-message">
+            <span>{error}</span>
+          </div>
+        )}
       </div>
       <div className="cart-sidebar-content">
+        {isLoading && (
+          <div className="cart-loading">
+            <span>Updating cart...</span>
+          </div>
+        )}
         <div className="cart-items">
           {items.map((item) => (
             <div key={item.id} className="cart-item">

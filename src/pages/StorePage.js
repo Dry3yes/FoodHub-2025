@@ -344,6 +344,8 @@ function StorePage() {
                                   price: item.price,
                                   image: item.image,
                                   quantity: 1,
+                                  sellerId: store?.id,
+                                  storeName: store?.name,
                                 })
                               }
                             >
