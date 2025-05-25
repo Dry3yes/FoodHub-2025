@@ -10,6 +10,7 @@ import SellerDashboard from "./pages/SellerDashboard"
 import LandingPage from "./pages/LandingPage"
 import Settings from "./pages/Settings"
 import StatusPage from "./pages/StatusPage"
+import SupportPage from "./pages/SupportPage"
 import Chat from "./components/Chat"
 
 // Component to conditionally render the Chat based on the current route
@@ -28,10 +29,10 @@ const AppContent = () => {
         <Route path="/store/:id" element={<StorePage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/seller" element={<SellerDashboard />} />
+        <Route path="/register" element={<RegisterPage />} />        <Route path="/seller" element={<SellerDashboard />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/seller" element={<Settings />} />
+        <Route path="/support" element={<SupportPage />} />
         {/* <Route path="/order-status/:orderId" element={<StatusPage />} /> */}
         <Route path="/order-status" element={<StatusPage />} />
       </Routes>

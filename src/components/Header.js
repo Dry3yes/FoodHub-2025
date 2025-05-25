@@ -49,6 +49,9 @@ function Header() {
           <Link to="/" className="nav-link">
             Menu
           </Link>
+          <Link to="/support" className="nav-link">
+            Support
+          </Link>
         </nav>
 
         <div className="header-actions">

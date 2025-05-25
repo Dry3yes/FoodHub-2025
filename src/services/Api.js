@@ -485,3 +485,27 @@ export const clearCart = async () => {
         throw error;
     }
 };
+
+// Submit support ticket
+export const submitSupportTicket = async (ticketData) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/tickets`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(ticketData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to submit support ticket');
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error submitting support ticket:', error);
+        throw error;
+    }
+};
