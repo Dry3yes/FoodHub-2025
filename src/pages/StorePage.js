@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
 import Header from "../components/Header"
 import CartSidebar from "../components/CartSidebar"
+import ConfirmationModal from "../components/ConfirmationModal"
 import { useCart } from "../hooks/useCart"
 import { fetchStoreBySlug, fetchMenusByStore } from "../services/Api"
 import "../styles/StorePage.css"
@@ -140,7 +141,9 @@ function StorePage() {
   const [menuItems, setMenuItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [pendingCartItem, setPendingCartItem] = useState(null)
+  const [confirmationMessage, setConfirmationMessage] = useState("")
   const handleAddToCart = async (item) => {
     const cartItem = {
       id: item.id,
@@ -155,15 +158,26 @@ function StorePage() {
     const result = await addToCart(cartItem)
     
     if (!result.success && result.errorCode === "DIFFERENT_STORE") {
-      // Show confirmation dialog for store conflict
-      const confirmClear = window.confirm(
-        `${result.message}\n\nDo you want to continue and clear your current cart?`
-      )
-      
-      if (confirmClear) {
-        await clearCartAndAddItem(cartItem)
-      }
+      // Show confirmation modal for store conflict
+      setPendingCartItem(cartItem)
+      setConfirmationMessage(result.message)
+      setShowConfirmModal(true)
     }
+  }
+
+  const handleConfirmClearCart = async () => {
+    if (pendingCartItem) {
+      await clearCartAndAddItem(pendingCartItem)
+    }
+    setShowConfirmModal(false)
+    setPendingCartItem(null)
+    setConfirmationMessage("")
+  }
+
+  const handleCancelClearCart = () => {
+    setShowConfirmModal(false)
+    setPendingCartItem(null)
+    setConfirmationMessage("")
   }
   
   useEffect(() => {
@@ -380,15 +394,24 @@ function StorePage() {
             <CartSidebar />
           </div>
         </div>
-      </main>
-
-      <footer className="store-footer">
+      </main>      <footer className="store-footer">
         <div className="footer-content">
           <div className="footer-text">
             <p>© 2023 FoodHub. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={handleCancelClearCart}
+        onConfirm={handleConfirmClearCart}
+        title="Different Store Detected"
+        message={`${confirmationMessage}\n\n`}
+        confirmText="Clear Cart & Continue"
+        cancelText="Cancel"
+        type="warning"
+      />
     </div>
   )
 }

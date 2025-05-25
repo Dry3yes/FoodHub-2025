@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import ConfirmationModal from "../components/ConfirmationModal";
 import "../styles/SellerDashboard.css";
 import { 
   fetchStoreById, 
@@ -45,6 +46,10 @@ function SellerDashboard() {
   });
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Confirmation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   // Form handling functions
   const handleInputChange = (e) => {
@@ -155,12 +160,15 @@ function SellerDashboard() {
 
   // Delete menu item
   const handleDeleteMenu = async (menuItem) => {
-    if (!window.confirm(`Are you sure you want to delete "${menuItem.itemName}"?`)) {
-      return;
-    }
+    setItemToDelete(menuItem);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
 
     try {
-      const response = await deleteMenu(menuItem.id);
+      const response = await deleteMenu(itemToDelete.id);
       
       if (response.success) {
         // Refresh the menu list
@@ -172,7 +180,15 @@ function SellerDashboard() {
     } catch (err) {
       console.error("Error deleting menu:", err);
       setError(err.message || "Failed to delete menu item");
+    } finally {
+      setShowDeleteModal(false);
+      setItemToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setItemToDelete(null);
   };
 
   // Start editing
@@ -648,6 +664,17 @@ function SellerDashboard() {
           </div>
         </div>
       </footer>
+      
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        title="Delete Menu Item"
+        message={`Are you sure you want to delete "${itemToDelete?.itemName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }

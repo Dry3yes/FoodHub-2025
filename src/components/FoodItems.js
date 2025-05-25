@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"
 import { useCart } from "../hooks/useCart"
 import { fetchStores, fetchMenusByStore } from "../services/Api"
+import ConfirmationModal from "./ConfirmationModal"
 import "../styles/FoodItems.css"
 
 // Fallback data in case API calls fail
@@ -61,6 +62,9 @@ function FoodItems() {
   const [foodItems, setFoodItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [pendingCartItem, setPendingCartItem] = useState(null)
+  const [confirmationMessage, setConfirmationMessage] = useState("")
 
   const handleAddToCart = async (item) => {
     const cartItem = {
@@ -76,15 +80,26 @@ function FoodItems() {
     const result = await addToCart(cartItem)
     
     if (!result.success && result.errorCode === "DIFFERENT_STORE") {
-      // Show confirmation dialog for store conflict
-      const confirmClear = window.confirm(
-        `${result.message}\n\nDo you want to continue and clear your current cart?`
-      )
-      
-      if (confirmClear) {
-        await clearCartAndAddItem(cartItem)
-      }
+      // Show confirmation modal for store conflict
+      setPendingCartItem(cartItem)
+      setConfirmationMessage(result.message)
+      setShowConfirmModal(true)
     }
+  }
+
+  const handleConfirmClearCart = async () => {
+    if (pendingCartItem) {
+      await clearCartAndAddItem(pendingCartItem)
+    }
+    setShowConfirmModal(false)
+    setPendingCartItem(null)
+    setConfirmationMessage("")
+  }
+
+  const handleCancelClearCart = () => {
+    setShowConfirmModal(false)
+    setPendingCartItem(null)
+    setConfirmationMessage("")
   }
 
   useEffect(() => {
@@ -199,6 +214,17 @@ function FoodItems() {
         </div>
       ))
       )}
+      
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={handleCancelClearCart}
+        onConfirm={handleConfirmClearCart}
+        title="Different Store Detected"
+        message={`${confirmationMessage}\n\n`}
+        confirmText="Clear Cart & Continue"
+        cancelText="Cancel"
+        type="warning"
+      />
     </div>
   )
 }

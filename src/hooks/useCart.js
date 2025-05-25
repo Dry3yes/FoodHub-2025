@@ -118,7 +118,7 @@ export function CartProvider({ children }) {
         const newStoreName = newItem.storeName || "Unknown Store"
         return {
           success: false,
-          message: `You can only order from one store at a time. Your cart contains items from ${existingStoreName}. Would you like to clear your cart and add items from ${newStoreName}?`,
+          message: `You can only order from one store at a time. Your cart contains items from ${existingStoreName}. Would you like to clear your cart?`,
           errorCode: "DIFFERENT_STORE",
           existingStoreName,
           newStoreName
@@ -175,7 +175,7 @@ export function CartProvider({ children }) {
         const newStoreName = newItem.storeName || "Unknown Store"
         return {
           success: false,
-          message: `You can only order from one store at a time. Your cart contains items from ${existingStoreName}. Would you like to clear your cart and add items from ${newStoreName}?`,
+          message: `You can only order from one store at a time. Your cart contains items from ${existingStoreName}. Would you like to clear your cart?`,
           errorCode: "DIFFERENT_STORE",
           existingStoreName,
           newStoreName
