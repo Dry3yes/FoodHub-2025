@@ -15,11 +15,11 @@ function CartPage() {
   const handleCheckout = () => {
     if (!isAuthenticated()) {
       // Redirect to login page if not authenticated
-      navigate('/login')
+      navigate('/login', { state: { from: '/checkout' } })
       return
     }
-    // TODO: Implement actual checkout logic for authenticated users
-    console.log('Proceeding to checkout for authenticated user')
+    // Navigate to the checkout page for authenticated users
+    navigate('/checkout')
   }
 
   return (

@@ -10,7 +10,8 @@ import {
   createMenu,
   updateMenu,
   deleteMenu,
-  uploadStoreImage
+  uploadStoreImage,
+  uploadQrisCode
 } from "../services/Api";
 
 function SellerDashboard() {
@@ -56,6 +57,10 @@ function SellerDashboard() {
   const [isUploadingStoreImage, setIsUploadingStoreImage] = useState(false);
   const [storeImageFile, setStoreImageFile] = useState(null);
 
+  // QRIS code upload state
+  const [isUploadingQrisCode, setIsUploadingQrisCode] = useState(false);
+  const [qrisImageFile, setQrisImageFile] = useState(null);
+
   // Form handling functions
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -76,6 +81,8 @@ function SellerDashboard() {
       setFormData(prev => ({ ...prev, imageURL: previewUrl }));
     }
   };
+  
+
 
   // Reset form
   const resetForm = () => {
@@ -284,6 +291,74 @@ function SellerDashboard() {
       setError(err.message || 'Failed to upload store image');
     } finally {
       setIsUploadingStoreImage(false);
+    }
+  };
+
+  // Handle QRIS code file selection
+  const handleQrisImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Please select a valid image file (JPEG, PNG, or GIF) for your QRIS code');
+        return;
+      }
+      
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        setError('QRIS code image size must be less than 2MB');
+        return;
+      }
+      
+      setQrisImageFile(file);
+      setError(''); // Clear any previous errors
+    }
+  };
+
+  // Upload QRIS payment code
+  const handleUploadQrisCode = async () => {
+    if (!qrisImageFile) {
+      setError('Please select a QRIS code image file first');
+      return;
+    }
+
+    setIsUploadingQrisCode(true);
+    try {
+      const response = await uploadQrisCode(qrisImageFile);
+      
+      if (response.success) {
+        // Update the store state with the new QRIS URL
+        setStore(prev => ({
+          ...prev,
+          qrisUrl: response.qrisUrl
+        }));
+        
+        // Clear the selected file
+        setQrisImageFile(null);
+        
+        // Reset the file input
+        const fileInput = document.getElementById('qris-image-input');
+        if (fileInput) {
+          fileInput.value = '';
+        }
+        
+        setError(''); // Clear any errors
+        
+        // Show success message temporarily
+        const originalError = error;
+        setError('QRIS payment code updated successfully!');
+        setTimeout(() => {
+          setError(originalError);
+        }, 3000);
+      } else {
+        setError(response.message || 'Failed to upload QRIS code');
+      }
+    } catch (err) {
+      console.error('Error uploading QRIS code:', err);
+      setError(err.message || 'Failed to upload QRIS code');
+    } finally {
+      setIsUploadingQrisCode(false);
     }
   };
   
@@ -751,6 +826,80 @@ function SellerDashboard() {
                   <span>Settings</span>
                 </Link>
               </nav>
+              
+              <div className="sidebar-section">
+                <h3 className="sidebar-title">Payment Settings</h3>
+                <div className="payment-settings">
+                  <div className="qris-upload-section">
+                    <h4 className="qris-section-title">QRIS Payment Code</h4>
+                    <p className="qris-description">Upload your QRIS code for customer payments</p>
+                    
+                    {store.qrisUrl && (
+                      <div className="qris-preview-container">
+                        <img src={store.qrisUrl} alt="Your QRIS Code" className="qris-preview-image" />
+                      </div>
+                    )}
+                    
+                    <div className="qris-upload-controls">
+                      <input
+                        id="qris-image-input"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleQrisImageSelect}
+                        style={{ display: 'none' }}
+                      />
+                      <button
+                        className="qris-upload-btn"
+                        onClick={() => document.getElementById('qris-image-input').click()}
+                        disabled={isUploadingQrisCode}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                          <circle cx="8.5" cy="8.5" r="1.5"/>
+                          <polyline points="21,15 16,10 5,21"/>
+                        </svg>
+                        {store.qrisUrl ? 'Change QRIS Code' : 'Upload QRIS Code'}
+                      </button>
+                      
+                      {qrisImageFile && (
+                        <div className="upload-controls">
+                          <span className="selected-file">{qrisImageFile.name}</span>
+                          <button
+                            className="seller-upload-btn"
+                            onClick={handleUploadQrisCode}
+                            disabled={isUploadingQrisCode}
+                          >
+                            {isUploadingQrisCode ? 'Uploading...' : 'Upload'}
+                          </button>
+                          <button
+                            className="seller-cancel-btn"
+                            onClick={() => {
+                              setQrisImageFile(null);
+                              document.getElementById('qris-image-input').value = '';
+                            }}
+                            disabled={isUploadingQrisCode}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="qris-info">
+                      <p>Your QRIS code will be shown to customers during checkout</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               <div className="sidebar-section">
                 <h3 className="sidebar-title">Recent Orders</h3>

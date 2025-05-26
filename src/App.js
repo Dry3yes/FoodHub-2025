@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Home from "./pages/Home"
 import StorePage from "./pages/StorePage"
 import CartPage from "./pages/CartPage"
+import CheckoutPage from "./pages/CheckoutPage"
 import { CartProvider } from "./hooks/useCart"
 import "./styles/global.css"
 import LoginPage from "./pages/LoginPage"
@@ -28,7 +29,9 @@ const AppContent = () => {
         <Route path="/" element={<Home />} />
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/store/:id" element={<StorePage />} />
-        <Route path="/cart" element={<CartPage />} />        <Route path="/login" element={<LoginPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />        
         <Route 
           path="/seller" 

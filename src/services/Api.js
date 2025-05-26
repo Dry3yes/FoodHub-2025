@@ -43,6 +43,8 @@ export const registerUser = async (userData) => {
     }
   }
 
+
+
 // Fetch all available stores for the home page
 export const fetchStores = async () => {
     try {
@@ -198,6 +200,51 @@ export const uploadStoreImage = async (imageFile) => {
     } catch (error) {
         console.error('Error uploading store image:', error);
         throw error;
+    }
+};
+
+// Upload seller QRIS payment code
+export const uploadQrisCode = async (qrisImageFile) => {
+    try {
+        const formData = new FormData();
+        formData.append('qrisImage', qrisImageFile);
+        
+        const response = await fetch(`${apiEndpoint}/api/v1/upload-qris-code`, {
+            method: 'POST',
+            headers: {
+                ...getAuthHeader(),
+                // Don't set Content-Type for multipart/form-data, browser will set it with boundary
+            },
+            body: formData,
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to upload QRIS code');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error uploading QRIS code:', error);
+        throw error;
+    }
+};
+
+// Fetch order details by orderId
+export const fetchOrderDetails = async (orderId) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/orders/${orderId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        const data = await response.json();
+        return data.success ? data.data : null;
+    } catch (error) {
+        console.error(`Error fetching order details for ${orderId}:`, error);
+        return null;
     }
 };
 
@@ -510,6 +557,30 @@ export const clearCart = async () => {
         return data;
     } catch (error) {
         console.error('Error clearing cart:', error);
+        throw error;
+    }
+};
+
+// Checkout (create a new order)
+export const checkout = async (notes) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/checkout`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify({ notes })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to complete checkout');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error during checkout:', error);
         throw error;
     }
 };
