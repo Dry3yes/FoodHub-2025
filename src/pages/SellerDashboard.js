@@ -803,30 +803,6 @@ function SellerDashboard() {
           
           <div className="sidebar-column">
             <div className="dashboard-sidebar">
-              <h3 className="sidebar-title">Quick Actions</h3>
-              <nav className="sidebar-nav">
-                <Link to="/SellerDashboard" className="sidebar-link active">
-                  <span className="sidebar-icon">🏠</span>
-                  <span>Dashboard</span>
-                </Link>
-                <Link to="/orders" className="sidebar-link">
-                  <span className="sidebar-icon">🛒</span>
-                  <span>Orders</span>
-                </Link>
-                <Link to="/products" className="sidebar-link">
-                  <span className="sidebar-icon">📦</span>
-                  <span>Products</span>
-                </Link>
-                <Link to="/messages" className="sidebar-link">
-                  <span className="sidebar-icon">💬</span>
-                  <span>Messages</span>
-                </Link>
-                <Link to="/settings" className="sidebar-link">
-                  <span className="sidebar-icon">⚙️</span>
-                  <span>Settings</span>
-                </Link>
-              </nav>
-              
               <div className="sidebar-section">
                 <h3 className="sidebar-title">Payment Settings</h3>
                 <div className="payment-settings">

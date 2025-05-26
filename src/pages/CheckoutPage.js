@@ -14,7 +14,8 @@ function CheckoutPage() {
 
   // Calculate totals
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
-  const total = subtotal; // No delivery, just the items total
+  const feeservice = 2000
+  const total = subtotal + feeservice; // No delivery, just the items total
 
   // Redirect to login if not authenticated
   React.useEffect(() => {
@@ -134,6 +135,10 @@ function CheckoutPage() {
                     <span>Subtotal</span>
                     <span>Rp {subtotal.toLocaleString('id-ID')}</span>
                   </div>
+                  <div className="summary-row">
+                    <span>Fee Service</span>
+                    <span>Rp {feeservice.toLocaleString('id-ID')}</span>
+                  </div>
                   <div className="summary-divider"></div>
                   <div className="summary-row total">
                     <span>Total</span>
@@ -160,7 +165,7 @@ function CheckoutPage() {
               </div>
               <div className="checkout-info-content">
                 <p>After placing your order, you'll be redirected to the order status page where you can see the seller's QRIS code for payment.</p>
-                <p>Please complete the payment within 1 hour to ensure your order is processed.</p>
+                <p>Please complete the payment to ensure your order is processed.</p>
               </div>
             </div>
           </div>
