@@ -141,14 +141,14 @@
 }
 
 /* Stats Grid */
-.stats-grid {
+.admin-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 24px;
   margin-bottom: 32px;
 }
 
-.stat-card {
+.admin-stat-card {
   background: white;
   border-radius: 8px;
   padding: 24px;
@@ -157,49 +157,49 @@
   transition: transform 0.2s;
 }
 
-.stat-card:hover {
+.admin-stat-card:hover {
   transform: translateY(-2px);
 }
 
-.stat-header {
+.admin-stat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
 }
 
-.stat-title {
+.admin-stat-title {
   font-size: 14px;
   font-weight: 500;
   color: #4a5568;
 }
 
-.stat-icon {
+.admin-stat-icon {
   font-size: 16px;
   color: #a0aec0;
 }
 
-.stat-number {
+.admin-stat-number {
   font-size: 24px;
   font-weight: bold;
   color: #1a202c;
   margin-bottom: 4px;
 }
 
-.stat-change {
+.admin-stat-change {
   font-size: 12px;
   margin: 0;
 }
 
-.stat-change.positive {
+.admin-stat-change.positive {
   color: #48bb78;
 }
 
-.stat-change.negative {
+.admin-stat-change.negative {
   color: #e53e3e;
 }
 
-.stat-change.neutral {
+.admin-stat-change.neutral {
   color: #ed8936;
 }
 

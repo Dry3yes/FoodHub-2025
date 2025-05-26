@@ -244,48 +244,48 @@ const sidebarItems = [
               </div>
 
               {/* Stats Cards */}
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-header">
-                    <span className="stat-title">Active Users</span>
-                    <span className="stat-icon">🟢</span>
+              <div className="admin-stats-grid">
+                <div className="admin-stat-card">
+                  <div className="admin-stat-header">
+                    <span className="admin-stat-title">Active Users</span>
+                    <span className="admin-stat-icon">🟢</span>
                   </div>
-                  <div className="stat-content">
-                    <div className="stat-number">{analyticsData.activeUsers.toLocaleString()}</div>
-                    <p className="stat-change positive">Users with role "User"</p>
-                  </div>
-                </div>
-
-                <div className="stat-card">
-                  <div className="stat-header">
-                    <span className="stat-title">Active Sellers</span>
-                    <span className="stat-icon">🛒</span>
-                  </div>
-                  <div className="stat-content">
-                    <div className="stat-number">{analyticsData.activeSellers.toLocaleString()}</div>
-                    <p className="stat-change positive">Users with role "Seller"</p>
+                  <div className="admin-stat-content">
+                    <div className="admin-stat-number">{analyticsData.activeUsers.toLocaleString()}</div>
+                    <p className="admin-stat-change positive">Users with role "User"</p>
                   </div>
                 </div>
 
-                <div className="stat-card">
-                  <div className="stat-header">
-                    <span className="stat-title">Pending Approvals</span>
-                    <span className="stat-icon">⏳</span>
+                <div className="admin-stat-card">
+                  <div className="admin-stat-header">
+                    <span className="admin-stat-title">Active Sellers</span>
+                    <span className="admin-stat-icon">🛒</span>
                   </div>
-                  <div className="stat-content">
-                    <div className="stat-number">{analyticsData.pendingApprovals}</div>
-                    <p className="stat-change neutral">Requires attention</p>
+                  <div className="admin-stat-content">
+                    <div className="admin-stat-number">{analyticsData.activeSellers.toLocaleString()}</div>
+                    <p className="admin-stat-change positive">Users with role "Seller"</p>
                   </div>
                 </div>
 
-                <div className="stat-card">
-                  <div className="stat-header">
-                    <span className="stat-title">Support Tickets</span>
-                    <span className="stat-icon">📄</span>
+                <div className="admin-stat-card">
+                  <div className="admin-stat-header">
+                    <span className="admin-stat-title">Pending Approvals</span>
+                    <span className="admin-stat-icon">⏳</span>
                   </div>
-                  <div className="stat-content">
-                    <div className="stat-number">{analyticsData.totalTickets.toLocaleString()}</div>
-                    <p className="stat-change neutral">Need attention</p>
+                  <div className="admin-stat-content">
+                    <div className="admin-stat-number">{analyticsData.pendingApprovals}</div>
+                    <p className="admin-stat-change neutral">Requires attention</p>
+                  </div>
+                </div>
+
+                <div className="admin-stat-card">
+                  <div className="admin-stat-header">
+                    <span className="admin-stat-title">Support Tickets</span>
+                    <span className="admin-stat-icon">📄</span>
+                  </div>
+                  <div className="admin-stat-content">
+                    <div className="admin-stat-number">{analyticsData.totalTickets.toLocaleString()}</div>
+                    <p className="admin-stat-change neutral">Need attention</p>
                   </div>
                 </div>
               </div>
