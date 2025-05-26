@@ -61,6 +61,9 @@ namespace api.Models
         public string StoreImageUrl { get; set; } = string.Empty;
 
         [FirestoreProperty]
+        public string QrisUrl { get; set; } = string.Empty;
+
+        [FirestoreProperty]
         public string Status { get; set; } = string.Empty;
         
         [FirestoreProperty]
