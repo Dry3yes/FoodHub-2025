@@ -105,14 +105,17 @@ namespace api.Repositories
                 // Set timestamps
                 order.CreatedAt = DateTime.UtcNow;
                 order.UpdatedAt = DateTime.UtcNow;
-                
+
+                // Update total with fee service
+                order.Total += 2000;
+
                 // Add document to Firestore
                 DocumentReference docRef = _firestoreDb.Collection(COLLECTION_NAME).Document();
                 await docRef.SetAsync(order);
                 
                 // Update the order with the document ID
                 order.Id = docRef.Id;
-                
+
                 return order;
             }
             catch (Exception ex)
