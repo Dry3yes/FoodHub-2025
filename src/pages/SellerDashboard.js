@@ -9,7 +9,8 @@ import {
   fetchSellerByUserId,
   createMenu,
   updateMenu,
-  deleteMenu
+  deleteMenu,
+  uploadStoreImage
 } from "../services/Api";
 
 function SellerDashboard() {
@@ -50,6 +51,10 @@ function SellerDashboard() {
   // Confirmation modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+
+  // Store image upload state
+  const [isUploadingStoreImage, setIsUploadingStoreImage] = useState(false);
+  const [storeImageFile, setStoreImageFile] = useState(null);
 
   // Form handling functions
   const handleInputChange = (e) => {
@@ -213,6 +218,74 @@ function SellerDashboard() {
       setMenuData(menus || []);
     }
   };
+
+  // Handle store image file selection
+  const handleStoreImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Please select a valid image file (JPEG, PNG, or GIF)');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+      
+      setStoreImageFile(file);
+      setError(''); // Clear any previous errors
+    }
+  };
+
+  // Upload store cover image
+  const handleUploadStoreImage = async () => {
+    if (!storeImageFile) {
+      setError('Please select an image file first');
+      return;
+    }
+
+    setIsUploadingStoreImage(true);
+    try {
+      const response = await uploadStoreImage(storeImageFile);
+      
+      if (response.success) {
+        // Update the store state with the new image URL
+        setStore(prev => ({
+          ...prev,
+          storeImageUrl: response.imageUrl
+        }));
+        
+        // Clear the selected file
+        setStoreImageFile(null);
+        
+        // Reset the file input
+        const fileInput = document.getElementById('store-image-input');
+        if (fileInput) {
+          fileInput.value = '';
+        }
+        
+        setError(''); // Clear any errors
+        
+        // Show success message temporarily
+        const originalError = error;
+        setError('Store image updated successfully!');
+        setTimeout(() => {
+          setError(originalError);
+        }, 3000);
+      } else {
+        setError(response.message || 'Failed to upload store image');
+      }
+    } catch (err) {
+      console.error('Error uploading store image:', err);
+      setError(err.message || 'Failed to upload store image');
+    } finally {
+      setIsUploadingStoreImage(false);
+    }
+  };
   
   // Check if user is authenticated and has seller role
   useEffect(() => {
@@ -333,29 +406,85 @@ function SellerDashboard() {
               <div className="store-cover-image-container">
                 <img src={store.storeImageUrl || "/placeholder.svg?height=300&width=900"} alt="Store Cover" className="store-cover-image" />
               </div>
-              <div className="store-header-content">
-                <h1 className="store-title">{store.storeName}</h1>
-                <div className="store-info">
-                  <div className="store-rating">
-                    <svg
-                      className="star-icon filled"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                    <span>{store.rating || "N/A"}</span>
+              <div className="seller-store-header-content">
+                <div className="store-header-left">
+                  <h1 className="store-title">{store.storeName}</h1>
+                  <div className="store-info">
+                    <div className="store-rating">
+                      <svg
+                        className="star-icon filled"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                      <span>{store.rating || "N/A"}</span>
+                    </div>
+                    <span className="info-separator">•</span>
+                    <span>{store.cuisine || "Various"}</span>
+                    <span className="info-separator">•</span>
+                    <span>{store.deliveryTimeEstimate + " min" || "20-30 min"}</span>
                   </div>
-                  <span className="info-separator">•</span>
-                  <span>{store.cuisine || "Various"}</span>
-                  <span className="info-separator">•</span>
-                  <span>{store.deliveryTimeEstimate + " min" || "20-30 min"}</span>
+                  <p className="store-description">{store.description || "Manage your store, edit menu items and view orders all in one place."}</p>
                 </div>
-                <p className="store-description">{store.description || "Manage your store, edit menu items and view orders all in one place."}</p>
+                <div className="store-header-right">
+                  <div className="store-image-upload">
+                    <input
+                      id="store-image-input"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleStoreImageSelect}
+                      style={{ display: 'none' }}
+                    />
+                    <button
+                      className="store-image-upload-btn"
+                      onClick={() => document.getElementById('store-image-input').click()}
+                      disabled={isUploadingStoreImage}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21,15 16,10 5,21"/>
+                      </svg>
+                      Change Cover Image
+                    </button>
+                    {storeImageFile && (
+                      <div className="upload-controls">
+                        <span className="selected-file">{storeImageFile.name}</span>
+                        <button
+                          className="seller-upload-btn"
+                          onClick={handleUploadStoreImage}
+                          disabled={isUploadingStoreImage}
+                        >
+                          {isUploadingStoreImage ? 'Uploading...' : 'Upload'}
+                        </button>
+                        <button
+                          className="seller-cancel-btn"
+                          onClick={() => {
+                            setStoreImageFile(null);
+                            document.getElementById('store-image-input').value = '';
+                          }}
+                          disabled={isUploadingStoreImage}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -533,7 +662,7 @@ function SellerDashboard() {
                           className="menu-item-image" 
                         />
                       </div>
-                      <div className="menu-item-content">
+                      <div className="seller-menu-item-content">
                         <div className="menu-item-info">
                           <h4 className="menu-item-name">{item.itemName}</h4>
                           <div className="menu-item-details">

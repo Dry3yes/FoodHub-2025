@@ -167,13 +167,39 @@ export const applyForSeller = async (sellerData, imageFile) => {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Network response was not ok');
       }
-      
-      return await response.json();
+        return await response.json();
     } catch (error) {
       console.error('Error applying for seller:', error);
       throw error;
     }
 }
+
+// Upload store cover image
+export const uploadStoreImage = async (imageFile) => {
+    try {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        
+        const response = await fetch(`${apiEndpoint}/api/v1/upload-store-image`, {
+            method: 'POST',
+            headers: {
+                ...getAuthHeader(),
+                // Don't set Content-Type for multipart/form-data, browser will set it with boundary
+            },
+            body: formData,
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to upload store image');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error uploading store image:', error);
+        throw error;
+    }
+};
 
 // Fetch order status by orderId
 export const fetchOrderStatus = async (orderId) => {
