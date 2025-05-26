@@ -12,11 +12,10 @@ const Settings = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [isSellerMode, setIsSellerMode] = useState(false);
-  
-  // User profile specific state
-  const [gender, setGender] = useState('');
-  
+    
   // Seller specific state
+  const [description, setDescription] = useState('');
+  const [deliveryEstimate, setDeliveryEstimate] = useState('');
   const [nik, setNik] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [faceImages, setFaceImages] = useState([null, null, null]);
@@ -58,7 +57,7 @@ const Settings = () => {
   // Handle form submission for user profile
   const handleUserSubmit = (e) => {
     e.preventDefault();
-    console.log('User form submitted:', { username, email, gender });
+    console.log('User form submitted:', { username, email });
     alert('Changes saved successfully!');
   };
   
@@ -105,6 +104,8 @@ const Settings = () => {
       const response = await applyForSeller(
         { 
           storeName: username, 
+          description : description,
+          deliveryEstimate : deliveryEstimate,
           nik: nik 
         }, 
         imageFile
@@ -114,6 +115,9 @@ const Settings = () => {
         setSuccess('Your seller application has been submitted successfully!');
         // Reset form
         setNik('');
+        setUsername('');
+        setDescription('');
+        setDeliveryEstimate('');
         setFaceImages([null, null, null]);
         setAgreedToTerms(false);
       } else {
@@ -214,7 +218,28 @@ const Settings = () => {
                   placeholder="Enter your store name"
                 />
               </div>
-              
+
+              <div className="form-group">
+                <label htmlFor="seller-description">Store Description</label>
+                <textarea
+                  id="seller-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter a brief description of your store"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="seller-deliveryestimate">Delivery Estimate Time</label>
+                <input
+                  type="text"
+                  id="seller-deliveryestimate"
+                  value={deliveryEstimate}
+                  onChange={(e) => setDeliveryEstimate(e.target.value)}
+                  placeholder="Enter delivery estimate time"
+                />
+              </div>
+
               <div className="form-group">
                 <label htmlFor="nik">NIK</label>
                 <input 
@@ -223,17 +248,6 @@ const Settings = () => {
                   value={nik}
                   onChange={(e) => setNik(e.target.value)}
                   placeholder="Enter your National ID"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="seller-email">Email</label>
-                <input 
-                  type="email" 
-                  id="seller-email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={JSON.parse(localStorage.getItem('user'))?.email || ''}
                 />
               </div>
               

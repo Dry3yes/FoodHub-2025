@@ -147,6 +147,8 @@ export const applyForSeller = async (sellerData, imageFile) => {
       const formData = new FormData();
       formData.append('StoreName', sellerData.storeName);
       formData.append('UserIdentificationNumber', sellerData.nik);
+      formData.append('Description', sellerData.description);
+      formData.append('DeliveryTimeEstimate', sellerData.deliveryEstimate);
       
       if (imageFile) {
         formData.append('image', imageFile);
@@ -513,7 +515,7 @@ export const submitSupportTicket = async (ticketData) => {
 // Admin Dashboard APIs
 export const getAnalytics = async () => {
     try {
-        const response = await fetch(`${apiEndpoint}/api/v1/users/analytics`, {
+        const response = await fetch(`${apiEndpoint}/api/v1/analytics`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

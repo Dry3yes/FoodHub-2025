@@ -20,7 +20,7 @@ const AppContent = () => {
   const location = useLocation();
   const currentPath = location.pathname;
     // Exclude Chat from login and register pages
-  const shouldShowChat = !["/login", "/register", "/admin"].includes(currentPath);
+  const shouldShowChat = !["/login", "/register"].includes(currentPath);
   
   return (
     <>

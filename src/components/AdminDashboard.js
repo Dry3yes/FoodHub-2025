@@ -156,6 +156,13 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleLogout = () => {
+    // Clear all localStorage
+    localStorage.clear()
+    // Redirect to login
+    window.location.href = '/login'
+  }
+
 const sidebarItems = [
   { id: "overview", label: "Overview", icon: <img src="/home.png" alt="Home" style={{ width: 20, height: 20 }} /> },
   { id: "help", label: "Help Tickets", icon: <img src="/support.png" alt="Help" style={{ width: 20, height: 20 }} /> },
@@ -207,7 +214,7 @@ const sidebarItems = [
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`nav-item ${activeTab === item.id ? "active" : ""}`}
+              className={`admin-nav-item ${activeTab === item.id ? "active" : ""}`}
             >
               <span className="nav-icon">{item.icon}</span>
               {item.label}
@@ -226,9 +233,14 @@ const sidebarItems = [
             <div>
               <div className="page-header">
                 <h2>Admin Dashboard</h2>
-                <button className="latest-reports-btn" onClick={fetchAnalyticsData} disabled={isLoading}>
-                  {isLoading ? "LOADING..." : "REFRESH DATA"}
-                </button>
+                <div className="page-actions">
+                  <button className="latest-reports-btn" onClick={fetchAnalyticsData} disabled={isLoading}>
+                    {isLoading ? "Loading..." : "Refresh Data"}
+                  </button>
+                  <button className="logout-btn" onClick={handleLogout}>
+                    Logout
+                  </button>
+                </div>
               </div>
 
               {/* Stats Cards */}
@@ -414,15 +426,12 @@ const sidebarItems = [
                     pendingUsers.map((user) => (
                       <div key={user.id} className="user-item">
                         <div className="user-info">
-                          <div className="user-avatar">
-                            <img src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                          </div>
                           <div className="user-details">
                             <h4>{user.name}</h4>
                             <p className="user-email">{user.email}</p>
                             <p className="user-business">Business: {user.businessName}</p>
-                            <p className="user-date">Applied: {user.requestDate}</p>
                             {user.description && <p className="user-description">Description: {user.description}</p>}
+                            <p className="user-date">Applied: {user.requestDate}</p>
                           </div>
                         </div>
 

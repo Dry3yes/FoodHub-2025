@@ -29,7 +29,7 @@
   margin-top: 24px;
 }
 
-.nav-item {
+.admin-nav-item {
   width: 100%;
   display: flex;
   align-items: center;
@@ -45,11 +45,11 @@
   position: relative;
 }
 
-.nav-item:hover {
+.admin-nav-item:hover {
   background-color: #f7fafc;
 }
 
-.nav-item.active {
+.admin-nav-item.active {
   background-color: #ebf8ff;
   color: red;
   border-right-color: red;
@@ -103,6 +103,12 @@
   margin-bottom: 1rem;
 }
 
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .latest-reports-btn {
   background-color: black;
   color: white;
@@ -121,6 +127,17 @@
 .latest-reports-btn:disabled {
   background-color: #a0aec0;
   cursor: not-allowed;
+}
+
+.logout-btn {
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 /* Stats Grid */
@@ -556,6 +573,12 @@
 }
 
 .user-business {
+  font-size: 14px;
+  color: #4a5568;
+  margin: 0 0 4px 0;
+}
+
+.user-description {
   font-size: 14px;
   color: #4a5568;
   margin: 0 0 4px 0;
