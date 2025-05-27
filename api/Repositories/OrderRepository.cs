@@ -112,7 +112,7 @@ namespace api.Repositories
                 // Add document to Firestore
                 DocumentReference docRef = _firestoreDb.Collection(COLLECTION_NAME).Document();
                 await docRef.SetAsync(order);
-                
+
                 // Update the order with the document ID
                 order.Id = docRef.Id;
 
@@ -153,6 +153,38 @@ namespace api.Repositories
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating order status {OrderId}", orderId);
+                throw;
+            }
+        }
+
+        public async Task<Order?> UpdateOrderPaymentProofAsync(string orderId, string paymentProofUrl)
+        {
+            try
+            {
+                DocumentReference docRef = _firestoreDb.Collection(COLLECTION_NAME).Document(orderId);
+                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+
+                if (!snapshot.Exists)
+                {
+                    return null;
+                }
+
+                var order = snapshot.ConvertTo<Order>();
+                order.Id = snapshot.Id;
+                order.PaymentProofUrl = paymentProofUrl;
+                order.UpdatedAt = DateTime.UtcNow;
+
+                await docRef.UpdateAsync(new Dictionary<string, object>
+                {
+                    { "PaymentProofUrl", paymentProofUrl },
+                    { "UpdatedAt", DateTime.UtcNow }
+                });
+
+                return order;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating order payment proof {OrderId}", orderId);
                 throw;
             }
         }

@@ -18,6 +18,7 @@ namespace api.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IMenuRepository _menuRepository;
         private readonly ISellerRepository _sellerRepository;
+        private readonly IImageService _imageService;
         private readonly ILogger<OrderController> _logger;
 
         public OrderController(
@@ -26,6 +27,7 @@ namespace api.Controllers
             IUserRepository userRepository,
             IMenuRepository menuRepository,
             ISellerRepository sellerRepository,
+            IImageService imageService,
             ILogger<OrderController> logger)
         {
             _orderRepository = orderRepository;
@@ -33,6 +35,7 @@ namespace api.Controllers
             _userRepository = userRepository;
             _menuRepository = menuRepository;
             _sellerRepository = sellerRepository;
+            _imageService = imageService;
             _logger = logger;
         }
 
@@ -328,11 +331,15 @@ namespace api.Controllers
                     return BadRequest(new { success = false, message = "File size must be less than 5MB" });
                 }
 
-                // For now, just confirm the upload was successful
-                // In a real implementation, you might want to:
-                // 1. Save the file to storage (Azure Blob, AWS S3, etc.)
-                // 2. Update the order with payment proof URL
-                // 3. Possibly change order status to "Payment Submitted" or similar
+                // Upload the payment proof to Cloudflare R2
+                var paymentProofUrl = await _imageService.UploadImageAsync(paymentProof);
+
+                // Update the order with the payment proof URL
+                var updatedOrder = await _orderRepository.UpdateOrderPaymentProofAsync(orderId, paymentProofUrl);
+                if (updatedOrder == null)
+                {
+                    return NotFound(new { success = false, message = "Order not found" });
+                }
 
                 _logger.LogInformation("Payment proof uploaded for order {OrderId} by user {UserId}", orderId, userId);
 
@@ -340,7 +347,7 @@ namespace api.Controllers
                 {
                     success = true,
                     message = "Payment proof uploaded successfully. Your order will be processed once payment is verified.",
-                    data = new { orderId = orderId }
+                    data = new { orderId = orderId, paymentProofUrl = paymentProofUrl }
                 });
             }
             catch (Exception ex)

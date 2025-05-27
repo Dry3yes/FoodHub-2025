@@ -30,6 +30,9 @@ namespace api.Models
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         [FirestoreProperty]
+        public string PaymentProofUrl { get; set; } = string.Empty;
+
+        [FirestoreProperty]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [FirestoreProperty]
