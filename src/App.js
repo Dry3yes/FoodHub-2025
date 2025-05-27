@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Home from "./pages/Home"
 import StorePage from "./pages/StorePage"
 import CartPage from "./pages/CartPage"
-import CheckoutPage from "./pages/CheckoutPage"
 import { CartProvider } from "./hooks/useCart"
 import "./styles/global.css"
 import LoginPage from "./pages/LoginPage"
@@ -12,7 +11,7 @@ import AdminDashboard from "./components/AdminDashboard"
 import ProtectedRoute from "./components/ProtectedRoute"
 import LandingPage from "./pages/LandingPage"
 import Settings from "./pages/Settings"
-import StatusPage from "./pages/StatusPage"
+import OrderStatus from "./components/OrderStatus"
 import SupportPage from "./pages/SupportPage"
 import Chat from "./components/Chat"
 
@@ -30,7 +29,6 @@ const AppContent = () => {
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/store/:id" element={<StorePage />} />
         <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />        
         <Route 
@@ -52,8 +50,8 @@ const AppContent = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/seller" element={<Settings />} />
         <Route path="/support" element={<SupportPage />} />
-        {/* <Route path="/order-status/:orderId" element={<StatusPage />} /> */}
-        <Route path="/order-status" element={<StatusPage />} />
+        {/* <Route path="/order-status/:orderId" element={<OrderStatus />} /> */}
+        <Route path="/order-status" element={<OrderStatus />} />
       </Routes>
       {/* Conditionally render Chat component based on the current route */}
       {shouldShowChat && <Chat />}
