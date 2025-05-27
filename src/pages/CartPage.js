@@ -1,12 +1,15 @@
 "use client"
+import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import Header from "../components/Header"
 import { useCart } from "../hooks/useCart"
+import CheckoutModal from "../components/CheckoutModal"
 import "../styles/CartPage.css"
 
 function CartPage() {
   const { items, updateQuantity, removeFromCart, clearCart, isAuthenticated } = useCart()
   const navigate = useNavigate()
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false)
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
   const feeservice = 2000
@@ -15,16 +18,17 @@ function CartPage() {
   const handleCheckout = () => {
     if (!isAuthenticated()) {
       // Redirect to login page if not authenticated
-      navigate('/login', { state: { from: '/checkout' } })
+      navigate('/login', { state: { from: '/cart' } })
       return
     }
-    // Navigate to the checkout page for authenticated users
-    navigate('/checkout')
+    // Show the checkout modal for authenticated users
+    setShowCheckoutModal(true)
   }
 
   return (
-    <div className="cart-page-container">
-      <Header />
+    <>
+      <div className="cart-page-container">
+        <Header />
 
       <main className="cart-main-content">
         <div className="cart-header">
@@ -181,14 +185,19 @@ function CartPage() {
         )}
       </main>
 
-      <footer className="cart-footer">
-        <div className="footer-content">
-          <div className="footer-text">
-            <p>© 2023 FoodHub. All rights reserved.</p>
+        <footer className="cart-footer">
+          <div className="footer-content">
+            <div className="footer-text">
+              <p>© 2023 FoodHub. All rights reserved.</p>
+            </div>
           </div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+      
+      {showCheckoutModal && (
+        <CheckoutModal onClose={() => setShowCheckoutModal(false)} />
+      )}
+    </>
   )
 }
 
