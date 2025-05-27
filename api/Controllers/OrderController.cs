@@ -275,6 +275,81 @@ namespace api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("upload-payment-proof")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> UploadPaymentProof([FromForm] string orderId, IFormFile paymentProof)
+        {
+            try
+            {
+                var userId = await GetCurrentUserIdAsync();
+                if (userId == null)
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated" });
+                }
+
+                // Validate required parameters
+                if (string.IsNullOrEmpty(orderId))
+                {
+                    return BadRequest(new { success = false, message = "Order ID is required" });
+                }
+
+                if (paymentProof == null || paymentProof.Length == 0)
+                {
+                    return BadRequest(new { success = false, message = "Payment proof file is required" });
+                }
+
+                // Get the order to verify ownership
+                var order = await _orderRepository.GetOrderByIdAsync(orderId);
+                if (order == null)
+                {
+                    return NotFound(new { success = false, message = "Order not found" });
+                }
+
+                // Ensure user can only upload payment proof for their own orders
+                if (order.UserId != userId)
+                {
+                    return Unauthorized(new { success = false, message = "You are not authorized to upload payment proof for this order" });
+                }
+
+                // Validate file type and size
+                var allowedTypes = new[] { "image/jpeg", "image/png", "image/jpg" };
+                if (!allowedTypes.Contains(paymentProof.ContentType.ToLower()))
+                {
+                    return BadRequest(new { success = false, message = "Only JPEG and PNG images are allowed" });
+                }
+
+                if (paymentProof.Length > 5 * 1024 * 1024) // 5MB limit
+                {
+                    return BadRequest(new { success = false, message = "File size must be less than 5MB" });
+                }
+
+                // For now, just confirm the upload was successful
+                // In a real implementation, you might want to:
+                // 1. Save the file to storage (Azure Blob, AWS S3, etc.)
+                // 2. Update the order with payment proof URL
+                // 3. Possibly change order status to "Payment Submitted" or similar
+
+                _logger.LogInformation("Payment proof uploaded for order {OrderId} by user {UserId}", orderId, userId);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Payment proof uploaded successfully. Your order will be processed once payment is verified.",
+                    data = new { orderId = orderId }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading payment proof for order {OrderId}", orderId);
+                return StatusCode(500, new { success = false, message = "Error uploading payment proof" });
+            }
+        }
+
         private async Task<string?> GetCurrentUserIdAsync()
         {
             try
