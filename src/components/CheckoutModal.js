@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/CheckoutModal.css';
 import { useCart } from '../hooks/useCart';
-import { checkout, fetchStoreById } from '../services/Api';
+import { checkout, fetchStoreById, uploadPaymentProof } from '../services/Api';
 
 function CheckoutModal({ onClose }) {
   const { items, clearCart } = useCart();
@@ -91,29 +91,16 @@ function CheckoutModal({ onClose }) {
     setError('');
 
     try {
-      // Create form data for file upload
-      const formData = new FormData();
-      formData.append('orderId', orderId);
-      formData.append('paymentProof', paymentProof);
+      // Use the API function from Api.js
+      const response = await uploadPaymentProof(orderId, paymentProof);
 
-      // Upload payment proof
-      const response = await fetch(`https://localhost:5001/api/v1/upload-payment-proof`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.success) {
         // Clear the cart after successful payment
         await clearCart();
         // Show success message
         setStep(4); // Success step
       } else {
-        setError(data.message || 'Failed to upload payment proof');
+        setError(response.message || 'Failed to upload payment proof');
       }
     } catch (err) {
       console.error('Error uploading payment proof:', err);
@@ -333,6 +320,57 @@ function CheckoutModal({ onClose }) {
                     </div>
                 </div>
                 </>
+            )}
+
+            {step === 4 && (
+                <>
+                <div className="checkout-modal-header">
+                    <h3 className="checkout-modal-title">Pesanan Berhasil Dibuat!</h3>
+                    <button className="checkout-modal-close" onClick={onClose}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    </button>
+                </div>
+
+                <div className="checkout-modal-body">
+                    <div className="checkout-success-section">
+                    <div className="success-icon">✅</div>
+                    <h4>Terima kasih!</h4>
+                    <p>Pesanan Anda telah berhasil dibuat dengan ID: <strong>{orderId}</strong></p>
+                    
+                    <div className="success-info">
+                        <h5>Apa selanjutnya?</h5>
+                        <ul>
+                        <li>Bukti pembayaran Anda sedang diverifikasi</li>
+                        <li>Anda akan dihubungi melalui WhatsApp untuk konfirmasi</li>
+                        <li>Proses verifikasi biasanya memakan waktu 5-15 menit</li>
+                        <li>Pesanan akan diproses setelah pembayaran terverifikasi</li>
+                        </ul>
+                    </div>
+
+                    <div className="checkout-customer-summary">
+                        <h5>Detail Pemesanan:</h5>
+                        <p><strong>Nama:</strong> {formData.name}</p>
+                        <p><strong>WhatsApp:</strong> {formData.phone}</p>
+                        <p><strong>Total:</strong> Rp {total.toLocaleString("id-ID")}</p>
+                    </div>
+                    </div>
+
+                    <div className="checkout-modal-actions">
+                    <button className="checkout-btn-primary" onClick={onClose}>
+                        Tutup
+                    </button>
+                    </div>
+                </div>
+                </>
+            )}
+
+            {error && (
+                <div className="checkout-error">
+                {error}
+                </div>
             )}
         </div>
     </div>

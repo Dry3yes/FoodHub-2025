@@ -575,12 +575,39 @@ export const checkout = async (notes) => {
         
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to complete checkout');
+            throw new Error(errorData.message || 'Checkout failed');
         }
         
         return await response.json();
     } catch (error) {
         console.error('Error during checkout:', error);
+        throw error;
+    }
+};
+
+// Upload payment proof for an order
+export const uploadPaymentProof = async (orderId, paymentProofFile) => {
+    try {
+        const formData = new FormData();
+        formData.append('orderId', orderId);
+        formData.append('paymentProof', paymentProofFile);
+
+        const response = await fetch(`${apiEndpoint}/api/v1/upload-payment-proof`, {
+            method: 'POST',
+            headers: {
+                ...getAuthHeader()
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to upload payment proof');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error uploading payment proof:', error);
         throw error;
     }
 };
