@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUserOrders } from '../services/Api';
-import '../styles/OrderHistoryModal.css';
+import styles from '../styles/OrderHistoryModal.module.css';
 
 const OrderHistoryModal = ({ isOpen, onClose }) => {
   const [orders, setOrders] = useState([]);
@@ -83,11 +83,11 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="order-history-modal-overlay" onClick={handleOverlayClick}>
-      <div className="order-history-modal">
-        <div className="modal-header">
+    <div className={styles['order-history-modal-overlay']} onClick={handleOverlayClick}>
+      <div className={styles['order-history-modal']}>
+        <div className={styles['modal-header']}>
           <h2>Riwayat Pesanan</h2>
-          <button className="close-button" onClick={onClose}>
+          <button className={styles['close-button']} onClick={onClose}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -95,33 +95,33 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        <div className="modal-content">
+        <div className={styles['modal-content']}>
           {loading && (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
+            <div className={styles['loading-container']}>
+              <div className={styles['loading-spinner']}></div>
               <p>Memuat riwayat pesanan...</p>
             </div>
           )}
 
           {error && (
-            <div className="error-container">
-              <p className="error-message">{error}</p>
-              <button className="retry-button" onClick={loadOrderHistory}>
+            <div className={styles['error-container']}>
+              <p className={styles['error-message']}>{error}</p>
+              <button className={styles['retry-button']}   onClick={loadOrderHistory}>
                 Coba Lagi
               </button>
             </div>
           )}
 
           {!loading && !error && orders.length === 0 && (
-            <div className="empty-state">
-              <div className="empty-icon">📋</div>
+            <div className={styles['empty-state']}>
+              <div className={styles['empty-icon']}>📋</div>
               <h3>Belum Ada Pesanan</h3>
               <p>Anda belum pernah melakukan pesanan.</p>
             </div>
           )}
 
           {!loading && !error && orders.length > 0 && (
-            <div className="orders-container">
+            <div className={styles['orders-container']}>
               {orders.map((order) => {
                 const statusInfo = getStatusInfo(order.status);
                 const isOngoing = isOngoingOrder(order.status);
@@ -132,55 +132,55 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
                     className={`order-item ${isOngoing ? 'ongoing' : 'completed'}`}
                     onClick={() => handleOrderClick(order.id)}
                   >
-                    <div className="order-header">
-                      <div className="order-id">#{order.id.slice(-8)}</div>
+                    <div className={styles['order-header']}>
+                      <div className={styles['order-id']}>#{order.id.slice(-8)}</div>
                       <div 
-                        className="order-status" 
+                        className={styles['order-status']} 
                         style={{ backgroundColor: statusInfo.color }}
                       >
-                        <span className="status-icon">{statusInfo.icon}</span>
-                        <span className="status-text">{statusInfo.text}</span>
+                        <span className={styles['status-icon']}>{statusInfo.icon}</span>
+                        <span className={styles['status-text']}>{statusInfo.text}</span>
                       </div>
                     </div>
 
-                    <div className="order-details">
-                      <div className="order-info-row">
-                        <span className="label">Total:</span>
-                        <span className="value">Rp {order.total.toLocaleString('id-ID')}</span>
+                    <div className={styles['order-details']}>
+                      <div className={styles['order-info-row']}>
+                        <span className={styles['label']}>Total:</span>
+                        <span className={styles['value']}>Rp {order.total.toLocaleString('id-ID')}</span>
                       </div>
-                      <div className="order-info-row">
-                        <span className="label">Tanggal:</span>
-                        <span className="value">{formatDate(order.createdAt)}</span>
+                      <div className={styles['order-info-row']}>
+                        <span className={styles['label']}>Tanggal:</span>
+                        <span className={styles['value']}>{formatDate(order.createdAt)}</span>
                       </div>
-                      <div className="order-info-row">
-                        <span className="label">Items:</span>
-                        <span className="value">{order.items.length} item(s)</span>
+                      <div className={styles['order-info-row']}>
+                        <span className={styles['label']}>Items:</span>
+                        <span className={styles['value']}>{order.items.length} item(s)</span>
                       </div>
                     </div>
 
-                    <div className="order-items-preview">
+                    <div className={styles['order-items-preview']}>
                       {order.items.slice(0, 2).map((item, index) => (
-                        <div key={index} className="item-preview">
+                        <div key={index} className={styles['item-preview']}>
                           <img 
                             src={item.imageURL || "/placeholder.svg"} 
                             alt={item.menuItemName}
-                            className="item-image"
+                            className={styles['item-image']}
                           />
-                          <div className="item-details">
-                            <span className="item-name">{item.menuItemName}</span>
-                            <span className="item-quantity">x{item.quantity}</span>
+                          <div className={styles['item-details']}>
+                            <span className={styles['item-name']}>{item.menuItemName}</span>
+                            <span className={styles['item-quantity']}>x{item.quantity}</span>
                           </div>
                         </div>
                       ))}
                       {order.items.length > 2 && (
-                        <div className="more-items">
+                        <div className={styles['more-items']}>
                           +{order.items.length - 2} item lainnya
                         </div>
                       )}
                     </div>
 
                     {isOngoing && (
-                      <div className="ongoing-badge">
+                      <div className={styles['ongoing-badge']}>
                         <span>Pesanan Aktif</span>
                       </div>
                     )}
