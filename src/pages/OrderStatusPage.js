@@ -206,9 +206,9 @@ const OrderStatusPage = () => {
       <div className="status-page-container">
         <Header />
         <main className="status-main-content">
-          <div className="loading-message">
+          <div className="error-loading-message">
             <h2>Error: {error}</h2>
-            <button className="btn-primary" onClick={handleBackToHome}>
+            <button className="status-btn-primary" onClick={handleBackToHome}>
               Back to Home
             </button>
           </div>
@@ -222,9 +222,9 @@ const OrderStatusPage = () => {
       <div className="status-page-container">
         <Header />
         <main className="status-main-content">
-          <div className="loading-message">
+          <div className="error-loading-message">
             <h2>Order not found</h2>
-            <button className="btn-primary" onClick={handleBackToHome}>
+            <button className="status-btn-primary" onClick={handleBackToHome}>
               Back to Home
             </button>
           </div>
@@ -240,7 +240,7 @@ const OrderStatusPage = () => {
         <div className="order-status-container">
           <div className="status-header">
             <h2>Status Pesanan</h2>
-            <div className="order-id">ID Pesanan: {orderData.orderId}</div>
+            <div className="order-id">ID Pesanan: {orderData.id}</div>
             {statusMessage && (
               <div className="status-message">
                 <p>{statusMessage}</p>
@@ -290,11 +290,11 @@ const OrderStatusPage = () => {
             <div className="order-info">
               <div className="info-row">
                 <span>Nama:</span>
-                <span>{orderData.customerName}</span>
+                <span>{orderData.name}</span>
               </div>
               <div className="info-row">
                 <span>WhatsApp:</span>
-                <span>{orderData.customerPhone}</span>
+                <span>{orderData.phone}</span>
               </div>
               <div className="info-row">
                 <span>Total:</span>
@@ -341,10 +341,10 @@ const OrderStatusPage = () => {
           )}
 
           <div className="status-actions">
-            <button className="btn-secondary" onClick={handleBackToHome}>
+            <button className="status-btn-secondary" onClick={handleBackToHome}>
               Kembali ke Home
             </button>
-            <button className="btn-primary" onClick={loadOrderData}>
+            <button className="status-btn-primary" onClick={loadOrderData}>
               Refresh Status
             </button>
           </div>

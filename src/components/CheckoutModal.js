@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/CheckoutModal.css';
+import styles from '../styles/CheckoutModal.module.css';
 import { useCart } from '../hooks/useCart';
 import { checkout, fetchStoreById, uploadPaymentProof } from '../services/Api';
 
@@ -45,8 +45,8 @@ function CheckoutModal({ onClose }) {
 
     try {
       // Call the checkout API
-      const response = await checkout(formData.notes);
-      
+      const response = await checkout(formData.name, formData.phone, formData.notes);
+
       if (response.success) {
         // Store the order ID for later use
         setOrderId(response.data.id);
@@ -112,13 +112,13 @@ function CheckoutModal({ onClose }) {
   };
 
   return (
-    <div className="checkout-modal-overlay" onClick={onClose}>
-        <div className="modal-content checkout-modal" onClick={(e) => e.stopPropagation()}>
+    <div className={styles['checkout-modal-overlay']} onClick={onClose}>
+        <div className={`${styles['modal-content']} ${styles['checkout-modal']}`} onClick={(e) => e.stopPropagation()}>
             {step === 1 && (
                 <>
-                <div className="checkout-modal-header">
-                    <h3 className="checkout-modal-title">Data Pemesanan</h3>
-                    <button className="checkout-modal-close" onClick={onClose}>
+                <div className={styles['checkout-modal-header']}>
+                    <h3 className={styles['checkout-modal-title']}>Data Pemesanan</h3>
+                    <button className={styles['checkout-modal-close']} onClick={onClose}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -126,30 +126,30 @@ function CheckoutModal({ onClose }) {
                     </button>
                 </div>
 
-                <div className="checkout-modal-body">
-                    <div className="order-summary-mini">
+                <div className={styles['checkout-modal-body']}>
+                    <div className={styles['order-summary-mini']}>
                     <h4>Ringkasan Pesanan</h4>
-                    <div className="mini-items">
+                    <div className={styles['mini-items']}>
                         {items.map((item) => (
-                        <div key={item.id} className="mini-item">
+                        <div key={item.id} className={styles['mini-item']}>
                             <span>
                             {item.name} x{item.quantity}
                             </span>
                             <span>Rp {(item.price * item.quantity).toLocaleString("id-ID")}</span>
                         </div>
                         ))}
-                        <div className="mini-item">
+                        <div className={styles['mini-item']}>
                             <span>Fee Service</span>
                             <span>Rp {feeservice.toLocaleString("id-ID")}</span>
                         </div>
                     </div>
-                    <div className="mini-total">
+                    <div className={styles['mini-total']}>
                         <strong>Total: Rp {total.toLocaleString("id-ID")}</strong>
                     </div>
                     </div>
 
-                    <form onSubmit={handleFormSubmit} className="checkout-form">
-                    <div className="form-group">
+                    <form onSubmit={handleFormSubmit} className={styles['checkout-form']}>
+                    <div className={styles['form-group']}>
                         <label>Nama Lengkap *</label>
                         <input
                         type="text"
@@ -160,7 +160,7 @@ function CheckoutModal({ onClose }) {
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className={styles['form-group']}>
                         <label>Nomor WhatsApp *</label>
                         <input
                         type="tel"
@@ -171,7 +171,7 @@ function CheckoutModal({ onClose }) {
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className={styles['form-group']}>
                         <label>Catatan (Opsional)</label>
                         <textarea
                         value={formData.notes}
@@ -181,7 +181,7 @@ function CheckoutModal({ onClose }) {
                         />
                     </div>
 
-                    <button type="submit" className="checkout-btn-primary">
+                    <button type="submit" className={styles['checkout-btn-primary']}>
                         Lanjut ke Pembayaran
                     </button>
                     </form>
@@ -191,9 +191,9 @@ function CheckoutModal({ onClose }) {
 
             {step === 2 && (
                 <>
-                <div className="checkout-modal-header">
-                    <h3 className="checkout-modal-title">Pembayaran QRIS</h3>
-                    <button className="modal-close" onClick={onClose}>
+                <div className={styles['checkout-modal-header']}>
+                    <h3 className={styles['checkout-modal-title']}>Pembayaran QRIS</h3>
+                    <button className={styles['checkout-modal-close']} onClick={onClose}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -201,34 +201,34 @@ function CheckoutModal({ onClose }) {
                     </button>
                 </div>
 
-                <div className="checkout-modal-body">
-                    <div className="payment-info">
-                    <div className="total-payment">
+                <div className={styles['checkout-modal-body']}>
+                    <div className={styles['payment-info']}>
+                    <div className={styles['total-payment']}>
                         <h4>Total Pembayaran</h4>
-                        <div className="amount">Rp {total.toLocaleString("id-ID")}</div>
+                        <div className={styles['amount']}>Rp {total.toLocaleString("id-ID")}</div>
                     </div>
 
-                    <div className="checkout-qris-section">
+                    <div className={styles['checkout-qris-section']}>
                         <h4>📱 Scan QRIS untuk Pembayaran</h4>
 
-                        <div className="checkout-qris-container">
-                        <div className="checkout-qris-image">
-                            <img src={qrisImageUrl || "/placeholder.svg?height=200&width=200"} alt="QRIS Code" className="checkout-qris-code" />
+                        <div className={styles['checkout-qris-container']}>
+                        <div className={styles['checkout-qris-image']}>
+                            <img src={qrisImageUrl || "/placeholder.svg?height=200&width=200"} alt="QRIS Code" className={styles['checkout-qris-code']} />
                         </div>
-                        <div className="checkout-qris-info">
+                        <div className={styles['checkout-qris-info']}>
                             <p>Scan dengan aplikasi:</p>
-                            <div className="payment-apps">
-                            <span className="app-badge">DANA</span>
-                            <span className="app-badge">GoPay</span>
-                            <span className="app-badge">OVO</span>
-                            <span className="app-badge">ShopeePay</span>
-                            <span className="app-badge">LinkAja</span>
+                            <div className={styles['payment-apps']}>
+                            <span className={styles['app-badge']}>DANA</span>
+                            <span className={styles['app-badge']}>GoPay</span>
+                            <span className={styles['app-badge']}>OVO</span>
+                            <span className={styles['app-badge']}>ShopeePay</span>
+                            <span className={styles['app-badge']}>LinkAja</span>
                             </div>
                         </div>
                         </div>
                     </div>
 
-                    <div className="checkout-payment-notes">
+                    <div className={styles['checkout-payment-notes']}>
                         <h5>⚠️ Penting:</h5>
                         <ul>
                         <li>
@@ -242,11 +242,11 @@ function CheckoutModal({ onClose }) {
                     </div>
                     </div>
 
-                    <div className="checkout-modal-actions">
-                    <button className="checkout-btn-secondary" onClick={() => setStep(1)}>
+                    <div className={styles['checkout-modal-actions']}>
+                    <button className={styles['checkout-btn-secondary']} onClick={() => setStep(1)}>
                         Kembali
                     </button>
-                    <button className="checkout-btn-primary" onClick={() => setStep(3)}>
+                    <button className={styles['checkout-btn-primary']} onClick={() => setStep(3)}>
                         Sudah Bayar
                     </button>
                     </div>
@@ -256,9 +256,9 @@ function CheckoutModal({ onClose }) {
 
             {step === 3 && (
                 <>
-                <div className="checkout-modal-header">
-                    <h3 className="checkout-modal-title">Upload Bukti Pembayaran QRIS</h3>
-                    <button className="modal-close" onClick={onClose}>
+                <div className={styles['checkout-modal-header']}>
+                    <h3 className={styles['checkout-modal-title']}>Upload Bukti Pembayaran QRIS</h3>
+                    <button className={styles['checkout-modal-close']} onClick={onClose}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -266,11 +266,11 @@ function CheckoutModal({ onClose }) {
                     </button>
                 </div>
 
-                <div className="checkout-modal-body">
-                    <div className="checkout-upload-section">
+                <div className={styles['checkout-modal-body']}>
+                    <div className={styles['checkout-upload-section']}>
                     <p>Upload screenshot bukti pembayaran dari aplikasi e-wallet Anda</p>
 
-                    <div className="checkout-file-upload">
+                    <div className={styles['checkout-file-upload']}>
                         <input
                         type="file"
                         id="payment-proof"
@@ -278,24 +278,24 @@ function CheckoutModal({ onClose }) {
                         onChange={handleFileUpload}
                         style={{ display: "none" }}
                         />
-                        <label htmlFor="payment-proof" className="checkout-upload-area">
+                        <label htmlFor="payment-proof" className={styles['checkout-upload-area']}>
                         {paymentProof ? (
-                            <div className="file-preview">
-                            <div className="file-icon">📄</div>
-                            <div className="file-name">{paymentProof.name}</div>
-                            <div className="file-size">{(paymentProof.size / 1024 / 1024).toFixed(2)} MB</div>
+                            <div className={styles['file-preview']}>
+                            <div className={styles['file-icon']}>📄</div>
+                            <div className={styles['file-name']}>{paymentProof.name}</div>
+                            <div className={styles['file-size']}>{(paymentProof.size / 1024 / 1024).toFixed(2)} MB</div>
                             </div>
                         ) : (
-                            <div className="checkout-upload-placeholder">
-                            <div className="checkout-upload-icon">📷</div>
+                            <div className={styles['checkout-upload-placeholder']}>
+                            <div className={styles['checkout-upload-icon']}>📷</div>
                             <div>Klik untuk upload bukti pembayaran</div>
-                            <div className="checkout-upload-hint">Format: JPG, PNG (Max 5MB)</div>
+                            <div className={styles['checkout-upload-hint']}>Format: JPG, PNG (Max 5MB)</div>
                             </div>
                         )}
                         </label>
                     </div>
 
-                    <div className="checkout-customer-summary">
+                    <div className={styles['checkout-customer-summary']}>
                         <h5>Data Pemesanan:</h5>
                         <p>
                         <strong>Nama:</strong> {formData.name}
@@ -311,11 +311,11 @@ function CheckoutModal({ onClose }) {
                     </div>
                     </div>
 
-                    <div className="checkout-modal-actions checkout-last">
-                    <button className="checkout-btn-secondary" onClick={() => setStep(2)}>
+                    <div className={styles['checkout-modal-actions']}>
+                    <button className={styles['checkout-btn-secondary']} onClick={() => setStep(2)}>
                         Kembali
                     </button>
-                    <button className="checkout-btn-primary" onClick={handleFinalSubmit} disabled={!paymentProof || isSubmitting}>
+                    <button className={styles['checkout-btn-primary']} onClick={handleFinalSubmit} disabled={!paymentProof || isSubmitting}>
                         {isSubmitting ? "Mengirim Pesanan..." : "Kirim Pesanan"}
                     </button>
                     </div>
@@ -325,9 +325,9 @@ function CheckoutModal({ onClose }) {
 
             {step === 4 && (
                 <>
-                <div className="checkout-modal-header">
-                    <h3 className="checkout-modal-title">Pesanan Berhasil Dibuat!</h3>
-                    <button className="checkout-modal-close" onClick={onClose}>
+                <div className={styles['checkout-modal-header']}>
+                    <h3 className={styles['checkout-modal-title']}>Pesanan Berhasil Dibuat!</h3>
+                    <button className={styles['checkout-modal-close']} onClick={onClose}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -335,13 +335,13 @@ function CheckoutModal({ onClose }) {
                     </button>
                 </div>
 
-                <div className="checkout-modal-body">
-                    <div className="checkout-success-section">
-                    <div className="success-icon">✅</div>
+                <div className={styles['checkout-modal-body']}>
+                    <div className={styles['checkout-success-section']}>
+                    <div className={styles['success-icon']}>✅</div>
                     <h4>Terima kasih!</h4>
                     <p>Pesanan Anda telah berhasil dibuat dengan ID: <strong>{orderId}</strong></p>
-                    
-                    <div className="success-info">
+
+                    <div className={styles['success-info']}>
                         <h5>Apa selanjutnya?</h5>
                         <ul>
                         <li>Bukti pembayaran Anda sedang diverifikasi</li>
@@ -351,7 +351,7 @@ function CheckoutModal({ onClose }) {
                         </ul>
                     </div>
 
-                    <div className="checkout-customer-summary">
+                    <div className={styles['checkout-customer-summary']}>
                         <h5>Detail Pemesanan:</h5>
                         <p><strong>Nama:</strong> {formData.name}</p>
                         <p><strong>WhatsApp:</strong> {formData.phone}</p>
@@ -359,8 +359,8 @@ function CheckoutModal({ onClose }) {
                     </div>
                     </div>
 
-                    <div className="checkout-modal-actions">
-                    <button className="checkout-btn-primary" onClick={onClose}>
+                    <div className={styles['checkout-modal-actions']}>
+                    <button className={styles['checkout-btn-primary']} onClick={onClose}>
                         Tutup
                     </button>
                     </div>
@@ -369,7 +369,7 @@ function CheckoutModal({ onClose }) {
             )}
 
             {error && (
-                <div className="checkout-error">
+                <div className={styles['checkout-error']}>
                 {error}
                 </div>
             )}

@@ -616,7 +616,7 @@ export const clearCart = async () => {
 };
 
 // Checkout (create a new order)
-export const checkout = async (notes) => {
+export const checkout = async (name, phone, notes) => {
     try {
         const response = await fetch(`${apiEndpoint}/api/v1/checkout`, {
             method: 'POST',
@@ -624,7 +624,7 @@ export const checkout = async (notes) => {
                 'Content-Type': 'application/json',
                 ...getAuthHeader()
             },
-            body: JSON.stringify({ notes })
+            body: JSON.stringify({ name, phone, notes })
         });
         
         if (!response.ok) {
