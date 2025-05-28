@@ -47,7 +47,7 @@
 }
 
 .store-cover-image-container {
-  height: 200px;
+  height: 300px;
   overflow: hidden;
 }
 
@@ -156,10 +156,23 @@
   align-items: center;
 }
 
+.cover-upload-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.upload-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
 .selected-file {
   font-size: 0.75rem;
   color: #6b7280;
-  max-width: 200px;
+  max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
