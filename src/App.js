@@ -12,6 +12,8 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import LandingPage from "./pages/LandingPage"
 import Settings from "./pages/Settings"
 import OrderStatus from "./components/OrderStatus"
+import OrderStatusPage from "./pages/OrderStatusPage"
+import SellerOrdersPage from "./pages/SellerOrdersPage"
 import SupportPage from "./pages/SupportPage"
 import Chat from "./components/Chat"
 
@@ -30,12 +32,19 @@ const AppContent = () => {
         <Route path="/store/:id" element={<StorePage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />        
-        <Route 
+        <Route path="/register" element={<RegisterPage />} />          <Route 
           path="/seller" 
           element={
             <ProtectedRoute requiredRole="Seller">
               <SellerDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/seller-orders" 
+          element={
+            <ProtectedRoute requiredRole="Seller">
+              <SellerOrdersPage />
             </ProtectedRoute>
           } 
         />
@@ -48,9 +57,8 @@ const AppContent = () => {
           } 
         />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/settings/seller" element={<Settings />} />
-        <Route path="/support" element={<SupportPage />} />
-        {/* <Route path="/order-status/:orderId" element={<OrderStatus />} /> */}
+        <Route path="/settings/seller" element={<Settings />} />        <Route path="/support" element={<SupportPage />} />
+        <Route path="/order-status/:orderId" element={<OrderStatusPage />} />
         <Route path="/order-status" element={<OrderStatus />} />
       </Routes>
       {/* Conditionally render Chat component based on the current route */}

@@ -269,7 +269,7 @@ export const fetchOrderStatus = async (orderId) => {
 // Update order status (for sellers/admins)
 export const updateOrderStatus = async (orderId, newStatus) => {
     try {
-        const response = await fetch(`${apiEndpoint}/api/v1/orders/${orderId}/status`, {
+        const response = await fetch(`${apiEndpoint}/api/v1/seller/orders/${orderId}/status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -278,10 +278,64 @@ export const updateOrderStatus = async (orderId, newStatus) => {
             body: JSON.stringify({ status: newStatus })
         });
         const data = await response.json();
-        return data.success;
+        return data;
     } catch (error) {
         console.error(`Error updating order status for ${orderId}:`, error);
-        return false;
+        return { success: false, message: 'Error updating order status' };
+    }
+};
+
+// Confirm pickup (for users)
+export const confirmPickup = async (orderId) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/orders/${orderId}/confirm-pickup`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(`Error confirming pickup for ${orderId}:`, error);
+        return { success: false, message: 'Error confirming pickup' };
+    }
+};
+
+// Get pending orders for sellers
+export const getPendingOrders = async () => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/seller/orders/pending`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        const data = await response.json();
+        return data.success ? data.data : null;
+    } catch (error) {
+        console.error('Error fetching pending orders:', error);
+        return null;
+    }
+};
+
+// Get seller orders
+export const getSellerOrders = async () => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/seller/orders`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        const data = await response.json();
+        return data.success ? data.data : null;
+    } catch (error) {
+        console.error('Error fetching seller orders:', error);
+        return null;
     }
 };
 

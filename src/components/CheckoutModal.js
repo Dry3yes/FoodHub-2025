@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/CheckoutModal.css';
 import { useCart } from '../hooks/useCart';
 import { checkout, fetchStoreById, uploadPaymentProof } from '../services/Api';
 
 function CheckoutModal({ onClose }) {
   const { items, clearCart } = useCart();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: JSON.parse(localStorage.getItem('user')).name,
@@ -92,13 +94,12 @@ function CheckoutModal({ onClose }) {
 
     try {
       // Use the API function from Api.js
-      const response = await uploadPaymentProof(orderId, paymentProof);
-
-      if (response.success) {
+      const response = await uploadPaymentProof(orderId, paymentProof);      if (response.success) {
         // Clear the cart after successful payment
         await clearCart();
-        // Show success message
-        setStep(4); // Success step
+        // Close the modal and redirect to order status page
+        onClose();
+        navigate(`/order-status/${orderId}`);
       } else {
         setError(response.message || 'Failed to upload payment proof');
       }
