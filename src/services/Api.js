@@ -339,6 +339,24 @@ export const getSellerOrders = async () => {
     }
 };
 
+// Get user orders (for order history)
+export const getUserOrders = async () => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/orders`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        const data = await response.json();
+        return data.success ? data.data : null;
+    } catch (error) {
+        console.error('Error fetching user orders:', error);
+        return null;
+    }
+};
+
 // ===== MENU CRUD OPERATIONS =====
 
 // Create a new menu item

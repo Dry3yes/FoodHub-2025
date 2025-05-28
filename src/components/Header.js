@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import { useCart } from "../hooks/useCart"
 import { useState, useEffect } from "react"
 import { getPendingOrders } from "../services/Api"
+import OrderHistoryModal from "./OrderHistoryModal"
 import "../styles/Header.css"
 import logo from "../assets/logo.png";
 
@@ -10,6 +11,7 @@ function Header() {
   const itemCount = items.reduce((total, item) => total + item.quantity, 0)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
   const [isSeller, setIsSeller] = useState(false)
+  const [showOrderHistory, setShowOrderHistory] = useState(false)
 
   // Check if user is a seller and fetch pending orders count
   useEffect(() => {
@@ -121,8 +123,7 @@ function Header() {
               </button>
             </Link>
           )}
-          
-          <Link to="/cart" className="cart-button-container">
+            <Link to="/cart" className="cart-button-container">
             <button className="cart-button">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -141,9 +142,36 @@ function Header() {
               {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
             </button>
           </Link>
+          
+          {/* Order History Button - Only for logged in non-seller users */}
+          {localStorage.getItem('token') && !isSeller && (
+            <div className="order-history-button-container">
+              <button 
+                className="order-history-button"
+                onClick={() => setShowOrderHistory(true)}
+                title="Order History"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="history-icon"
+              >
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                  <path d="M12 7v5l4 2"></path>
+                </svg>
+              </button>
+            </div>
+          )}
+          
           { localStorage.getItem('token') ? (
             <>
-              <Link to="/settings" className="settings-button">
+              <Link to="/settings" className="settings-button-container">
                 <button className="settings-button">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -172,6 +200,12 @@ function Header() {
           )}
         </div>
       </div>
+      
+      {/* Order History Modal */}
+      <OrderHistoryModal 
+        isOpen={showOrderHistory}
+        onClose={() => setShowOrderHistory(false)}
+      />
     </header>
   )
 }
