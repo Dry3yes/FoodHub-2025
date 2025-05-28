@@ -9,6 +9,8 @@ namespace api.Dtos.Order
         public string SellerId { get; set; } = string.Empty;
         public string StoreName { get; set; } = string.Empty;
         public List<OrderItemDto> Items { get; set; } = new List<OrderItemDto>();
+        public string Name { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
         public double Total { get; set; }
         public string Status { get; set; } = string.Empty;

@@ -21,6 +21,8 @@ namespace api.Mappers
                     Quantity = item.Quantity,
                     ImageURL = item.ImageURL
                 }).ToList(),
+                Name = order.Name,
+                Phone = order.Phone,
                 Notes = order.Notes,
                 Total = order.Total,
                 Status = order.Status.ToString(),
@@ -30,7 +32,7 @@ namespace api.Mappers
             };
         }
 
-        public static Order ToOrderFromCart(this Cart cart, string notes)
+        public static Order ToOrderFromCart(this Cart cart, string notes, string name, string phone)
         {
             return new Order
             {
@@ -45,6 +47,8 @@ namespace api.Mappers
                     Quantity = item.Quantity,
                     ImageURL = item.ImageURL
                 }).ToList(),
+                Name = name,
+                Phone = phone,
                 Notes = notes,
                 Total = cart.Items.Sum(item => item.Price * item.Quantity),
                 Status = OrderStatus.Pending,

@@ -9,7 +9,7 @@ namespace api.Repositories
     {
         private readonly FirestoreDb _firestoreDb;
         private readonly ILogger<OrderRepository> _logger;
-        private const string COLLECTION_NAME = "orders";
+        private const string COLLECTION_NAME = "Orders";
 
         public OrderRepository(FirestoreDb firestoreDb, ILogger<OrderRepository> logger)
         {

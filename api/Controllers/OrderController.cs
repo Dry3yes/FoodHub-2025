@@ -83,7 +83,7 @@ namespace api.Controllers
                 }
 
                 // Create the order from the cart
-                var order = cart.ToOrderFromCart(createOrderDto.Notes);
+                var order = cart.ToOrderFromCart(createOrderDto.Notes, createOrderDto.Name, createOrderDto.Phone);
                 var createdOrder = await _orderRepository.CreateOrderAsync(order);
 
                 // Update stock for each menu item

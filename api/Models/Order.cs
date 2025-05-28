@@ -21,6 +21,12 @@ namespace api.Models
         public List<OrderItem> Items { get; set; } = new List<OrderItem>();
 
         [FirestoreProperty]
+        public string Name { get; set; } = string.Empty;
+
+        [FirestoreProperty]
+        public string Phone { get; set; } = string.Empty;
+
+        [FirestoreProperty]
         public string Notes { get; set; } = string.Empty;
 
         [FirestoreProperty]
