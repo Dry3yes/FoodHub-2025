@@ -4,7 +4,7 @@ import { HubConnectionBuilder } from '@microsoft/signalr';
 import Header from "../components/Header";
 import PaymentVerificationModal from "../components/PaymentVerificationModal";
 import { getPendingOrders, getSellerOrders, updateOrderStatus } from "../services/Api";
-import "../styles/SellerOrders.css";
+import styles from "../styles/SellerOrders.module.css";
 
 function SellerOrdersPage() {
   const navigate = useNavigate();
@@ -211,10 +211,10 @@ function SellerOrdersPage() {
 
   if (loading) {
     return (
-      <div className="seller-orders-container">
+      <div className={styles['seller-orders-container']}>
         <Header />
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
+        <div className={styles['loading-container']}>
+          <div className={styles['loading-spinner']}></div>
           <p>Loading orders...</p>
         </div>
       </div>
@@ -222,42 +222,42 @@ function SellerOrdersPage() {
   }
 
   return (
-    <div className="seller-orders-container">
+    <div className={styles['seller-orders-container']}>
       <Header />
-      
-      <main className="seller-orders-main">
-        <div className="seller-orders-header">
-          <h1 className="page-title">Order Management</h1>
-          <p className="page-subtitle">Manage your orders and payment verifications</p>
+
+      <main className={styles['seller-orders-main']}>
+        <div className={styles['seller-orders-header']}>
+          <h1 className={styles['page-title']}>Order Management</h1>
+          <p className={styles['page-subtitle']}>Manage your orders and payment verifications</p>
         </div>
 
         {error && (
-          <div className="error-message">
+          <div className={styles['error-message']}>
             <p>{error}</p>
           </div>
         )}
 
         {/* Order Tabs */}
-        <div className="order-tabs">
+        <div className={styles['order-tabs']}>
           {orderTabs.map(tab => (
             <button
               key={tab.id}
-              className={`order-tab ${activeTab === tab.id ? 'active' : ''}`}
+              className={`${styles['order-tab']} ${activeTab === tab.id ? styles['active'] : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.name}
               {tab.id === "pending" && orders.length > 0 && (
-                <span className="tab-badge">{orders.length}</span>
+                <span className={styles['tab-badge']}>{orders.length}</span>
               )}
             </button>
           ))}
         </div>
 
         {/* Orders List */}
-        <div className="orders-container">
+        <div className={styles['orders-container']}>
           {orders.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">📋</div>
+            <div className={styles['empty-state']}>
+              <div className={styles['empty-icon']}>📋</div>
               <h3>No {activeTab === "pending" ? "pending" : ""} orders found</h3>
               <p>
                 {activeTab === "pending" 
@@ -267,21 +267,21 @@ function SellerOrdersPage() {
               </p>
             </div>
           ) : (
-            <div className="orders-grid">
+            <div className={styles['orders-grid']}>
               {orders.map((order) => (
-                <div key={order.id} className="order-card">
-                  <div className="order-header">
-                    <div className="order-id">Order #{order.id.slice(-8)}</div>
+                <div key={order.id} className={styles['order-card']}>
+                  <div className={styles['order-header']}>
+                    <div className={styles['order-id']}>Order #{order.id.slice(-8)}</div>
                     <span 
-                      className="order-status"
+                      className={styles['order-status']}
                       style={{ backgroundColor: getStatusColor(order.status) }}
                     >
                       {order.status}
                     </span>
                   </div>
-                  
-                  <div className="order-details">
-                    <div className="order-info">
+
+                  <div className={styles['order-details']}>
+                    <div className={styles['order-info']}>
                       <p><strong>Total:</strong> Rp {order.total.toLocaleString('id-ID')}</p>
                       <p><strong>Items:</strong> {order.items.length} item(s)</p>
                       <p><strong>Order Time:</strong> {formatDate(order.createdAt)}</p>
@@ -289,28 +289,28 @@ function SellerOrdersPage() {
                         <p><strong>Notes:</strong> {order.notes}</p>
                       )}
                     </div>
-                    
-                    <div className="order-items">
+
+                    <div className={styles['order-items']}>
                       {order.items.map((item, index) => (
-                        <div key={index} className="order-item">
+                        <div key={index} className={styles['order-item']}>
                           <img 
                             src={item.imageURL || "/placeholder.svg"} 
                             alt={item.menuItemName}
-                            className="item-image"
+                            className={styles['item-image']}
                           />
-                          <div className="item-details">
-                            <span className="item-name">{item.menuItemName}</span>
-                            <span className="item-quantity">x{item.quantity}</span>
+                          <div className={styles['item-details']}>
+                            <span className={styles['item-name']}>{item.menuItemName}</span>
+                            <span className={styles['item-quantity']}>x{item.quantity}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                    <div className="order-actions">
+                    <div className={styles['order-actions']}>
                     {console.log("Order in render:", order.id, "Status:", order.status, "PaymentProofUrl:", order.paymentProofUrl)}
                     {activeTab === "pending" && order.paymentProofUrl && (
                       <button
-                        className="verify-payment-btn"
+                        className={styles['verify-payment-btn']}
                         onClick={() => handleViewPaymentProof(order)}
                       >
                         Verify Payment
@@ -320,7 +320,7 @@ function SellerOrdersPage() {
                     {/* Always show button for debugging */}
                     {activeTab === "pending" && !order.paymentProofUrl && (
                       <button
-                        className="verify-payment-btn"
+                        className={styles['verify-payment-btn']}
                         onClick={() => handleViewPaymentProof(order)}
                         style={{ backgroundColor: '#f59e0b', opacity: 0.7 }}
                       >
@@ -330,7 +330,7 @@ function SellerOrdersPage() {
                     
                     {activeTab === "all" && getNextStatus(order.status) && (
                       <button
-                        className="status-update-btn"
+                        className={styles['status-update-btn']}
                         onClick={() => handleStatusUpdate(order.id, getNextStatus(order.status))}
                       >
                         Mark as {getNextStatus(order.status)}

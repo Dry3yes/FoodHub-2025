@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { fetchOrderDetails, confirmPickup } from '../services/Api';
 import Header from '../components/Header';
-import PickupConfirmationModal from '../components/PickupConfirmationModal';
 import '../styles/OrderStatus.css';
 
 const OrderStatusPage = () => {
@@ -333,7 +332,7 @@ const OrderStatusPage = () => {
               <div className="pickup-alert">
                 <h4>🎉 Pesanan Siap Diambil!</h4>
                 <p>Silakan konfirmasi setelah Anda mengambil pesanan. Jika tidak dikonfirmasi dalam 15 menit, sistem akan otomatis mengkonfirmasi pesanan.</p>
-                <button className="btn-primary" onClick={handlePickupConfirmation}>
+                <button className="status-btn-primary" onClick={handlePickupConfirmation}>
                   Konfirmasi Pengambilan
                 </button>
               </div>
