@@ -208,6 +208,7 @@ namespace api.Repositories
                     sellerId = sellerId,
                     storeName = storeData.StoreName,
                     storeImageUrl = storeData.StoreImageUrl,
+                    qrisUrl = storeData.QrisUrl,
                     status = storeData.Status,
                     description = storeData.Description,
                     deliveryTimeEstimate = storeData.DeliveryTimeEstimate,

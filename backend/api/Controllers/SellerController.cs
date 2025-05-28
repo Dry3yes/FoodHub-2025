@@ -106,7 +106,29 @@ namespace api.Controllers
             try
             {
                 var applications = await _sellerRepo.GetAllApplicationsAsync(status);
-                return Ok(new { success = true, data = applications });
+
+                // Enrich applications with user information
+                var enrichedApplications = new List<object>();
+                foreach (var app in applications)
+                {
+                    var user = await _userRepo.GetByIdAsync(app.UserId);
+                    enrichedApplications.Add(new
+                    {
+                        applicationId = app.ApplicationId,
+                        userId = app.UserId,
+                        userName = user?.Name ?? "Unknown User",
+                        userEmail = user?.Email ?? "No email",
+                        storeName = app.StoreName,
+                        description = app.Description,
+                        deliveryTimeEstimate = app.DeliveryTimeEstimate,
+                        status = app.Status,
+                        adminMessage = app.AdminMessage,
+                        createdAt = app.CreatedAt,
+                        processedAt = app.ProcessedAt
+                    });
+                }
+
+                return Ok(new { success = true, data = enrichedApplications });
             }
             catch (Exception ex)
             {
@@ -313,6 +335,76 @@ namespace api.Controllers
             {
                 _logger.LogError(ex, "Error uploading store image");
                 return StatusCode(500, new { success = false, message = "Error uploading store image" });
+            }
+        }
+
+        [HttpPost]
+        [Route("upload-qris-code")]
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> UploadQrisCode(IFormFile qrisImage)
+        {
+            try
+            {
+                // Get Firebase UID from claims
+                var firebaseUid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(firebaseUid))
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated" });
+                }
+
+                // Get the actual user with DocumentId from Firestore
+                var users = await _userRepo.GetAllAsync();
+                var user = users.FirstOrDefault(u => u.FirebaseUid == firebaseUid);
+
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                // Get seller record
+                var seller = await _sellerRepo.GetSellerByUserIdAsync(user.UserId);
+
+                if (seller == null)
+                {
+                    return NotFound(new { success = false, message = "Seller not found" });
+                }
+
+                if (qrisImage == null)
+                {
+                    return BadRequest(new { success = false, message = "No QRIS image provided" });
+                }
+
+                // Validate file size (max 2MB)
+                if (qrisImage.Length > 2 * 1024 * 1024)
+                {
+                    return BadRequest(new { success = false, message = "QRIS image must be less than 2MB" });
+                }
+
+                // Validate file type
+                var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                if (!allowedTypes.Contains(qrisImage.ContentType))
+                {
+                    return BadRequest(new { success = false, message = "Only JPEG, PNG, and GIF images are allowed" });
+                }
+
+                // Upload the image
+                string qrisUrl = await _imageService.UploadImageAsync(qrisImage);
+
+                // Update seller with QRIS URL
+                seller.QrisUrl = qrisUrl;
+                await _sellerRepo.UpdateSellerAsync(seller);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "QRIS code uploaded successfully",
+                    qrisUrl = qrisUrl
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading QRIS code");
+                return StatusCode(500, new { success = false, message = "Error uploading QRIS code" });
             }
         }
     }

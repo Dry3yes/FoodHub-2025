@@ -5,6 +5,7 @@ import "../styles/LoginPage.css";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/Api";
 import { Eye } from "lucide-react";
+import { useCart } from "../hooks/useCart";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +15,7 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { syncCartWithBackend } = useCart();
 
   const handleSubmit = async (e) => {
       e.preventDefault();
@@ -48,10 +50,19 @@ const LoginPage = () => {
               if (response.data.seller) {
                   localStorage.setItem('sellerInfo', JSON.stringify(response.data.seller));
               }
-              
-              // Check if user is a seller and redirect accordingly
+
+              // Sync cart with backend after successful login
+              try {
+                  await syncCartWithBackend();
+              } catch (cartError) {
+                  console.error('Failed to sync cart after login:', cartError);
+                  // Don't fail login if cart sync fails
+              }
+                // Check if user is a seller and redirect accordingly
               const user = response.data.user;
-              if (user && user.role === 'Seller') {
+              if (user && user.role === 'Admin') {
+                  navigate('/admin');
+              } else if (user && user.role === 'Seller') {
                   navigate('/seller');
               } else {
                   navigate('/');

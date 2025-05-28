@@ -19,6 +19,15 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddEndpointsApiExplorer();
 
+// Add SignalR
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.KeepAliveInterval = TimeSpan.FromSeconds(30);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+});
+
 // Add Response Compression
 builder.Services.AddResponseCompression(options =>
 {
@@ -128,9 +137,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = projectId,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
-    };
-
-    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    }; options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
     {
         OnTokenValidated = context =>
         {
@@ -148,6 +155,19 @@ builder.Services.AddAuthentication(options =>
                     context.Principal?.AddIdentity(appIdentity);
                 }
             }
+            return Task.CompletedTask;
+        },
+        OnMessageReceived = context =>
+        {
+            // For SignalR connections, get token from query string
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
+            {
+                context.Token = accessToken;
+            }
+
             return Task.CompletedTask;
         }
     };
@@ -168,6 +188,10 @@ builder.Services.AddSingleton<FirebaseAuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<ISellerRepository, SellerRepository>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
 builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddSingleton<CloudflareClient>(sp =>
@@ -183,8 +207,7 @@ builder.Services.AddSingleton<CloudflareClient>(sp =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DefaultPolicy", policy =>
-    {
-        // More permissive CORS policy for development
+    {        // More permissive CORS policy for development
         if (builder.Environment.IsDevelopment())
         {
             policy
@@ -192,6 +215,7 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials()
+                .WithExposedHeaders("Access-Control-Allow-Origin")
                 .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
         }
         else
@@ -215,7 +239,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => {
+    app.UseSwaggerUI(c =>
+    {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
         // Enable Swagger UI at both HTTP and HTTPS endpoints
         c.RoutePrefix = "swagger";
@@ -246,5 +271,8 @@ app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthC
 {
     Predicate = _ => false
 });
+
+// Map SignalR hub
+app.MapHub<api.Hubs.ChatHub>("/chathub");
 
 app.Run();

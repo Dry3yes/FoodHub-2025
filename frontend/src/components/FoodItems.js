@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"
 import { useCart } from "../hooks/useCart"
 import { fetchStores, fetchMenusByStore } from "../services/Api"
+import ConfirmationModal from "./ConfirmationModal"
 import "../styles/FoodItems.css"
 
 // Fallback data in case API calls fail
@@ -57,10 +58,49 @@ const fallbackFoodItems = [
 ]
 
 function FoodItems() {
-  const { addToCart } = useCart()
+  const { addToCart, clearCartAndAddItem } = useCart()
   const [foodItems, setFoodItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [pendingCartItem, setPendingCartItem] = useState(null)
+  const [confirmationMessage, setConfirmationMessage] = useState("")
+
+  const handleAddToCart = async (item) => {
+    const cartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      quantity: 1,
+      sellerId: item.sellerId,
+      storeName: item.storeName,
+    }
+
+    const result = await addToCart(cartItem)
+    
+    if (!result.success && result.errorCode === "DIFFERENT_STORE") {
+      // Show confirmation modal for store conflict
+      setPendingCartItem(cartItem)
+      setConfirmationMessage(result.message)
+      setShowConfirmModal(true)
+    }
+  }
+
+  const handleConfirmClearCart = async () => {
+    if (pendingCartItem) {
+      await clearCartAndAddItem(pendingCartItem)
+    }
+    setShowConfirmModal(false)
+    setPendingCartItem(null)
+    setConfirmationMessage("")
+  }
+
+  const handleCancelClearCart = () => {
+    setShowConfirmModal(false)
+    setPendingCartItem(null)
+    setConfirmationMessage("")
+  }
 
   useEffect(() => {
     const fetchFeaturedMenuItems = async () => {
@@ -98,7 +138,9 @@ function FoodItems() {
               restaurant: item.storeName || 'Restaurant',
               rating: parseFloat((4 + Math.random()).toFixed(1)), // Random rating between 4.0-5.0
               price: item.price,
-              image: item.imageURL || "/placeholder.svg?height=200&width=300"
+              image: item.imageURL || "/placeholder.svg?height=200&width=300",
+              sellerId: item.sellerId,
+              storeName: item.storeName
             }))
             // Take random items or all if less than 6
             .slice(0, Math.min(6, allMenuItems.length))
@@ -140,18 +182,21 @@ function FoodItems() {
             <h3 className="food-item-name">{item.name}</h3>
             <div className="food-item-info">
               <div className="food-item-rating">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="star-icon filled"
-                >
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                </svg>
-                <span>{item.rating}</span>
+                  {[...Array(5)].map((_, i) => (
+                  <svg
+                    key={i}
+                    className={`star-icon ${i < Math.floor(item.rating) ? "filled" : "empty"}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                ))}
+                <span className="rating-value">{item.rating}</span>
               </div>
               <span className="info-separator">•</span>
               <span>{item.restaurant}</span>
@@ -161,15 +206,7 @@ function FoodItems() {
           <div className="food-item-footer">
             <button
               className="add-to-cart-button"
-              onClick={() =>
-                addToCart({
-                  id: item.id,
-                  name: item.name,
-                  price: item.price,
-                  image: item.image,
-                  quantity: 1,
-                })
-              }
+              onClick={() => handleAddToCart(item)}
             >
               Add to Cart
             </button>
@@ -177,6 +214,17 @@ function FoodItems() {
         </div>
       ))
       )}
+      
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={handleCancelClearCart}
+        onConfirm={handleConfirmClearCart}
+        title="Different Store Detected"
+        message={`${confirmationMessage}\n\n`}
+        confirmText="Clear Cart & Continue"
+        cancelText="Cancel"
+        type="warning"
+      />
     </div>
   )
 }

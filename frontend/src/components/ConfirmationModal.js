@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/ConfirmationModal.css';
+import styles from '../styles/ConfirmationModal.module.css';
 
 const ConfirmationModal = ({ 
   isOpen, 
@@ -20,29 +20,29 @@ const ConfirmationModal = ({
   };
 
   return (
-    <div className="confirmation-modal-overlay" onClick={handleOverlayClick}>
-      <div className="confirmation-modal">
-        <div className="modal-header">
-          <div className="modal-icon-container">
+    <div className={styles['confirmation-modal-overlay']} onClick={handleOverlayClick}>
+      <div className={styles['confirmation-modal']}>
+        <div className={styles['modal-header']}>
+          <div className={styles['modal-icon-container']}>
           </div>
-          <button className="modal-close-button" onClick={onClose}>
+          <button className={styles['modal-close-button']} onClick={onClose}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
-        
-        <div className="modal-content">
-          <h3 className="modal-title">{title}</h3>
-          <p className="modal-message">{message}</p>
+
+        <div className={styles['modal-content']}>
+          <h3 className={styles['modal-title']}>{title}</h3>
+          <p className={styles['modal-message']}>{message}</p>
         </div>
-        
-        <div className="modal-actions">
-          <button className="modal-button cancel" onClick={onClose}>
+
+        <div className={styles['modal-actions']}>
+          <button className={`${styles['modal-button']} ${styles['cancel']}`} onClick={onClose}>
             {cancelText}
           </button>
-          <button className={`modal-button confirm ${type}`} onClick={onConfirm}>
+          <button className={`${styles['modal-button']} ${styles['confirm']} ${styles[type]}`} onClick={onConfirm}>
             {confirmText}
           </button>
         </div>

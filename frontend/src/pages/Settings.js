@@ -8,35 +8,38 @@ const Settings = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Determine if we're in seller mode based on the URL
-  const [isSellerMode, setIsSellerMode] = useState(location.pathname === '/settings/seller');
-  
   // Common state
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  
-  // User profile specific state
-  const [gender, setGender] = useState('');
-  
+  const [isSellerMode, setIsSellerMode] = useState(false);
+    
   // Seller specific state
+  const [description, setDescription] = useState('');
+  const [deliveryEstimate, setDeliveryEstimate] = useState('');
   const [nik, setNik] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [faceImages, setFaceImages] = useState([null, null, null]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [isUserSeller, setIsUserSeller] = useState(false);
 
-  // Update the URL and mode state when toggling between views
-  const toggleMode = () => {
-    const newMode = !isSellerMode;
-    setIsSellerMode(newMode);
-    navigate(newMode ? '/settings/seller' : '/settings', { replace: true });
-  };
-  
-  // Update mode based on URL when location changes
+  // Check if the user is already a seller
   useEffect(() => {
-    setIsSellerMode(location.pathname === '/settings/seller');
-  }, [location.pathname]);
+    // Check both user role and sellerInfo
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const sellerInfo = localStorage.getItem('sellerInfo');
+    
+    // User is a seller if either role is 'Seller' or sellerInfo exists
+    const isSeller = user?.role === 'Seller' || !!sellerInfo;
+    
+    setIsUserSeller(isSeller);
+    
+    // If user is a seller and currently in seller mode, redirect to profile
+    if (isSeller && location.pathname === '/settings/seller') {
+      navigate('/settings', { replace: true });
+    }
+  }, [navigate, location.pathname]);
 
   // Handle face image upload for seller mode
   const handleImageUpload = (index, e) => {
@@ -54,7 +57,7 @@ const Settings = () => {
   // Handle form submission for user profile
   const handleUserSubmit = (e) => {
     e.preventDefault();
-    console.log('User form submitted:', { username, email, gender });
+    console.log('User form submitted:', { username, email });
     alert('Changes saved successfully!');
   };
   
@@ -101,6 +104,8 @@ const Settings = () => {
       const response = await applyForSeller(
         { 
           storeName: username, 
+          description : description,
+          deliveryEstimate : deliveryEstimate,
           nik: nik 
         }, 
         imageFile
@@ -110,6 +115,9 @@ const Settings = () => {
         setSuccess('Your seller application has been submitted successfully!');
         // Reset form
         setNik('');
+        setUsername('');
+        setDescription('');
+        setDeliveryEstimate('');
         setFaceImages([null, null, null]);
         setAgreedToTerms(false);
       } else {
@@ -130,6 +138,11 @@ const Settings = () => {
     return new File([blob], fileName, { type: blob.type });
   };
 
+  // Toggle between user profile and seller registration modes
+  const toggleMode = () => {
+    setIsSellerMode(!isSellerMode);
+  };
+
   return (
     <>
       <Header />
@@ -147,7 +160,9 @@ const Settings = () => {
           <ul>
             <label>My Account</label>
             <li className={`nav-item account-item active`} onClick={() => navigate('/settings')}>Profile</li>
-            <li className={`nav-item seller-toggle`} onClick={toggleMode}>Apply for Seller</li>
+            {!isUserSeller && (
+              <li className={`nav-item seller-toggle`} onClick={toggleMode}>Apply for Seller</li>
+            )}
           </ul>
         </nav>
       </div>
@@ -203,7 +218,28 @@ const Settings = () => {
                   placeholder="Enter your store name"
                 />
               </div>
-              
+
+              <div className="form-group">
+                <label htmlFor="seller-description">Store Description</label>
+                <textarea
+                  id="seller-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter a brief description of your store"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="seller-deliveryestimate">Delivery Estimate Time</label>
+                <input
+                  type="text"
+                  id="seller-deliveryestimate"
+                  value={deliveryEstimate}
+                  onChange={(e) => setDeliveryEstimate(e.target.value)}
+                  placeholder="Enter delivery estimate time"
+                />
+              </div>
+
               <div className="form-group">
                 <label htmlFor="nik">NIK</label>
                 <input 
@@ -212,17 +248,6 @@ const Settings = () => {
                   value={nik}
                   onChange={(e) => setNik(e.target.value)}
                   placeholder="Enter your National ID"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="seller-email">Email</label>
-                <input 
-                  type="email" 
-                  id="seller-email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={JSON.parse(localStorage.getItem('user'))?.email || ''}
                 />
               </div>
               

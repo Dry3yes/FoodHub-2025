@@ -3,20 +3,17 @@ import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
 import Header from "../components/Header"
 import CartSidebar from "../components/CartSidebar"
+import ConfirmationModal from "../components/ConfirmationModal"
 import { useCart } from "../hooks/useCart"
 import { fetchStoreBySlug, fetchMenusByStore } from "../services/Api"
 import "../styles/StorePage.css"
 
 // Generate random additional data for store display if missing from backend
 const generateRandomData = () => {
-  const cuisines = ["Seafood", "Asian", "Italian", "Fast Food", "Mexican", "Breakfast", "Japanese", "Indian", "Thai"]
-  const deliveryTimes = ["15-25 min", "20-30 min", "25-35 min", "30-40 min", "10-20 min"]
   const ratings = [4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]
   
   return {
     rating: ratings[Math.floor(Math.random() * ratings.length)],
-    cuisine: cuisines[Math.floor(Math.random() * cuisines.length)],
-    deliveryTime: deliveryTimes[Math.floor(Math.random() * deliveryTimes.length)],
   }
 }
 
@@ -138,12 +135,50 @@ const fallbackStoreData = [
 
 function StorePage() {
   const { id: slug } = useParams()
-  const { addToCart } = useCart()
+  const { addToCart, clearCartAndAddItem } = useCart()
   
   const [store, setStore] = useState(null)
   const [menuItems, setMenuItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [pendingCartItem, setPendingCartItem] = useState(null)
+  const [confirmationMessage, setConfirmationMessage] = useState("")
+  const handleAddToCart = async (item) => {
+    const cartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      quantity: 1,
+      sellerId: store?.id,
+      storeName: store?.name,
+    }
+
+    const result = await addToCart(cartItem)
+    
+    if (!result.success && result.errorCode === "DIFFERENT_STORE") {
+      // Show confirmation modal for store conflict
+      setPendingCartItem(cartItem)
+      setConfirmationMessage(result.message)
+      setShowConfirmModal(true)
+    }
+  }
+
+  const handleConfirmClearCart = async () => {
+    if (pendingCartItem) {
+      await clearCartAndAddItem(pendingCartItem)
+    }
+    setShowConfirmModal(false)
+    setPendingCartItem(null)
+    setConfirmationMessage("")
+  }
+
+  const handleCancelClearCart = () => {
+    setShowConfirmModal(false)
+    setPendingCartItem(null)
+    setConfirmationMessage("")
+  }
   
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -167,8 +202,7 @@ function StorePage() {
           coverImage: storeData.storeImageUrl || "/placeholder.svg?height=300&width=900", // Use placeholder if none exists
           logo: "/placeholder.svg?height=100&width=100",
           rating: randomData.rating,
-          cuisine: randomData.cuisine,
-          deliveryTime: randomData.deliveryTime,
+          deliveryTime: storeData.deliveryTimeEstimate + " min",
           description: storeData.description,
         }
         
@@ -293,21 +327,22 @@ function StorePage() {
                 <h1 className="store-title">{store.name}</h1>
                 <div className="store-info">
                   <div className="store-rating">
-                    <svg
-                      className="star-icon filled"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
+                    {[...Array(5)].map((_, i) => (
+                      <svg
+                        key={i}
+                        className={`star-icon ${i < Math.floor(store.rating) ? "filled" : "empty"}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                    ))}
                     <span>{store.rating}</span>
                   </div>
-                  <span className="info-separator">•</span>
-                  <span>{store.cuisine}</span>
                   <span className="info-separator">•</span>
                   <span>{store.deliveryTime}</span>
                 </div>
@@ -316,7 +351,7 @@ function StorePage() {
             </div>
 
             <div className="menu-card">
-              <h2 className="menu-title">Menu</h2>
+              <h2 className="store-menu-title">Menu</h2>
 
               {store.menuCategories && store.menuCategories.length > 0 ? (
                 store.menuCategories.map((category) => (
@@ -333,19 +368,10 @@ function StorePage() {
                             <h4 className="menu-item-name">{item.name}</h4>
                             <p className="menu-item-description">{item.description}</p>
                           </div>
-                          <div className="menu-item-actions">
-                            <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>
-                            <button
+                          <div className="store-menu-item-actions">
+                            <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>                            <button
                               className="add-to-cart-button"
-                              onClick={() =>
-                                addToCart({
-                                  id: item.id,
-                                  name: item.name,
-                                  price: item.price,
-                                  image: item.image,
-                                  quantity: 1,
-                                })
-                              }
+                              onClick={() => handleAddToCart(item)}
                             >
                               Add to Cart
                             </button>
@@ -368,15 +394,24 @@ function StorePage() {
             <CartSidebar />
           </div>
         </div>
-      </main>
-
-      <footer className="store-footer">
+      </main>      <footer className="store-footer">
         <div className="footer-content">
           <div className="footer-text">
             <p>© 2023 FoodHub. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={handleCancelClearCart}
+        onConfirm={handleConfirmClearCart}
+        title="Different Store Detected"
+        message={`${confirmationMessage}\n\n`}
+        confirmText="Clear Cart & Continue"
+        cancelText="Cancel"
+        type="warning"
+      />
     </div>
   )
 }

@@ -1,118 +1,315 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import chatService from '../services/ChatService';
 import '../styles/Chat.css';
 
 const Chat = () => {
-  // Sample data for contacts and messages (replace with actual API calls)
-  const [contacts, setContacts] = useState([
-    { id: '1', name: 'Restaurant 1', lastMessage: 'Your order is ready', unread: 2 },
-    { id: '2', name: 'Restaurant 2', lastMessage: 'Thank you for your order', unread: 0 },
-    { id: '3', name: 'Customer Support', lastMessage: 'How can I help you?', unread: 1 }
-  ]);
-
-  const [messages, setMessages] = useState({
-    '1': [
-      { sender: 'other', text: 'Your order #1234 is being prepared', time: '10:30 AM' },
-      { sender: 'other', text: 'Your order is ready for pickup', time: '10:45 AM' },
-      { sender: 'me', text: 'Thanks! I\'ll be there in 10 minutes', time: '10:46 AM' }
-    ],
-    '2': [
-      { sender: 'me', text: 'Is my order ready?', time: '11:20 AM' },
-      { sender: 'other', text: 'Yes, it will be ready in 5 minutes', time: '11:22 AM' },
-      { sender: 'me', text: 'Great, thanks!', time: '11:23 AM' }
-    ],
-    '3': [
-      { sender: 'other', text: 'Hello! How can I assist you today?', time: '9:00 AM' },
-      { sender: 'me', text: 'I have a question about my order', time: '9:05 AM' },
-      { sender: 'other', text: 'Sure, what\'s your order number?', time: '9:06 AM' }
-    ]
-  });
-
-  // State for new message input
+  // State management
+  const [chats, setChats] = useState([]);
+  const [messages, setMessages] = useState({});
   const [newMessage, setNewMessage] = useState('');
-
-  // State for chat box visibility
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [activeChat, setActiveChat] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState({ connected: false });
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+  const [typingUsers, setTypingUsers] = useState(new Set());
+  const [onlineUsers, setOnlineUsers] = useState(new Set());
+  
+  const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const messageInputRef = useRef(null);
 
-  // State for active chat contact
-  const [activeContact, setActiveContact] = useState(null);
+  // Initialize chat service and load chats
+  useEffect(() => {
+    initializeChatService();
+    loadUserChats();
+    
+    return () => {
+      chatService.disconnect();
+    };
+  }, []);
 
-  // Handle chat contact selection
-  const handleContactSelect = (contactId) => {
-    setActiveContact(contactId);
-    // Mark messages as read when selecting a contact
-    if (contacts.find(c => c.id === contactId)?.unread > 0) {
-      setContacts(contacts.map(c => 
-        c.id === contactId ? { ...c, unread: 0 } : c
+  // Set up event listeners
+  useEffect(() => {
+    const handleConnectionStateChanged = (state) => {
+      setConnectionStatus(state);
+    };
+
+    const handleMessageReceived = (message) => {
+      setMessages(prev => ({
+        ...prev,
+        [message.chatId]: [...(prev[message.chatId] || []), message]
+      }));
+      
+      // Update chat list with new last message
+      setChats(prev => prev.map(chat => 
+        chat.chatId === message.chatId 
+          ? { 
+              ...chat, 
+              lastMessage: message.content, 
+              lastMessageTime: message.timestamp,
+              lastMessageSender: message.senderId,
+              unreadCount: chat.unreadCount + 1
+            }
+          : chat
       ));
+      
+      scrollToBottom();
+    };
+
+    const handleUserTyping = ({ chatId, userId, userName }) => {
+      if (chatId === activeChat?.chatId) {
+        setTypingUsers(prev => new Set([...prev, `${userName} is typing...`]));
+        
+        // Clear typing indicator after 3 seconds
+        setTimeout(() => {
+          setTypingUsers(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(`${userName} is typing...`);
+            return newSet;
+          });
+        }, 3000);
+      }
+    };
+
+    const handleUserStoppedTyping = ({ chatId, userId }) => {
+      // Will be cleared by timeout in handleUserTyping
+    };
+
+    const handleUserOnline = ({ userId }) => {
+      setOnlineUsers(prev => new Set([...prev, userId]));
+    };
+
+    const handleUserOffline = ({ userId }) => {
+      setOnlineUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+    };
+
+    const handleUnreadCountUpdate = ({ count }) => {
+      setTotalUnreadCount(count);
+    };
+
+    const handleChatRead = ({ chatId, userId }) => {
+      // Update UI to show messages as read
+      setMessages(prev => ({
+        ...prev,
+        [chatId]: (prev[chatId] || []).map(msg => ({
+          ...msg,
+          isRead: msg.senderId === userId ? true : msg.isRead
+        }))
+      }));
+    };
+
+    // Register event listeners
+    chatService.on('connectionStateChanged', handleConnectionStateChanged);
+    chatService.on('messageReceived', handleMessageReceived);
+    chatService.on('userTyping', handleUserTyping);
+    chatService.on('userStoppedTyping', handleUserStoppedTyping);
+    chatService.on('userOnline', handleUserOnline);
+    chatService.on('userOffline', handleUserOffline);
+    chatService.on('unreadCountUpdate', handleUnreadCountUpdate);
+    chatService.on('chatRead', handleChatRead);
+
+    return () => {
+      chatService.off('connectionStateChanged', handleConnectionStateChanged);
+      chatService.off('messageReceived', handleMessageReceived);
+      chatService.off('userTyping', handleUserTyping);
+      chatService.off('userStoppedTyping', handleUserStoppedTyping);
+      chatService.off('userOnline', handleUserOnline);
+      chatService.off('userOffline', handleUserOffline);
+      chatService.off('unreadCountUpdate', handleUnreadCountUpdate);
+      chatService.off('chatRead', handleChatRead);
+    };
+  }, [activeChat]);
+
+  // Initialize chat service with authentication
+  const initializeChatService = async () => {
+    try {
+      // Get auth token from localStorage or your auth service
+      const token = localStorage.getItem('token');
+      if (token) {
+        await chatService.connect(token);
+      }
+    } catch (error) {
+      console.error('Failed to connect to chat service:', error);
     }
+  };
+
+  // Load user's chats
+  const loadUserChats = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('https://localhost:5001/api/chat', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setChats(data.chats || []);
+        setTotalUnreadCount(data.totalUnreadCount || 0);
+      }
+    } catch (error) {
+      console.error('Failed to load chats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load messages for a specific chat
+  const loadChatMessages = async (chatId) => {
+    try {
+      const response = await fetch(`https://localhost:5001/api/chat/${chatId}/messages`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const messages = await response.json();
+        setMessages(prev => ({
+          ...prev,
+          [chatId]: messages
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+    }
+  };
+
+  // Handle chat selection
+  const handleChatSelect = async (chat) => {
+    setActiveChat(chat);
+    
+    // Join the chat room for real-time updates
+    try {
+      await chatService.joinChat(chat.chatId);
+    } catch (error) {
+      console.error('Failed to join chat:', error);
+    }
+    
+    // Load messages if not already loaded
+    if (!messages[chat.chatId]) {
+      await loadChatMessages(chat.chatId);
+    }
+    
+    // Mark chat as read
+    try {
+      await chatService.markChatAsRead(chat.chatId);
+      setChats(prev => prev.map(c => 
+        c.chatId === chat.chatId ? { ...c, unreadCount: 0 } : c
+      ));
+    } catch (error) {
+      console.error('Failed to mark chat as read:', error);
+    }
+    
+    scrollToBottom();
   };
 
   // Toggle chat box visibility
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
-    if (!isChatOpen && !activeContact && contacts.length > 0) {
-      setActiveContact(contacts[0].id);
+    if (!isChatOpen && !activeChat && chats.length > 0) {
+      handleChatSelect(chats[0]);
     }
   };
 
   // Handle sending a new message
-  const handleSendMessage = () => {
-    if (newMessage.trim() === '' || !activeContact) return;
+  const handleSendMessage = async () => {
+    if (newMessage.trim() === '' || !activeChat) return;
     
-    const newMessageObj = {
-      sender: 'me',
-      text: newMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    
-    setMessages(prevMessages => ({
-      ...prevMessages,
-      [activeContact]: [...(prevMessages[activeContact] || []), newMessageObj]
-    }));
-    
-    setNewMessage('');
-    
-    // Simulate response after 1 second
-    setTimeout(() => {
-      const responseMessage = {
-        sender: 'other',
-        text: 'Thanks for your message. We\'ll get back to you shortly.',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    try {
+      const messageData = {
+        chatId: activeChat.chatId,
+        content: newMessage.trim(),
+        messageType: 'text'
       };
       
-      setMessages(prevMessages => ({
-        ...prevMessages,
-        [activeContact]: [...(prevMessages[activeContact] || []), responseMessage]
-      }));
-    }, 1000);
+      // Send via SignalR for real-time delivery
+      await chatService.sendMessage(messageData);
+      
+      setNewMessage('');
+      scrollToBottom();
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
+  };
+
+  // Handle typing indicators
+  const handleTyping = () => {
+    if (!activeChat || !connectionStatus.connected) return;
+    
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Send typing indicator
+    chatService.startTyping(activeChat.chatId);
+    
+    // Stop typing after 3 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      chatService.stopTyping(activeChat.chatId);
+    }, 3000);
   };
 
   // Handle Enter key press to send message
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleSendMessage();
+    } else {
+      handleTyping();
     }
   };
 
-  // Scroll to bottom of messages when new message is added
-  useEffect(() => {
-    if (activeContact) {
-      const messageList = document.querySelector('.message-list');
-      if (messageList) {
-        messageList.scrollTop = messageList.scrollHeight;
-      }
+  // Scroll to bottom of messages
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  // Format timestamp
+  const formatTime = (timestamp) => {
+    return new Date(timestamp).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  // Get chat display name
+  const getChatDisplayName = (chat) => {
+    if (chat.participantDetails && chat.participantDetails.length > 0) {
+      return chat.participantDetails[0].name;
     }
-  }, [messages, activeContact]);
+    return 'Unknown User';
+  };
+
+  // Check if user is online
+  const isUserOnline = (userId) => {
+    return onlineUsers.has(userId);
+  };
 
   return (
     <div className="chat-wrapper">
       {/* Inbox Button (Bottom Right) */}
       <button className="inbox-button" onClick={toggleChat}>
-        Inbox
-        {contacts.reduce((total, contact) => total + contact.unread, 0) > 0 && (
-          <span className="inbox-badge">
-            {contacts.reduce((total, contact) => total + contact.unread, 0)}
-          </span>
+        <span>Inbox</span>
+        {!connectionStatus.connected && (
+          <span className="connection-status offline">●</span>
+        )}
+        {connectionStatus.connected && (
+          <span className="connection-status online">●</span>
+        )}
+        {totalUnreadCount > 0 && (
+          <span className="inbox-badge">{totalUnreadCount}</span>
         )}
       </button>
 
@@ -120,66 +317,117 @@ const Chat = () => {
       {isChatOpen && (
         <div className="chat-container">
           <div className="chat-header">
-            <h3>Chat</h3>
+            <h3>
+              Chat 
+              {connectionStatus.reconnecting && <span className="reconnecting"> (Reconnecting...)</span>}
+            </h3>
             <button className="close-button" onClick={toggleChat}>×</button>
           </div>
           <div className="chat-body">
-            {/* Left Panel - Contacts */}
+            {/* Left Panel - Chats */}
             <div className="chat-contacts">
-              {contacts.map(contact => (
-                <div
-                  key={contact.id}
-                  className={`contact-item ${activeContact === contact.id ? 'active' : ''}`}
-                  onClick={() => handleContactSelect(contact.id)}
-                >
-                  <div className="contact-avatar">
-                    {contact.name.charAt(0)}
+              {loading ? (
+                <div className="loading">Loading chats...</div>
+              ) : chats.length === 0 ? (
+                <div className="no-chats">No chats available</div>
+              ) : (
+                chats.map(chat => (
+                  <div
+                    key={chat.chatId}
+                    className={`contact-item ${activeChat?.chatId === chat.chatId ? 'active' : ''}`}
+                    onClick={() => handleChatSelect(chat)}
+                  >
+                    <div className="contact-avatar">
+                      {getChatDisplayName(chat).charAt(0).toUpperCase()}
+                      {chat.participantDetails?.some(p => isUserOnline(p.userId)) && (
+                        <span className="online-indicator">●</span>
+                      )}
+                    </div>
+                    <div className="contact-info">
+                      <div className="contact-name">{getChatDisplayName(chat)}</div>
+                      <div className="contact-last-message">
+                        {chat.lastMessage || 'No messages yet'}
+                      </div>
+                      <div className="contact-time">
+                        {chat.lastMessageTime && formatTime(chat.lastMessageTime)}
+                      </div>
+                    </div>
+                    {chat.unreadCount > 0 && (
+                      <div className="unread-badge">{chat.unreadCount}</div>
+                    )}
                   </div>
-                  <div className="contact-info">
-                    <div className="contact-name">{contact.name}</div>
-                    <div className="contact-last-message">{contact.lastMessage}</div>
-                  </div>
-                  {contact.unread > 0 && (
-                    <div className="unread-badge">{contact.unread}</div>
-                  )}
-                </div>
-              ))}
+                ))
+              )}
             </div>
             
             {/* Right Panel - Messages */}
             <div className="chat-messages">
-              {activeContact ? (
+              {activeChat ? (
                 <>
                   <div className="message-header">
-                    {contacts.find(c => c.id === activeContact)?.name}
+                    <span>{getChatDisplayName(activeChat)}</span>
+                    {activeChat.participantDetails?.some(p => isUserOnline(p.userId)) && (
+                      <span className="online-status">● Online</span>
+                    )}
                   </div>
                   <div className="message-list">
-                    {messages[activeContact]?.map((message, index) => (
+                    {(messages[activeChat.chatId] || []).map((message, index) => (
                       <div 
-                        key={index} 
-                        className={`message ${message.sender === 'me' ? 'sent' : 'received'}`}
+                        key={message.messageId || index} 
+                        className={`message ${message.senderId === getCurrentUserId() ? 'sent' : 'received'}`}
                       >
                         <div className="message-content">
-                          <p>{message.text}</p>
-                          <span className="message-time">{message.time}</span>
+                          <div className="message-sender">{message.senderName}</div>
+                          <p>{message.content}</p>
+                          <div className="message-meta">
+                            <span className="message-time">
+                              {formatTime(message.timestamp)}
+                            </span>
+                            {message.editedAt && (
+                              <span className="edited-indicator">(edited)</span>
+                            )}
+                            {message.senderId === getCurrentUserId() && message.isRead && (
+                              <span className="read-indicator">✓✓</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
+                    
+                    {/* Typing indicators */}
+                    {typingUsers.size > 0 && (
+                      <div className="typing-indicators">
+                        {Array.from(typingUsers).map((text, index) => (
+                          <div key={index} className="typing-indicator">
+                            {text}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div ref={messagesEndRef} />
                   </div>
                   <div className="message-input">
                     <input 
+                      ref={messageInputRef}
                       type="text" 
-                      placeholder="Type a message..."
+                      placeholder={connectionStatus.connected ? "Type a message..." : "Connecting..."}
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
+                      disabled={!connectionStatus.connected}
                     />
-                    <button onClick={handleSendMessage}>Send</button>
+                    <button 
+                      onClick={handleSendMessage}
+                      disabled={!connectionStatus.connected || !newMessage.trim()}
+                    >
+                      Send
+                    </button>
                   </div>
                 </>
               ) : (
                 <div className="no-chat-selected">
-                  Select a contact to start chatting
+                  Select a chat to start messaging
                 </div>
               )}
             </div>
@@ -188,6 +436,20 @@ const Chat = () => {
       )}
     </div>
   );
+
+  // Helper function to get current user ID
+  function getCurrentUserId() {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        return user.userId || user.uid || 'current-user';
+      }
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+    }
+    return 'current-user';
+  }
 };
 
 export default Chat;

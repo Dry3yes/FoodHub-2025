@@ -314,6 +314,43 @@ namespace api.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("analytics")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAnalytics()
+        {
+            try
+            {
+                var users = await _userRepository.GetAllAsync();
+                var sellers = await _sellerRepository.GetAllApplicationsAsync("Pending");
+
+                var totalActiveUsers = users.Count(u => u.Role == "User" && u.IsActive);
+                var totalActiveSellers = users.Count(u => u.Role == "Seller" && u.IsActive);
+                var pendingApprovals = sellers.Count();
+
+                return Ok(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        activeUsers = totalActiveUsers,
+                        activeSellers = totalActiveSellers,
+                        pendingApprovals = pendingApprovals
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving analytics data");
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred while retrieving analytics data"
+                });
+            }
+        }
+
         private bool ValidateRole(string role)
         {
             var validRoles = new[] { "Admin", "User", "Seller" };

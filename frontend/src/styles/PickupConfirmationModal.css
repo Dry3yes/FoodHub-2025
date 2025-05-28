@@ -1,0 +1,270 @@
+/* Pickup Confirmation Modal Styles */
+.pickup-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pickup-modal-content {
+  background: white;
+  border-radius: 1rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(2rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.pickup-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.pickup-icon {
+  font-size: 2rem;
+  margin-right: 0.75rem;
+}
+
+.pickup-modal-header h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.pickup-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+}
+
+.pickup-close-btn:hover {
+  color: #374151;
+  background-color: #f3f4f6;
+}
+
+.pickup-modal-body {
+  padding: 1.5rem;
+}
+
+.pickup-message {
+  margin-bottom: 1.5rem;
+}
+
+.pickup-message p {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.pickup-message p:last-child {
+  margin-bottom: 0;
+}
+
+.pickup-order-summary {
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pickup-order-summary h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.pickup-order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pickup-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.pickup-info-row span:first-child {
+  color: #6b7280;
+}
+
+.pickup-info-row span:last-child {
+  color: #111827;
+  font-weight: 500;
+}
+
+.pickup-timer {
+  background-color: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.timer-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.timer-label {
+  font-size: 0.875rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.timer-countdown {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #92400e;
+  font-family: 'Courier New', monospace;
+}
+
+.timer-bar {
+  width: 100%;
+  height: 0.5rem;
+  background-color: #fde68a;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.timer-progress {
+  height: 100%;
+  transition: width 1s linear, background-color 0.3s ease;
+  border-radius: 0.25rem;
+}
+
+.pickup-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pickup-btn-secondary,
+.pickup-btn-primary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  min-width: 120px;
+}
+
+.pickup-btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.pickup-btn-secondary:hover {
+  background-color: #e5e7eb;
+}
+
+.pickup-btn-primary {
+  background-color: #10b981;
+  color: white;
+}
+
+.pickup-btn-primary:hover {
+  background-color: #059669;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pickup-modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .pickup-modal-header {
+    padding: 1rem 1rem 0.75rem 1rem;
+  }
+
+  .pickup-modal-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .pickup-modal-body {
+    padding: 1rem;
+  }
+
+  .pickup-modal-footer {
+    padding: 0.75rem 1rem 1rem 1rem;
+    flex-direction: column;
+  }
+
+  .pickup-btn-secondary,
+  .pickup-btn-primary {
+    width: 100%;
+  }
+
+  .timer-countdown {
+    font-size: 1.125rem;
+  }
+}
+
+/* Animation for urgent timer */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.timer-countdown.urgent {
+  animation: pulse 1s infinite;
+  color: #dc2626;
+}
+
+.timer-progress.urgent {
+  background-color: #dc2626;
+}

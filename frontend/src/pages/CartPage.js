@@ -1,19 +1,34 @@
 "use client"
-import { Link } from "react-router-dom"
+import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import Header from "../components/Header"
 import { useCart } from "../hooks/useCart"
+import CheckoutModal from "../components/CheckoutModal"
 import "../styles/CartPage.css"
 
 function CartPage() {
-  const { items, updateQuantity, removeFromCart, clearCart } = useCart()
+  const { items, updateQuantity, removeFromCart, clearCart, isAuthenticated } = useCart()
+  const navigate = useNavigate()
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false)
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
-  const shipping = items.length > 0 ? 5 : 0
-  const total = subtotal + shipping
+  const feeservice = 2000
+  const total = subtotal + feeservice
+
+  const handleCheckout = () => {
+    if (!isAuthenticated()) {
+      // Redirect to login page if not authenticated
+      navigate('/login', { state: { from: '/cart' } })
+      return
+    }
+    // Show the checkout modal for authenticated users
+    setShowCheckoutModal(true)
+  }
 
   return (
-    <div className="cart-page-container">
-      <Header />
+    <>
+      <div className="cart-page-container">
+        <Header />
 
       <main className="cart-main-content">
         <div className="cart-header">
@@ -150,8 +165,8 @@ function CartPage() {
                       <span>Rp {subtotal.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="summary-row">
-                      <span>Shipping</span>
-                      <span>Rp {shipping.toLocaleString('id-ID')}</span>
+                      <span>Fee Service</span>
+                      <span>Rp {feeservice.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="summary-divider"></div>
                     <div className="summary-row total">
@@ -159,9 +174,10 @@ function CartPage() {
                       <span>Rp {total.toLocaleString('id-ID')}</span>
                     </div>
                   </div>
-                </div>
-                <div className="order-summary-footer">
-                  <button className="checkout-button">Proceed to Checkout</button>
+                </div>                <div className="order-summary-footer">
+                  <button className="checkout-button" onClick={handleCheckout}>
+                    Proceed to Checkout
+                  </button>
                 </div>
               </div>
             </div>
@@ -169,14 +185,19 @@ function CartPage() {
         )}
       </main>
 
-      <footer className="cart-footer">
-        <div className="footer-content">
-          <div className="footer-text">
-            <p>© 2023 FoodHub. All rights reserved.</p>
+        <footer className="cart-footer">
+          <div className="footer-content">
+            <div className="footer-text">
+              <p>© 2023 FoodHub. All rights reserved.</p>
+            </div>
           </div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+      
+      {showCheckoutModal && (
+        <CheckoutModal onClose={() => setShowCheckoutModal(false)} />
+      )}
+    </>
   )
 }
 
