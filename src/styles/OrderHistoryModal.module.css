@@ -181,8 +181,9 @@
 }
 
 .order-item:hover {
-  border-color: #3b82f6;
+  border-color: #f9fafb;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .order-item.ongoing {
@@ -300,9 +301,8 @@
 }
 
 /* Ongoing Badge */
-.ongoing-badge {
+/* .ongoing-badge {
   position: absolute;
-  top: 8px;
   right: 8px;
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
@@ -312,7 +312,7 @@
   border-radius: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
+} */
 
 /* Responsive Design */
 @media (max-width: 640px) {

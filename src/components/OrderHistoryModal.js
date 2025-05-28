@@ -126,10 +126,9 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
                 const statusInfo = getStatusInfo(order.status);
                 const isOngoing = isOngoingOrder(order.status);
                 
-                return (
-                  <div 
+                return (                  <div 
                     key={order.id} 
-                    className={`order-item ${isOngoing ? 'ongoing' : 'completed'}`}
+                    className={`${styles['order-item']} ${isOngoing ? styles['ongoing'] : styles['completed']}`}
                     onClick={() => handleOrderClick(order.id)}
                   >
                     <div className={styles['order-header']}>
@@ -179,11 +178,11 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
                       )}
                     </div>
 
-                    {isOngoing && (
+                    {/* {isOngoing && (
                       <div className={styles['ongoing-badge']}>
                         <span>Pesanan Aktif</span>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 );
               })}
