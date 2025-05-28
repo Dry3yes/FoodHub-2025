@@ -185,7 +185,7 @@
 }
 
 .menu-item-name {
-  font-weight: 500;
+  font-weight: 700;
   margin-bottom: 0.25rem;
   line-height: 1.2;
 }
@@ -205,7 +205,7 @@
 }
 
 .menu-item-price {
-  font-weight: 500;
+  font-weight: 700;
   margin-right: 0.75rem; /* Added margin to separate price from button */
   font-size: 1rem;
 }

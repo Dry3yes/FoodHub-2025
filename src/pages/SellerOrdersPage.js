@@ -235,9 +235,7 @@ function SellerOrdersPage() {
           <div className={styles['error-message']}>
             <p>{error}</p>
           </div>
-        )}
-
-        {/* Order Tabs */}
+        )}        {/* Order Tabs */}
         <div className={styles['order-tabs']}>
           {orderTabs.map(tab => (
             <button
@@ -246,8 +244,13 @@ function SellerOrdersPage() {
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.name}
-              {tab.id === "pending" && orders.length > 0 && (
-                <span className={styles['tab-badge']}>{orders.length}</span>
+              {tab.id === "pending" && (
+                <span className={styles['tab-badge']}>
+                  {activeTab === "pending" 
+                    ? orders.length 
+                    : orders.filter(order => order.status.toLowerCase() === 'pending').length
+                  }
+                </span>
               )}
             </button>
           ))}
