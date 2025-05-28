@@ -57,11 +57,11 @@ namespace api.Models
         [FirestoreProperty]
         public string ImageURL { get; set; } = string.Empty;
     }
-
     public enum OrderStatus
     {
         Pending,
         Confirmed,
+        Preparing,
         Ready,
         Completed,
         Cancelled

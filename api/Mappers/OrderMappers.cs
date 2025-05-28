@@ -24,6 +24,7 @@ namespace api.Mappers
                 Notes = order.Notes,
                 Total = order.Total,
                 Status = order.Status.ToString(),
+                PaymentProofUrl = order.PaymentProofUrl,
                 CreatedAt = order.CreatedAt,
                 UpdatedAt = order.UpdatedAt
             };

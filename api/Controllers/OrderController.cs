@@ -4,6 +4,8 @@ using api.Mappers;
 using api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using api.Hubs;
 using System.Security.Claims;
 
 namespace api.Controllers
@@ -20,6 +22,7 @@ namespace api.Controllers
         private readonly ISellerRepository _sellerRepository;
         private readonly IImageService _imageService;
         private readonly ILogger<OrderController> _logger;
+        private readonly IHubContext<ChatHub> _hubContext;
 
         public OrderController(
             IOrderRepository orderRepository,
@@ -28,7 +31,8 @@ namespace api.Controllers
             IMenuRepository menuRepository,
             ISellerRepository sellerRepository,
             IImageService imageService,
-            ILogger<OrderController> logger)
+            ILogger<OrderController> logger,
+            IHubContext<ChatHub> hubContext)
         {
             _orderRepository = orderRepository;
             _cartRepository = cartRepository;
@@ -37,6 +41,7 @@ namespace api.Controllers
             _sellerRepository = sellerRepository;
             _imageService = imageService;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         [HttpPost]
@@ -193,7 +198,7 @@ namespace api.Controllers
 
         [HttpGet]
         [Route("seller/orders")]
-        [Authorize(Policy = "RequireSellerRole")]
+        [Authorize(Roles = "Seller")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetSellerOrders()
@@ -224,7 +229,7 @@ namespace api.Controllers
 
         [HttpPut]
         [Route("seller/orders/{orderId}/status")]
-        [Authorize(Policy = "RequireSellerRole")]
+        [Authorize(Roles = "Seller")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -256,7 +261,6 @@ namespace api.Controllers
                 {
                     return BadRequest(new { success = false, message = "Invalid order status" });
                 }
-
                 var updatedOrder = await _orderRepository.UpdateOrderStatusAsync(orderId, status);
                 if (updatedOrder == null)
                 {
@@ -264,6 +268,10 @@ namespace api.Controllers
                 }
 
                 var orderDto = updatedOrder.ToOrderDto();
+
+                // Send real-time notifications to the customer and seller
+                await NotifyOrderStatusUpdate(updatedOrder, status);
+
                 return Ok(new
                 {
                     success = true,
@@ -341,9 +349,7 @@ namespace api.Controllers
                     return NotFound(new { success = false, message = "Order not found" });
                 }
 
-                _logger.LogInformation("Payment proof uploaded for order {OrderId} by user {UserId}", orderId, userId);
-
-                return Ok(new
+                _logger.LogInformation("Payment proof uploaded for order {OrderId} by user {UserId}", orderId, userId); return Ok(new
                 {
                     success = true,
                     message = "Payment proof uploaded successfully. Your order will be processed once payment is verified.",
@@ -354,6 +360,97 @@ namespace api.Controllers
             {
                 _logger.LogError(ex, "Error uploading payment proof for order {OrderId}", orderId);
                 return StatusCode(500, new { success = false, message = "Error uploading payment proof" });
+            }
+        }
+
+        [HttpPost]
+        [Route("orders/{orderId}/confirm-pickup")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ConfirmPickup(string orderId)
+        {
+            try
+            {
+                var userId = await GetCurrentUserIdAsync();
+                if (userId == null)
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated" });
+                }
+
+                var order = await _orderRepository.GetOrderByIdAsync(orderId);
+                if (order == null)
+                {
+                    return NotFound(new { success = false, message = "Order not found" });
+                }
+
+                // Ensure user can only confirm pickup for their own orders
+                if (order.UserId != userId)
+                {
+                    return Unauthorized(new { success = false, message = "You are not authorized to confirm pickup for this order" });
+                }
+
+                // Check if order is ready for pickup
+                if (order.Status != OrderStatus.Ready)
+                {
+                    return BadRequest(new { success = false, message = "Order is not ready for pickup" });
+                }
+                var updatedOrder = await _orderRepository.UpdateOrderStatusAsync(orderId, OrderStatus.Completed);
+                if (updatedOrder == null)
+                {
+                    return NotFound(new { success = false, message = "Order not found" });
+                }
+
+                // Send pickup confirmation notifications
+                await NotifyOrderStatusUpdate(updatedOrder, OrderStatus.Completed);
+
+                _logger.LogInformation("Order {OrderId} pickup confirmed by user {UserId}", orderId, userId);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Order pickup confirmed successfully",
+                    data = updatedOrder.ToOrderDto()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error confirming pickup for order {OrderId}", orderId);
+                return StatusCode(500, new { success = false, message = "Error confirming pickup" });
+            }
+        }
+
+        [HttpGet]
+        [Route("seller/orders/pending")]
+        [Authorize(Roles = "Seller")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetPendingOrders()
+        {
+            try
+            {
+                var sellerId = await GetSellerIdForUserAsync();
+                if (string.IsNullOrEmpty(sellerId))
+                {
+                    return Unauthorized(new { success = false, message = "Seller not found" });
+                }
+
+                var orders = await _orderRepository.GetOrdersBySellerIdAsync(sellerId);
+                var pendingOrders = orders.Where(o => o.Status == OrderStatus.Pending && !string.IsNullOrEmpty(o.PaymentProofUrl)).ToList();
+                var orderDtos = pendingOrders.Select(o => o.ToOrderDto()).ToList();
+
+                return Ok(new
+                {
+                    success = true,
+                    data = new { orders = orderDtos, count = orderDtos.Count }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving pending orders");
+                return StatusCode(500, new { success = false, message = "Error retrieving pending orders" });
             }
         }
 
@@ -408,6 +505,66 @@ namespace api.Controllers
             {
                 _logger.LogError(ex, "Error getting seller ID");
                 return null;
+            }
+        }
+
+        private async Task NotifyOrderStatusUpdate(Order order, OrderStatus newStatus)
+        {
+            try
+            {
+                var orderDto = order.ToOrderDto();
+
+                // Prepare notification message based on status
+                string notificationMessage = newStatus switch
+                {
+                    OrderStatus.Confirmed => "Pesanan Anda telah dikonfirmasi dan akan segera dimasak",
+                    OrderStatus.Preparing => "Pesanan Anda sedang dimasak",
+                    OrderStatus.Ready => "Pesanan Anda sudah siap untuk diambil!",
+                    OrderStatus.Completed => "Pesanan telah selesai. Terima kasih!",
+                    OrderStatus.Cancelled => "Pesanan telah dibatalkan",
+                    _ => "Status pesanan telah diperbarui"
+                };
+
+                // Notify the customer about order status update
+                if (!string.IsNullOrEmpty(order.UserId))
+                {
+                    await _hubContext.Clients.User(order.UserId).SendAsync("OrderStatusUpdated", new
+                    {
+                        orderId = order.Id,
+                        status = newStatus.ToString(),
+                        message = notificationMessage,
+                        orderData = orderDto
+                    });
+                }
+
+                // Notify all sellers about order updates for their orders dashboard
+                if (!string.IsNullOrEmpty(order.SellerId))
+                {
+                    await _hubContext.Clients.User(order.SellerId).SendAsync("SellerOrderUpdated", new
+                    {
+                        orderId = order.Id,
+                        status = newStatus.ToString(),
+                        orderData = orderDto
+                    });
+                }
+
+                // For "Ready" status, send special pickup notification
+                if (newStatus == OrderStatus.Ready)
+                {
+                    await _hubContext.Clients.User(order.UserId).SendAsync("OrderReadyForPickup", new
+                    {
+                        orderId = order.Id,
+                        message = "🎉 Pesanan Anda sudah siap untuk diambil!",
+                        orderData = orderDto,
+                        timeout = 900 // 15 minutes in seconds
+                    });
+                }
+
+                _logger.LogInformation("Order status notification sent for order {OrderId}, status: {Status}", order.Id, newStatus);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending order status notification for order {OrderId}", order.Id);
             }
         }
     }
