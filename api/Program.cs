@@ -192,6 +192,7 @@ builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddSingleton<CloudflareClient>(sp =>
