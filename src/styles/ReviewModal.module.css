@@ -1,0 +1,368 @@
+/* Review Modal Styles */
+.review-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.review-modal-content {
+  background: white;
+  border-radius: 0.75rem;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.review-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.review-icon {
+  font-size: 2rem;
+  margin-right: 0.75rem;
+}
+
+.review-modal-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.review-close-btn {
+  position: absolute;
+  right: 1.5rem;
+  top: 1.5rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.review-close-btn:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.review-modal-body {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.review-order-summary {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.review-order-summary h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.75rem 0;
+}
+
+.review-order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.review-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.review-info-row span:first-child {
+  color: #6b7280;
+}
+
+.review-info-row span:last-child {
+  color: #111827;
+  font-weight: 500;
+}
+
+.review-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.review-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.review-section h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1rem 0;
+}
+
+.rating-input {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rating-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.review-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  resize: vertical;
+  margin-bottom: 1rem;
+  font-family: inherit;
+}
+
+.review-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tag-selection {
+  margin-top: 1rem;
+}
+
+.tag-selection p {
+  font-size: 0.875rem;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+  font-weight: 500;
+}
+
+.tag-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-option {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 0.5rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.tag-option.small {
+  padding: 0.375rem 0.625rem;
+  font-size: 0.6875rem;
+}
+
+.tag-option:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.tag-option.selected {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.menu-items-review {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.menu-item-review {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: #fafbfc;
+}
+
+.menu-item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.menu-item-image {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.375rem;
+  object-fit: cover;
+}
+
+.menu-item-details h5 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.25rem 0;
+}
+
+.menu-item-details p {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.menu-item-rating {
+  margin-bottom: 0.75rem;
+}
+
+.menu-item-textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+  font-family: inherit;
+}
+
+.menu-item-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.menu-item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.review-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.review-btn-primary,
+.review-btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.review-btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.review-btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.review-btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.review-btn-secondary {
+  background: white;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.review-btn-secondary:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.review-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .review-modal-overlay {
+    padding: 0.5rem;
+  }
+  
+  .review-modal-content {
+    max-height: 95vh;
+  }
+  
+  .review-modal-header,
+  .review-modal-body,
+  .review-modal-footer {
+    padding: 1rem;
+  }
+  
+  .rating-input {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .menu-item-info {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  .tag-options {
+    gap: 0.375rem;
+  }
+  
+  .review-modal-footer {
+    flex-direction: column-reverse;
+  }
+  
+  .review-btn-primary,
+  .review-btn-secondary {
+    width: 100%;
+  }
+}

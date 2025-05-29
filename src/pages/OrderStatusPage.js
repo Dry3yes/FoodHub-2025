@@ -13,8 +13,7 @@ const OrderStatusPage = () => {
   const [error, setError] = useState('');
   const [currentStatus, setCurrentStatus] = useState('pending');
   const [pickupTimer, setPickupTimer] = useState(null);
-  const [showPickupConfirmation, setShowPickupConfirmation] = useState(false);
-  const [countdown, setCountdown] = useState(900); // 15 minutes in seconds
+  const [showPickupConfirmation, setShowPickupConfirmation] = useState(false);  const [countdown, setCountdown] = useState(900); // 15 minutes in seconds
   const [connection, setConnection] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
 
@@ -152,8 +151,7 @@ const OrderStatusPage = () => {
         if (pickupTimer) {
           clearTimeout(pickupTimer);
           setPickupTimer(null);
-        }
-        // Reload order data to reflect the completed status
+        }        // Reload order data to reflect the completed status
         loadOrderData();
       }
     } catch (err) {
@@ -161,30 +159,22 @@ const OrderStatusPage = () => {
     }
   };
 
-  const handleClosePickupModal = () => {
-    // Don't close the modal, just keep it open until confirmed or auto-confirmed
-    // This ensures the user doesn't miss the pickup confirmation
-  };
-
   const handleAutoPickupConfirmation = async () => {
     try {
-      await confirmPickup(orderId);
-      setCurrentStatus('Completed');
-      setShowPickupConfirmation(false);
-      setPickupTimer(null);
+      console.log('Auto-confirming pickup after timeout');
+      await handlePickupConfirmation();
     } catch (err) {
-      console.error('Error auto-confirming pickup:', err);
+      console.error('Error with auto pickup confirmation:', err);
     }
-  };
-
-  const getStepStatus = (step) => {
-    const currentIndex = statusSteps.findIndex(s => s.status === currentStatus);
-    const stepIndex = statusSteps.findIndex(s => s.id === step.id);
-    return stepIndex <= currentIndex;
   };
 
   const handleBackToHome = () => {
     navigate('/');
+  };
+  const getStepStatus = (step) => {
+    const currentStepIndex = statusSteps.findIndex(s => s.status === currentStatus);
+    const stepIndex = statusSteps.findIndex(s => s.id === step.id);
+    return stepIndex <= currentStepIndex;
   };
 
   if (loading) {
@@ -337,9 +327,7 @@ const OrderStatusPage = () => {
                 </button>
               </div>
             </div>
-          )}
-
-          <div className="status-actions">
+          )}          <div className="status-actions">
             <button className="status-btn-secondary" onClick={handleBackToHome}>
               Kembali ke Home
             </button>

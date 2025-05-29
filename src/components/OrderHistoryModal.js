@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { getUserOrders } from '../services/Api';
+import { getUserOrders, getOrderReviewStatus, createReview } from '../services/Api';
+import ReviewModal from './ReviewModal';
 import styles from '../styles/OrderHistoryModal.module.css';
 
 const OrderHistoryModal = ({ isOpen, onClose }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (isOpen) {
-      loadOrderHistory();
-    }
-  }, [isOpen]);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedOrderForReview, setSelectedOrderForReview] = useState(null);  const [orderReviewStatuses, setOrderReviewStatuses] = useState({});
 
   const loadOrderHistory = async () => {
     try {
@@ -43,6 +40,74 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Load review statuses for completed orders
+  const loadReviewStatuses = async (completedOrders) => {
+    try {
+      const reviewStatuses = {};
+      for (const order of completedOrders) {
+        if (order.status === 'Completed') {
+          try {
+            const reviewStatus = await getOrderReviewStatus(order.id);
+            reviewStatuses[order.id] = reviewStatus;
+          } catch (err) {
+            console.error(`Error loading review status for order ${order.id}:`, err);
+            reviewStatuses[order.id] = { canReview: false, hasReviewed: false };
+          }
+        }
+      }
+      setOrderReviewStatuses(reviewStatuses);
+    } catch (err) {
+      console.error('Error loading review statuses:', err);
+    }
+  };
+
+  // Load orders and review statuses when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadOrderHistory();
+    }
+  }, [isOpen]);
+
+  // Load review statuses after orders are loaded
+  useEffect(() => {
+    if (orders.length > 0) {
+      const completedOrders = orders.filter(order => order.status === 'Completed');
+      if (completedOrders.length > 0) {
+        loadReviewStatuses(completedOrders);
+      }
+    }
+  }, [orders]);
+
+  const handleOrderClick = (orderId) => {
+    onClose();
+    window.location.href = `/order-status/${orderId}`;
+  };
+
+  const handleReviewClick = (order) => {
+    setSelectedOrderForReview(order);
+    setShowReviewModal(true);
+  };
+
+  const handleReviewSubmit = async (reviewData) => {
+    try {
+      await createReview(reviewData);
+      setShowReviewModal(false);
+      setSelectedOrderForReview(null);
+      
+      // Refresh review status for this order
+      if (selectedOrderForReview) {
+        const updatedReviewStatus = await getOrderReviewStatus(selectedOrderForReview.id);
+        setOrderReviewStatuses(prev => ({
+          ...prev,
+          [selectedOrderForReview.id]: updatedReviewStatus
+        }));
+      }
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      throw err;
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('id-ID', {
       year: 'numeric',
@@ -67,11 +132,6 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
 
   const isOngoingOrder = (status) => {
     return ['Pending', 'Confirmed', 'Preparing', 'Ready'].includes(status);
-  };
-
-  const handleOrderClick = (orderId) => {
-    onClose();
-    window.location.href = `/order-status/${orderId}`;
   };
 
   if (!isOpen) return null;
@@ -175,8 +235,22 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
                         <div className={styles['more-items']}>
                           +{order.items.length - 2} item lainnya
                         </div>
-                      )}
-                    </div>
+                      )}                    </div>
+
+                    {/* Review Button for Completed Orders */}
+                    {order.status === 'Completed' && orderReviewStatuses[order.id] && (
+                      <div className={styles['order-actions']}>
+                        <button
+                          className={styles['review-button']}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent triggering order click
+                            handleReviewClick(order);
+                          }}
+                        >
+                          {orderReviewStatuses[order.id].hasReviewed ? '✏️ Edit Review' : '⭐ Rate & Review'}
+                        </button>
+                      </div>
+                    )}
 
                     {/* {isOngoing && (
                       <div className={styles['ongoing-badge']}>
@@ -187,9 +261,22 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
                 );
               })}
             </div>
-          )}
-        </div>
+          )}        </div>
       </div>
+
+      {/* Review Modal */}
+      {showReviewModal && selectedOrderForReview && (
+        <ReviewModal
+          isOpen={showReviewModal}
+          onClose={() => {
+            setShowReviewModal(false);
+            setSelectedOrderForReview(null);
+          }}
+          onSubmit={handleReviewSubmit}
+          orderData={selectedOrderForReview}
+          existingReview={orderReviewStatuses[selectedOrderForReview.id]?.existingReview}
+        />
+      )}
     </div>
   );
 };
