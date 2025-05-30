@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserOrders, getOrderReviewStatus, createReview } from '../services/Api';
+import { getUserOrders, getOrderReviewStatus, createReview, updateReview } from '../services/Api';
 import ReviewModal from './ReviewModal';
 import styles from '../styles/OrderHistoryModal.module.css';
 
@@ -87,10 +87,18 @@ const OrderHistoryModal = ({ isOpen, onClose }) => {
     setSelectedOrderForReview(order);
     setShowReviewModal(true);
   };
-
   const handleReviewSubmit = async (reviewData) => {
     try {
-      await createReview(reviewData);
+      const existingReview = orderReviewStatuses[selectedOrderForReview.id]?.existingReview;
+      
+      if (existingReview && existingReview.id) {
+        // Update existing review
+        await updateReview(existingReview.id, reviewData);
+      } else {
+        // Create new review
+        await createReview(reviewData);
+      }
+      
       setShowReviewModal(false);
       setSelectedOrderForReview(null);
       
