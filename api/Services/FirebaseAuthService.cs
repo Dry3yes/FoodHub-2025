@@ -111,5 +111,27 @@ namespace api.Services
                 return false;
             }
         }
+
+        public async Task<bool> UpdateEmailInFirebaseAsync(string firebaseUid, string newEmail)
+        {
+            try
+            {
+                var userUpdateArgs = new FirebaseAdmin.Auth.UserRecordArgs()
+                {
+                    Uid = firebaseUid,
+                    Email = newEmail,
+                    EmailVerified = false // Reset email verification when email is changed
+                };
+
+                await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.UpdateUserAsync(userUpdateArgs);
+                _logger.LogInformation("Email updated successfully in Firebase for user: {FirebaseUid}", firebaseUid);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating email in Firebase for user: {FirebaseUid}", firebaseUid);
+                return false;
+            }
+        }
     }
 }

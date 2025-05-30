@@ -10,6 +10,7 @@ namespace api.Interfaces
         Task<User?> GetByEmailAsync(string email);
         Task<(User? User, string? Token)> LoginAsync(string email, string password);
         Task<bool> UpdateUserAsync(User user);
+        Task<bool> UpdateUserWithEmailAsync(User originalUser, User updatedUser);
         Task<(string? Token, string? RefreshToken)> RefreshTokenAsync(string userId, string refreshToken);
     }
 }
