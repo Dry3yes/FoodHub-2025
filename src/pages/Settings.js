@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { applyForSeller } from '../services/Api';
+import { applyForSeller, updateUser } from '../services/Api';
 import Header from '../components/Header';
 import '../styles/Settings.css';
 
@@ -39,6 +39,14 @@ const Settings = () => {
     if (isSeller && location.pathname === '/settings/seller') {
       navigate('/settings', { replace: true });
     }
+    
+    // Load user data into form fields
+    if (user?.name) {
+      setUsername(user.name);
+    }
+    if (user?.email) {
+      setEmail(user.email);
+    }
   }, [navigate, location.pathname]);
 
   // Handle face image upload for seller mode
@@ -55,10 +63,68 @@ const Settings = () => {
   };
 
   // Handle form submission for user profile
-  const handleUserSubmit = (e) => {
+  const handleUserSubmit = async (e) => {
     e.preventDefault();
-    console.log('User form submitted:', { username, email });
-    alert('Changes saved successfully!');
+    
+    // Reset error and success messages
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
+    
+    try {
+      // Get current user data
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Validate input
+      if (!username.trim()) {
+        setError('Username is required');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!email.trim()) {
+        setError('Email is required');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setError('Please enter a valid email address');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Prepare update data
+      const updateData = {
+        name: username.trim(),
+        email: email.trim()
+      };
+      
+      // Call API to update user
+      const response = await updateUser(user.userId, updateData);
+      
+      if (response.success) {
+        // Update local storage with new user data
+        const updatedUser = { ...user, ...updateData };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        setSuccess('Profile updated successfully!');
+        
+        // If email was changed, show additional message
+        if (email !== user.email) {
+          setSuccess('Profile updated successfully! Your email has been updated in Firebase as well.');
+        }
+      } else {
+        setError(response.message || 'Failed to update profile');
+      }
+    } catch (err) {
+      console.error('Error updating user profile:', err);
+      setError(err.message || 'An error occurred while updating your profile');
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   // Handle form submission for seller registration
@@ -182,7 +248,8 @@ const Settings = () => {
                   id="username" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder={JSON.parse(localStorage.getItem('user'))?.name || ''}
+                  placeholder={JSON.parse(localStorage.getItem('user'))?.name || 'Enter your username'}
+                  required
                 />
               </div>
               
@@ -193,12 +260,34 @@ const Settings = () => {
                   id="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={JSON.parse(localStorage.getItem('user'))?.email || ''}
+                  placeholder={JSON.parse(localStorage.getItem('user'))?.email || 'Enter your email'}
+                  required
                 />
+                <small className="form-help">
+                  Changing your email will update your Firebase account as well.
+                </small>
               </div>
               
+              {error && (
+                <div className="error-message">
+                  {error}
+                </div>
+              )}
+              
+              {success && (
+                <div className="success-message">
+                  {success}
+                </div>
+              )}
+              
               <div className="form-actions">
-                <button type="submit" className="apply-button">Save Changes</button>
+                <button 
+                  type="submit" 
+                  className="apply-button"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </button>
               </div>
             </form>
           </div>

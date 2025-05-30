@@ -976,3 +976,31 @@ export const deleteReview = async (reviewId) => {
         throw error;
     }
 };
+
+// ========================
+// USER PROFILE API FUNCTIONS
+// ========================
+
+// Update user profile (name, email, etc.)
+export const updateUser = async (userId, userData) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update user profile');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating user profile:', error);
+        throw error;
+    }
+};
