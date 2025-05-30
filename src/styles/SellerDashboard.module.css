@@ -333,8 +333,8 @@
 }
 
 .menu-item-image-container {
-  width: 100px;
-  height: 100px;
+  width: 115px;
+  height: 115px;
   align-self: center;
   border-radius: 0.5rem;
   overflow: hidden;
@@ -405,7 +405,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0.5rem;
+  margin-top: 2rem;
 }
 
 .menu-item-price {

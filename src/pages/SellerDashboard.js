@@ -506,7 +506,8 @@ function SellerDashboard() {
               <div className={styles['seller-store-header-content']}>
                 <div className={styles['store-header-left']}>
                   <h1 className={styles['store-title']}>{store.storeName}</h1>
-                  <div className={styles['store-info']}>                    <div className={styles['store-rating']}>
+                  <div className={styles['store-info']}>
+                    <div className={styles['store-rating']}>
                       {store.rating !== null ? (
                         <>
                           {[...Array(5)].map((_, i) => (
