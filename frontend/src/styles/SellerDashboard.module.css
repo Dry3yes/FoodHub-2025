@@ -333,8 +333,8 @@
 }
 
 .menu-item-image-container {
-  width: 100px;
-  height: 100px;
+  width: 115px;
+  height: 115px;
   align-self: center;
   border-radius: 0.5rem;
   overflow: hidden;
@@ -405,7 +405,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0.5rem;
+  margin-top: 2rem;
 }
 
 .menu-item-price {
@@ -853,7 +853,8 @@
 
 .order-item {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.25rem;
   justify-content: space-between;
   padding: 0.75rem;
   background-color: #f9fafb;
@@ -888,7 +889,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
+  border-radius: 4px;
   text-align: center;
 }
 

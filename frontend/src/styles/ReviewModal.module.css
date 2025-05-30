@@ -129,14 +129,17 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: #111827;
-  margin: 0 0 1rem 0;
+}
+
+.review-item-section-title {
+  margin-bottom: 1rem;
 }
 
 .rating-input {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .rating-label {

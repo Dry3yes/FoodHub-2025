@@ -201,7 +201,6 @@ namespace api.Repositories
                 throw;
             }
         }
-
         public async Task<bool> UpdateUserAsync(api.Models.User user)
         {
             try
@@ -217,6 +216,45 @@ namespace api.Repositories
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating user: {UserId}", user.UserId);
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateUserWithEmailAsync(api.Models.User originalUser, api.Models.User updatedUser)
+        {
+            try
+            {
+                // Check if email is being updated
+                bool emailChanged = !string.IsNullOrEmpty(updatedUser.Email) &&
+                                  !updatedUser.Email.Equals(originalUser.Email, StringComparison.OrdinalIgnoreCase);
+
+                if (emailChanged && !string.IsNullOrEmpty(originalUser.FirebaseUid))
+                {
+                    // Update email in Firebase Authentication
+                    var emailUpdateSuccess = await _firebaseAuthService.UpdateEmailInFirebaseAsync(
+                        originalUser.FirebaseUid,
+                        updatedUser.Email
+                    );
+
+                    if (!emailUpdateSuccess)
+                    {
+                        _logger.LogError("Failed to update email in Firebase for user: {UserId}", updatedUser.UserId);
+                        return false;
+                    }
+                }
+
+                // Update user in Firestore
+                var userRef = _firestoreDb.Collection("Users").Document(updatedUser.UserId);
+                await userRef.SetAsync(updatedUser, SetOptions.MergeAll);
+
+                _cache.Remove(UsersCacheKey);
+
+                _logger.LogInformation("User updated successfully with email sync: {UserId}", updatedUser.UserId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user with email sync: {UserId}", updatedUser.UserId);
                 throw;
             }
         }

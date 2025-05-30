@@ -13,7 +13,8 @@ import {
   deleteMenu,
   uploadStoreImage,
   uploadQrisCode,
-  getSellerReviews
+  getSellerReviews,
+  getSellerOrders
 } from "../services/Api";
 
 function SellerDashboard() {
@@ -26,13 +27,10 @@ function SellerDashboard() {
   
   // Menu category tabs
   const [activeTab, setActiveTab] = useState("all");
-  
-  const sellerTabs = [
+    const sellerTabs = [
     { id: "all", name: "All Items" },
-    { id: "appetizers", name: "Appetizers" },
-    { id: "main", name: "Main Courses" },
-    { id: "desserts", name: "Desserts" },
-    { id: "beverages", name: "Beverages" },
+    { id: "Makanan", name: "Makanan" },
+    { id: "Minuman", name: "Minuman" },
   ];
 
   // Menu state
@@ -58,10 +56,75 @@ function SellerDashboard() {
   // Store image upload state
   const [isUploadingStoreImage, setIsUploadingStoreImage] = useState(false);
   const [storeImageFile, setStoreImageFile] = useState(null);
-
   // QRIS code upload state
   const [isUploadingQrisCode, setIsUploadingQrisCode] = useState(false);
   const [qrisImageFile, setQrisImageFile] = useState(null);
+
+  // Statistics state
+  const [statistics, setStatistics] = useState({
+    monthlyOrders: 0,
+    monthlyRevenue: 0,
+    uniqueCustomers: 0,
+    recentOrders: []
+  });
+
+  // Calculate statistics from orders data
+  const calculateStatistics = (orders) => {
+    if (!orders || orders.length === 0) {
+      return {
+        monthlyOrders: 0,
+        monthlyRevenue: 0,
+        uniqueCustomers: 0,
+        recentOrders: []
+      };
+    }
+
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    // Filter orders for current month
+    const monthlyOrders = orders.filter(order => {
+      const orderDate = new Date(order.createdAt);
+      return orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear;
+    });
+
+    // Calculate monthly revenue
+    const monthlyRevenue = monthlyOrders.reduce((total, order) => total + order.total, 0);
+
+    // Calculate unique customers from all orders
+    const uniqueUserIds = new Set(orders.map(order => order.userId));
+
+    // Get recent orders (latest 5 orders) for sidebar
+    const recentOrders = orders
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5)
+      .map(order => ({
+        id: order.id,
+        customerName: order.name || 'Anonymous',
+        amount: order.total,
+        status: order.status
+      }));
+
+    return {
+      monthlyOrders: monthlyOrders.length,
+      monthlyRevenue: monthlyRevenue,
+      uniqueCustomers: uniqueUserIds.size,
+      recentOrders: recentOrders
+    };
+  };
+  // Load statistics data
+  const loadStatistics = async () => {
+    try {
+      const response = await getSellerOrders();
+      if (response && response.orders) {
+        const stats = calculateStatistics(response.orders);
+        setStatistics(stats);
+      }
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+    }
+  };
 
   // Form handling functions
   const handleInputChange = (e) => {
@@ -404,8 +467,7 @@ function SellerDashboard() {
         }
         
         setLoading(true);
-        
-        // If we have seller info in localStorage, use it
+          // If we have seller info in localStorage, use it
         if (sellerInfoString) {
           const sellerInfo = JSON.parse(sellerInfoString);
           
@@ -418,6 +480,8 @@ function SellerDashboard() {
             // Fetch menu items for this seller
             const menus = await fetchMenusByStore(sellerInfo.sellerId);
             setMenuData(menus || []);
+            // Load statistics data
+            await loadStatistics();
           } else {
             setError("Could not fetch store data.");
           }
@@ -430,8 +494,7 @@ function SellerDashboard() {
             setLoading(false);
             return;
           }
-          
-          // Now use the sellerId to fetch store data
+            // Now use the sellerId to fetch store data
           const storeData = await fetchStoreById(sellerInfo.sellerId);
           if (storeData) {
             // Fetch rating data
@@ -440,6 +503,8 @@ function SellerDashboard() {
             // Fetch menu items for this seller
             const menus = await fetchMenusByStore(sellerInfo.sellerId);
             setMenuData(menus || []);
+            // Load statistics data
+            await loadStatistics();
           } else {
             setError("Could not fetch store data.");
           }
@@ -506,7 +571,8 @@ function SellerDashboard() {
               <div className={styles['seller-store-header-content']}>
                 <div className={styles['store-header-left']}>
                   <h1 className={styles['store-title']}>{store.storeName}</h1>
-                  <div className={styles['store-info']}>                    <div className={styles['store-rating']}>
+                  <div className={styles['store-info']}>
+                    <div className={styles['store-rating']}>
                       {store.rating !== null ? (
                         <>
                           {[...Array(5)].map((_, i) => (
@@ -825,7 +891,7 @@ function SellerDashboard() {
                   <div className={styles['stat-icon']}><span role="img" aria-label="Orders">📦</span></div>
                   <div className={styles['stat-content']}>
                     <h3 className={styles['stat-title']}>Orders</h3>
-                    <p className={styles['stat-value']}>24</p>
+                    <p className={styles['stat-value']}>{statistics.monthlyOrders}</p>
                     <p className={styles['stat-subtitle']}>This month</p>
                   </div>
                 </div>
@@ -833,7 +899,7 @@ function SellerDashboard() {
                   <div className={styles['stat-icon']}><span role="img" aria-label="Revenue">💰</span></div>
                   <div className={styles['stat-content']}>
                     <h3 className={styles['stat-title']}>Revenue</h3>
-                    <p className={styles['stat-value']}>Rp 3.450.000</p>
+                    <p className={styles['stat-value']}>Rp {statistics.monthlyRevenue.toLocaleString('id-ID')}</p>
                     <p className={styles['stat-subtitle']}>This month</p>
                   </div>
                 </div>
@@ -841,7 +907,7 @@ function SellerDashboard() {
                   <div className={styles['stat-icon']}><span role="img" aria-label="Customers">👥</span></div>
                   <div className={styles['stat-content']}>
                     <h3 className={styles['stat-title']}>Customers</h3>
-                    <p className={styles['stat-value']}>18</p>
+                    <p className={styles['stat-value']}>{statistics.uniqueCustomers}</p>
                     <p className={styles['stat-subtitle']}>Repeat customers</p>
                   </div>
                 </div>
@@ -928,30 +994,20 @@ function SellerDashboard() {
               <div className={styles['sidebar-section']}>
                 <h3 className={styles['sidebar-title']}>Recent Orders</h3>
                 <div className={styles['recent-orders']}>
-                  <div className={styles['order-item']}>
-                    <div className={styles['order-info']}>
-                      <p className={styles['order-id']}>#1234</p>
-                      <p className={styles['order-customer']}>John D.</p>
-                    </div>
-                    <p className={styles['order-amount']}>Rp 125.000</p>
-                    <span className={`${styles['order-status']} ${styles['completed']}`}>Completed</span>
-                  </div>
-                  <div className={styles['order-item']}>
-                    <div className={styles['order-info']}>
-                      <p className={styles['order-id']}>#1235</p>
-                      <p className={styles['order-customer']}>Sarah M.</p>
-                    </div>
-                    <p className={styles['order-amount']}>Rp 85.000</p>
-                    <span className={`${styles['order-status']} ${styles['pending']}`}>Pending</span>
-                  </div>
-                  <div className={styles['order-item']}>
-                    <div className={styles['order-info']}>
-                      <p className={styles['order-id']}>#1236</p>
-                      <p className={styles['order-customer']}>Mike R.</p>
-                    </div>
-                    <p className={styles['order-amount']}>Rp 150.000</p>
-                    <span className={`${styles['order-status']} ${styles['processing']}`}>Processing</span>
-                  </div>
+                  {statistics.recentOrders.length === 0 ? (
+                    <p className={styles['no-recent-orders']}>No recent orders</p>
+                  ) : (
+                    statistics.recentOrders.map(order => (
+                      <div key={order.id} className={styles['order-item']}>
+                        <div className={styles['order-info']}>
+                          <p className={styles['order-id']}>#{order.id}</p>
+                          <p className={styles['order-customer']}>{order.customerName}</p>
+                        </div>
+                        <p className={styles['order-amount']}>Rp {order.amount.toLocaleString('id-ID')}</p>
+                        <span className={`${styles['order-status']} ${styles[order.status.toLowerCase()]}`}>{order.status}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

@@ -243,11 +243,18 @@ namespace api.Controllers
                 if (user == null)
                 {
                     return NotFound(new { success = false, message = "User not found" });
-                }
-
-                // Get current user info from token
-                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                }                // Get current user info from token
+                var firebaseUid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                // Get the current user by Firebase UID to get their actual UserId
+                string? currentUserId = null;
+                if (!string.IsNullOrEmpty(firebaseUid))
+                {
+                    var users = await _userRepository.GetAllAsync();
+                    var currentUser = users.FirstOrDefault(u => u.FirebaseUid == firebaseUid);
+                    currentUserId = currentUser?.UserId;
+                }
 
                 // Security check: Only allow users to update their own data OR admins to update any user
                 if (currentUserId != id && currentUserRole != "Admin")
@@ -271,9 +278,7 @@ namespace api.Controllers
                         success = false,
                         message = "Invalid role. Please provide a valid role (Admin, User, Seller)."
                     });
-                }
-
-                // Update email check: Ensure new email is not already taken by someone else
+                }                // Update email check: Ensure new email is not already taken by someone else
                 if (!string.IsNullOrEmpty(updateUserDto.Email) &&
                     !updateUserDto.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase))
                 {
@@ -284,11 +289,18 @@ namespace api.Controllers
                     }
                 }
 
+                // Store original user for email update comparison
+                var originalUser = await _userRepository.GetByIdAsync(id);
+                if (originalUser == null)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
                 // Apply updates to user object
                 user.UpdateUserFromDto(updateUserDto);
 
-                // Save the updated user
-                var result = await _userRepository.UpdateUserAsync(user);
+                // Save the updated user with email synchronization
+                var result = await _userRepository.UpdateUserWithEmailAsync(originalUser, user);
                 if (!result)
                 {
                     return StatusCode(500, new { success = false, message = "Failed to update user" });

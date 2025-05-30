@@ -39,7 +39,6 @@ export default function AdminDashboard() {
   })
 
   const [isLoading, setIsLoading] = useState(false)
-
   // Fetch analytics data
   const fetchAnalyticsData = async () => {
     try {
@@ -53,10 +52,39 @@ export default function AdminDashboard() {
           pendingApprovals: response.data.pendingApprovals
         }))
       }
+      
+      // Fetch pending support tickets count
+      await fetchPendingTicketsCount()
     } catch (error) {
       console.error('Error fetching analytics:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Fetch count of pending support tickets
+  const fetchPendingTicketsCount = async () => {
+    try {
+      // Fetch tickets with status "Open" or "in-progress" to count as pending
+      const openResponse = await getAllSupportTickets('Open', '', '', 1, 1000)
+      const inProgressResponse = await getAllSupportTickets('in-progress', '', '', 1, 1000)
+      
+      let pendingCount = 0
+      
+      if (openResponse.success && openResponse.data.tickets) {
+        pendingCount += openResponse.data.tickets.length
+      }
+      
+      if (inProgressResponse.success && inProgressResponse.data.tickets) {
+        pendingCount += inProgressResponse.data.tickets.length
+      }
+      
+      setAnalyticsData(prev => ({
+        ...prev,
+        totalTickets: pendingCount
+      }))
+    } catch (error) {
+      console.error('Error fetching pending tickets count:', error)
     }
   }
 
@@ -141,15 +169,15 @@ export default function AdminDashboard() {
       alert('Failed to reject application')
     }
   }
-
   const handleAnswerTicket = async (ticketId, response) => {
     try {
       await updateSupportTicketStatus(ticketId, {
         Status: "answered",
         AdminResponse: response
       })
-      // Refresh tickets
+      // Refresh tickets and pending count
       fetchSupportTickets()
+      fetchPendingTicketsCount()
     } catch (error) {
       console.error('Error answering ticket:', error)
       alert('Failed to send response')
@@ -217,9 +245,11 @@ const sidebarItems = [
               className={`admin-nav-item ${activeTab === item.id ? "active" : ""}`}
             >
               <span className="nav-icon">{item.icon}</span>
-              {item.label}
-              {item.id === "help" && helpTickets.filter((t) => t.status === "pending").length > 0 && (
-                <span className="notification-badge">{helpTickets.filter((t) => t.status === "pending").length}</span>
+              {item.label}              {item.id === "help" && helpTickets.filter((t) => t.status === "open" || t.status === "in-progress").length > 0 && (
+                <span className="notification-badge">{helpTickets.filter((t) => t.status === "open" || t.status === "in-progress").length}</span>
+              )}
+              {item.id === "approve" && pendingUsers.length > 0 && (
+                <span className="notification-badge">{pendingUsers.length}</span>
               )}
             </button>
           ))}
@@ -276,15 +306,13 @@ const sidebarItems = [
                     <div className="admin-stat-number">{analyticsData.pendingApprovals}</div>
                     <p className="admin-stat-change neutral">Requires attention</p>
                   </div>
-                </div>
-
-                <div className="admin-stat-card">
+                </div>                <div className="admin-stat-card">
                   <div className="admin-stat-header">
-                    <span className="admin-stat-title">Support Tickets</span>
+                    <span className="admin-stat-title">Pending Tickets</span>
                     <span className="admin-stat-icon">📄</span>
                   </div>
                   <div className="admin-stat-content">
-                    <div className="admin-stat-number">{analyticsData.totalTickets.toLocaleString()}</div>
+                    <div className="admin-stat-number">{helpTickets.filter((t) => t.status === "open" || t.status === "in-progress").length}</div>
                     <p className="admin-stat-change neutral">Need attention</p>
                   </div>
                 </div>
@@ -385,11 +413,9 @@ const sidebarItems = [
 
           {activeTab === "help" && (
             <div>
-              <h2 className="page-title">Help Tickets Management</h2>
-
-              <div className="help-stats">
+              <h2 className="page-title">Help Tickets Management</h2>              <div className="help-stats">
                 <div className="help-stat">
-                  <span className="help-stat-number">{helpTickets.filter((t) => t.status === "pending" || t.status === "open").length}</span>
+                  <span className="help-stat-number">{helpTickets.filter((t) => t.status === "open" || t.status === "in-progress").length}</span>
                   <span className="help-stat-label">Pending</span>
                 </div>
                 <div className="help-stat">
@@ -476,7 +502,7 @@ function TicketCard({ ticket, onAnswer }) {
     }
   }
 
-  const isPending = ticket.status === "pending" || ticket.status === "open"
+  const isPending = ticket.status === "open" || ticket.status === "in-progress"
 
   return (
     <div className={`ticket-card ${ticket.status}`}>
