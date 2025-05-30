@@ -1,21 +1,37 @@
 "use client"
 
-import { useState } from "react"
 import "../styles/FoodCategories.css"
 
-function FoodCategories() {
-  const [selectedCategory, setSelectedCategory] = useState("all")
-
+function FoodCategories({ selectedCategory = "all", onCategoryChange }) {
   const categories = [
-    { id: "all", name: "All", icon: "Utensils" },
-    { id: "fast-food", name: "Fast Food", icon: "Pizza" },
-    { id: "healthy", name: "Healthy", icon: "Salad" },
-    { id: "meat", name: "Meat & Grill", icon: "Beef" },
+    { id: "all", name: "All", icon: "All" },
+    { id: "food", name: "Food", icon: "Utensils" },
     { id: "drinks", name: "Drinks", icon: "Coffee" },
   ]
 
+  const handleCategoryClick = (categoryId) => {
+    if (onCategoryChange) {
+      onCategoryChange(categoryId)
+    }
+  }
+
   const renderIcon = (iconName) => {
     switch (iconName) {
+      case "All":
+        return (
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="category-icon"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+        )
       case "Utensils":
         return (
           <svg
@@ -112,7 +128,7 @@ function FoodCategories() {
           <button
             key={category.id}
             className={`category-button ${selectedCategory === category.id ? "active" : ""}`}
-            onClick={() => setSelectedCategory(category.id)}
+            onClick={() => handleCategoryClick(category.id)}
           >
             {renderIcon(category.icon)}
             {category.name}

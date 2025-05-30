@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useCart } from "../hooks/useCart"
-import { fetchStores, fetchMenusByStore, getMenuItemReviews } from "../services/Api"
+import { fetchStores, fetchMenusByStore, getMenusByCategory, getMenuItemReviews } from "../services/Api"
 import ConfirmationModal from "./ConfirmationModal"
 import "../styles/FoodItems.css"
 
@@ -63,7 +63,7 @@ const fallbackFoodItems = [
   },
 ]
 
-function FoodItems() {
+function FoodItems({ selectedCategory = "all" }) {
   const { addToCart, clearCartAndAddItem } = useCart()
   const [foodItems, setFoodItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -113,26 +113,41 @@ function FoodItems() {
       try {
         setLoading(true)
         
-        // First, fetch stores to get their IDs
-        const stores = await fetchStores()
+        let allMenuItems = []
         
-        if (!stores || stores.length === 0) {
-          setFoodItems(fallbackFoodItems)
-          return
+        if (selectedCategory === "all") {
+          // Fetch from multiple stores as before
+          const stores = await fetchStores()
+          
+          if (!stores || stores.length === 0) {
+            setFoodItems(fallbackFoodItems)
+            return
+          }
+          
+          // Select up to 3 random stores to fetch menu items from
+          const selectedStores = stores.slice(0, Math.min(3, stores.length))
+          
+          // Fetch menu items for each selected store
+          const menuPromises = selectedStores.map(store => fetchMenusByStore(store.sellerId))
+          const menuResults = await Promise.allSettled(menuPromises)
+          
+          // Process successful results
+          allMenuItems = menuResults
+            .filter(result => result.status === 'fulfilled' && result.value)
+            .flatMap(result => result.value)
+            .filter(item => item) // Remove null/undefined items
+        } else {
+          // Fetch by category using the API
+          const categoryMap = {
+            "food": "Makanan",
+            "drinks": "Minuman"
+          }
+          
+          const backendCategory = categoryMap[selectedCategory]
+          if (backendCategory) {
+            allMenuItems = await getMenusByCategory(backendCategory)
+          }
         }
-        
-        // Select up to 3 random stores to fetch menu items from
-        const selectedStores = stores.slice(0, Math.min(3, stores.length))
-        
-        // Fetch menu items for each selected store
-        const menuPromises = selectedStores.map(store => fetchMenusByStore(store.sellerId))
-        const menuResults = await Promise.allSettled(menuPromises)
-        
-        // Process successful results
-        const allMenuItems = menuResults
-          .filter(result => result.status === 'fulfilled' && result.value)
-          .flatMap(result => result.value)
-          .filter(item => item) // Remove null/undefined items
         
         // If we have items from the API, transform them
         if (allMenuItems.length > 0) {
@@ -183,7 +198,7 @@ function FoodItems() {
     }
     
     fetchFeaturedMenuItems()
-  }, [])
+  }, [selectedCategory])
 
   return (
     <div className="food-items-grid">

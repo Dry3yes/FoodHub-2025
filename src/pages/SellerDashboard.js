@@ -30,10 +30,8 @@ function SellerDashboard() {
   
   const sellerTabs = [
     { id: "all", name: "All Items" },
-    { id: "appetizers", name: "Appetizers" },
-    { id: "main", name: "Main Courses" },
-    { id: "desserts", name: "Desserts" },
-    { id: "beverages", name: "Beverages" },
+    { id: "makanan", name: "Makanan" },
+    { id: "minuman", name: "Minuman" },
   ];
 
   // Menu state

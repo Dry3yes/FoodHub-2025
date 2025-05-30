@@ -11,6 +11,7 @@ function Home() {
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [selectedCategory, setSelectedCategory] = useState("all")
 
   useEffect(() => {
     const loadStores = async () => {
@@ -65,7 +66,10 @@ function Home() {
           <div className="main-column">
             <h1 className="page-title">Order delicious food online</h1>
 
-            <FoodCategories />
+            <FoodCategories 
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
 
             <div className="section">
               <h2 className="section-title">Popular Restaurants</h2>
@@ -144,7 +148,7 @@ function Home() {
 
             <div className="section">
               <h2 className="section-title">Featured Items</h2>
-              <FoodItems />
+              <FoodItems selectedCategory={selectedCategory} />
             </div>
           </div>
 
