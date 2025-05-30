@@ -1,0 +1,81 @@
+/* Rating Stars Component */
+.rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.stars-container {
+  display: flex;
+  gap: 0.125rem;
+}
+
+.star {
+  cursor: default;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.rating-stars.interactive .star {
+  cursor: pointer;
+}
+
+.rating-stars.interactive .star:hover {
+  transform: scale(1.1);
+}
+
+.star.filled {
+  color: #fbbf24;
+  text-shadow: 0 0 2px rgba(251, 191, 36, 0.5);
+}
+
+.star.empty {
+  color: #d1d5db;
+}
+
+/* Size variants */
+.rating-stars-small .star {
+  font-size: 1rem;
+}
+
+.rating-stars-medium .star {
+  font-size: 1.25rem;
+}
+
+.rating-stars-large .star {
+  font-size: 1.5rem;
+}
+
+.rating-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-top: 0.15rem;
+}
+
+/* Hover effects for interactive stars */
+.rating-stars.interactive .star {
+  transition: all 0.15s ease;
+}
+
+.rating-stars.interactive .star:hover {
+  transform: scale(1.15);
+  filter: brightness(1.1);
+}
+
+/* Readonly styling */
+.rating-stars.readonly .star {
+  cursor: default;
+}
+
+/* Animation for new ratings */
+@keyframes starPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.rating-stars.interactive .star.filled {
+  animation: starPulse 0.3s ease;
+}

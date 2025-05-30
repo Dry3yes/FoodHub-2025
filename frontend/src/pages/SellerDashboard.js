@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import ConfirmationModal from "../components/ConfirmationModal";
+import MenuItemRating from "../components/MenuItemRating";
 import styles from "../styles/SellerDashboard.module.css";
 import { 
   fetchStoreById, 
@@ -11,7 +12,8 @@ import {
   updateMenu,
   deleteMenu,
   uploadStoreImage,
-  uploadQrisCode
+  uploadQrisCode,
+  getSellerReviews
 } from "../services/Api";
 
 function SellerDashboard() {
@@ -361,7 +363,23 @@ function SellerDashboard() {
       setIsUploadingQrisCode(false);
     }
   };
-  
+    // Load rating data for the store
+  const loadStoreRating = async (sellerId) => {
+    try {
+      const ratingData = await getSellerReviews(sellerId, 1, 0);
+      if (ratingData && ratingData.totalReviews > 0) {
+        return {
+          rating: ratingData.averageRating,
+          totalReviews: ratingData.totalReviews
+        };
+      }
+      return { rating: null, totalReviews: 0 };
+    } catch (error) {
+      console.error(`Failed to fetch rating for store ${sellerId}:`, error);
+      return { rating: null, totalReviews: 0 };
+    }
+  };
+
   // Check if user is authenticated and has seller role
   useEffect(() => {
     const checkAuthentication = async () => {
@@ -394,7 +412,9 @@ function SellerDashboard() {
           // Fetch store data using the sellerId from localStorage
           const storeData = await fetchStoreById(sellerInfo.sellerId);
           if (storeData) {
-            setStore(storeData);
+            // Fetch rating data
+            const ratingInfo = await loadStoreRating(sellerInfo.sellerId);
+            setStore({ ...storeData, ...ratingInfo });
             // Fetch menu items for this seller
             const menus = await fetchMenusByStore(sellerInfo.sellerId);
             setMenuData(menus || []);
@@ -414,7 +434,9 @@ function SellerDashboard() {
           // Now use the sellerId to fetch store data
           const storeData = await fetchStoreById(sellerInfo.sellerId);
           if (storeData) {
-            setStore(storeData);
+            // Fetch rating data
+            const ratingInfo = await loadStoreRating(sellerInfo.sellerId);
+            setStore({ ...storeData, ...ratingInfo });
             // Fetch menu items for this seller
             const menus = await fetchMenusByStore(sellerInfo.sellerId);
             setMenuData(menus || []);
@@ -484,23 +506,44 @@ function SellerDashboard() {
               <div className={styles['seller-store-header-content']}>
                 <div className={styles['store-header-left']}>
                   <h1 className={styles['store-title']}>{store.storeName}</h1>
-                  <div className={styles['store-info']}>
-                    <div className={styles['store-rating']}>
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`star-icon ${i < Math.floor(store.rating) ? "filled" : "empty"}`}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
-                      ))}
-                      <span>{store.rating || "N/A"}</span>
+                  <div className={styles['store-info']}>                    <div className={styles['store-rating']}>
+                      {store.rating !== null ? (
+                        <>
+                          {[...Array(5)].map((_, i) => (
+                            <svg
+                              key={i}
+                              className={`star-icon ${i < Math.floor(store.rating) ? "filled" : "empty"}`}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                          ))}
+                          <span>{store.rating.toFixed(1)}</span>
+                        </>
+                      ) : (
+                        <>
+                          {[...Array(5)].map((_, i) => (
+                            <svg
+                              key={i}
+                              className="star-icon empty"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                          ))}
+                          <span>N/A</span>
+                        </>
+                      )}
                     </div>
                     <span className={styles['info-separator']}>•</span>
                     <span>{store.cuisine || "Various"}</span>
@@ -742,13 +785,13 @@ function SellerDashboard() {
                           className={styles['menu-item-image']} 
                         />
                       </div>
-                      <div className={styles['seller-menu-item-content']}>
-                        <div className={styles['menu-item-info']}>
+                      <div className={styles['seller-menu-item-content']}>                        <div className={styles['menu-item-info']}>
                           <h4 className={styles['menu-item-name']}>{item.itemName}</h4>
                           <div className={styles['menu-item-details']}>
                             <span className={styles['menu-category']}>{item.category}</span>
                             <span className={styles['menu-stock']}>Stock: {item.stock}</span>
                           </div>
+                          <MenuItemRating menuId={item.id} />
                         </div>
                         <div className={styles['menu-item-actions']}>
                           <span className={styles['menu-item-price']}>Rp {item.price.toLocaleString('id-ID')}</span>

@@ -4,18 +4,8 @@ import Header from "../components/Header"
 import FoodCategories from "../components/FoodCategories"
 import FoodItems from "../components/FoodItems"
 import CartSidebar from "../components/CartSidebar"
-import { fetchStores } from "../services/Api"
+import { fetchStores, getSellerReviews } from "../services/Api"
 import "../styles/Home.css"
-
-// Generate random additional data for store display
-const generateRandomData = () => {
-  const deliveryTimes = ["15-25 min", "20-30 min", "25-35 min", "30-40 min", "10-20 min"]
-  const ratings = [4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]
-  
-  return {
-    rating: ratings[Math.floor(Math.random() * ratings.length)],
-  }
-}
 
 function Home() {
   const [restaurants, setRestaurants] = useState([])
@@ -29,18 +19,31 @@ function Home() {
         const stores = await fetchStores()
         
         // Map stores to the format needed for display
-        // Add random data for fields not available in the backend
-        const mappedStores = stores.map(store => {
-          const randomData = generateRandomData()
+        // Fetch ratings for each store
+        const mappedStores = await Promise.all(stores.map(async store => {
+          let rating = null;
+          let totalReviews = 0;
+          
+          try {
+            const ratingData = await getSellerReviews(store.sellerId, 1, 0);
+            if (ratingData && ratingData.totalReviews > 0) {
+              rating = ratingData.averageRating;
+              totalReviews = ratingData.totalReviews;
+            }
+          } catch (error) {
+            console.error(`Failed to fetch rating for store ${store.sellerId}:`, error);
+          }
+          
           return {
             id: store.sellerId,
             name: store.storeName,
             slug: store.storeName.toLowerCase().replace(/\s+/g, ''),
             image: store.storeImageUrl || "/placeholder.svg?height=200&width=300",
             deliveryTime: store.deliveryTimeEstimate + " min",
-            ...randomData
+            rating: rating,
+            totalReviews: totalReviews
           }
-        })
+        }))
         
         setRestaurants(mappedStores)
       } catch (err) {
@@ -90,21 +93,43 @@ function Home() {
                         <h3 className="restaurant-name">{restaurant.name}</h3>
                         <div className="restaurant-info">
                           <div className="restaurant-rating">
-                            {[...Array(5)].map((_, i) => (
-                              <svg
-                                key={i}
-                                className={`star-icon ${i < Math.floor(restaurant.rating) ? "filled" : "empty"}`}
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                              </svg>
-                            ))}
-                            <span className="rating-value">{restaurant.rating}</span>
+                            {restaurant.rating !== null ? (
+                              <>
+                                {[...Array(5)].map((_, i) => (
+                                  <svg
+                                    key={i}
+                                    className={`star-icon ${i < Math.floor(restaurant.rating) ? "filled" : "empty"}`}
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                  </svg>
+                                ))}
+                                <span className="rating-value">{restaurant.rating.toFixed(1)}</span>
+                              </>
+                            ) : (
+                              <>
+                                {[...Array(5)].map((_, i) => (
+                                  <svg
+                                    key={i}
+                                    className="star-icon empty"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                  </svg>
+                                ))}
+                                <span className="rating-value">N/A</span>
+                              </>
+                            )}
                           </div>
                           <span className="info-separator">•</span>
                           <span>{restaurant.deliveryTime}</span>

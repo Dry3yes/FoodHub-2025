@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useCart } from "../hooks/useCart"
-import { fetchStores, fetchMenusByStore } from "../services/Api"
+import { fetchStores, fetchMenusByStore, getMenuItemReviews } from "../services/Api"
 import ConfirmationModal from "./ConfirmationModal"
 import "../styles/FoodItems.css"
 
@@ -11,7 +11,8 @@ const fallbackFoodItems = [
     id: 1,
     name: "Baked Fillets Shrimp Eggplant",
     restaurant: "Seafood Delight",
-    rating: 4.8,
+    rating: null,
+    totalReviews: 0,
     price: 19.99,
     image: "/placeholder.svg?height=200&width=300",
   },
@@ -19,7 +20,8 @@ const fallbackFoodItems = [
     id: 2,
     name: "Truffle Belly Shrimp",
     restaurant: "Gourmet Bites",
-    rating: 4.5,
+    rating: null,
+    totalReviews: 0,
     price: 24.99,
     image: "/placeholder.svg?height=200&width=300",
   },
@@ -27,7 +29,8 @@ const fallbackFoodItems = [
     id: 3,
     name: "Oatmeal Delight Shrimp",
     restaurant: "Morning Feast",
-    rating: 4.7,
+    rating: null,
+    totalReviews: 0,
     price: 14.99,
     image: "/placeholder.svg?height=200&width=300",
   },
@@ -35,7 +38,8 @@ const fallbackFoodItems = [
     id: 4,
     name: "Beef Dumpling Noodle Soup",
     restaurant: "Asian Fusion",
-    rating: 4.6,
+    rating: null,
+    totalReviews: 0,
     price: 16.99,
     image: "/placeholder.svg?height=200&width=300",
   },
@@ -43,7 +47,8 @@ const fallbackFoodItems = [
     id: 5,
     name: "Baked Fillets Shrimp Eggplant",
     restaurant: "Seafood Delight",
-    rating: 4.8,
+    rating: null,
+    totalReviews: 0,
     price: 19.99,
     image: "/placeholder.svg?height=200&width=300",
   },
@@ -51,7 +56,8 @@ const fallbackFoodItems = [
     id: 6,
     name: "Truffle Belly Shrimp",
     restaurant: "Gourmet Bites",
-    rating: 4.5,
+    rating: null,
+    totalReviews: 0,
     price: 24.99,
     image: "/placeholder.svg?height=200&width=300",
   },
@@ -130,20 +136,37 @@ function FoodItems() {
         
         // If we have items from the API, transform them
         if (allMenuItems.length > 0) {
-          // Transform menu items to the format needed for display
-          const transformedItems = allMenuItems
-            .map(item => ({
-              id: item.id,
-              name: item.itemName,
-              restaurant: item.storeName || 'Restaurant',
-              rating: parseFloat((4 + Math.random()).toFixed(1)), // Random rating between 4.0-5.0
-              price: item.price,
-              image: item.imageURL || "/placeholder.svg?height=200&width=300",
-              sellerId: item.sellerId,
-              storeName: item.storeName
-            }))
-            // Take random items or all if less than 6
-            .slice(0, Math.min(6, allMenuItems.length))
+          // Transform menu items to the format needed for display and fetch ratings
+          const transformedItems = await Promise.all(
+            allMenuItems
+              .slice(0, Math.min(6, allMenuItems.length))
+              .map(async item => {
+                let rating = null;
+                let totalReviews = 0;
+                
+                try {
+                  const ratingData = await getMenuItemReviews(item.id, 1, 0);
+                  if (ratingData && ratingData.totalReviews > 0) {
+                    rating = ratingData.averageRating;
+                    totalReviews = ratingData.totalReviews;
+                  }
+                } catch (error) {
+                  console.error(`Failed to fetch rating for menu item ${item.id}:`, error);
+                }
+                
+                return {
+                  id: item.id,
+                  name: item.itemName,
+                  restaurant: item.storeName || 'Restaurant',
+                  rating: rating,
+                  totalReviews: totalReviews,
+                  price: item.price,
+                  image: item.imageURL || "/placeholder.svg?height=200&width=300",
+                  sellerId: item.sellerId,
+                  storeName: item.storeName
+                };
+              })
+          );
           
           setFoodItems(transformedItems)
         } else {
@@ -182,21 +205,43 @@ function FoodItems() {
             <h3 className="food-item-name">{item.name}</h3>
             <div className="food-item-info">
               <div className="food-item-rating">
-                  {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className={`star-icon ${i < Math.floor(item.rating) ? "filled" : "empty"}`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                  </svg>
-                ))}
-                <span className="rating-value">{item.rating}</span>
+                {item.rating !== null ? (
+                  <>
+                    {[...Array(5)].map((_, i) => (
+                      <svg
+                        key={i}
+                        className={`star-icon ${i < Math.floor(item.rating) ? "filled" : "empty"}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                    ))}
+                    <span className="rating-value">{item.rating.toFixed(1)}</span>
+                  </>
+                ) : (
+                  <>
+                    {[...Array(5)].map((_, i) => (
+                      <svg
+                        key={i}
+                        className="star-icon empty"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                    ))}
+                    <span className="rating-value">N/A</span>
+                  </>
+                )}
               </div>
               <span className="info-separator">•</span>
               <span>{item.restaurant}</span>

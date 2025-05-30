@@ -834,3 +834,145 @@ export const processSellerApplication = async (applicationId, processData) => {
         throw error;
     }
 };
+
+// Review and Rating API functions
+export const createReview = async (reviewData) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/review`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(reviewData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to create review');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating review:', error);
+        throw error;
+    }
+};
+
+export const getOrderReviewStatus = async (orderId) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/review/order/${orderId}/status`, {
+            method: 'GET',
+            headers: {
+                ...getAuthHeader()
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to get order review status');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error getting order review status:', error);
+        throw error;
+    }
+};
+
+export const getSellerReviews = async (sellerId, limit = 10, offset = 0) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/review/seller/${sellerId}?limit=${limit}&offset=${offset}`, {
+            method: 'GET',
+            headers: {
+                ...getAuthHeader()
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to get seller reviews');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error getting seller reviews:', error);
+        throw error;
+    }
+};
+
+export const getMenuItemReviews = async (menuId, limit = 10, offset = 0) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/review/menu/${menuId}?limit=${limit}&offset=${offset}`, {
+            method: 'GET',
+            headers: {
+                ...getAuthHeader()
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to get menu item reviews');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error getting menu item reviews:', error);
+        throw error;
+    }
+};
+
+export const getRecentReviews = async (limit = 10) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/review/recent?limit=${limit}`, {
+            method: 'GET'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to get recent reviews');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error getting recent reviews:', error);
+        throw error;
+    }
+};
+
+export const updateReview = async (reviewId, reviewData) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/review/${reviewId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(reviewData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update review');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating review:', error);
+        throw error;
+    }
+};
+
+export const deleteReview = async (reviewId) => {
+    try {
+        const response = await fetch(`${apiEndpoint}/api/v1/review/${reviewId}`, {
+            method: 'DELETE',
+            headers: {
+                ...getAuthHeader()
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete review');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error deleting review:', error);
+        throw error;
+    }
+};
