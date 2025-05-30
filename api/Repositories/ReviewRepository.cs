@@ -219,7 +219,6 @@ namespace api.Repositories
                 return null;
             }
         }
-
         public async Task UpdateSellerRatingAsync(string sellerId)
         {
             try
@@ -233,6 +232,17 @@ namespace api.Repositories
 
                 if (reviews.Count == 0)
                 {
+                    // If no reviews, ensure we have a default entry with zero values
+                    var emptyRating = new SellerRating
+                    {
+                        SellerId = sellerId,
+                        TotalReviews = 0,
+                        AverageRating = 0,
+                        LastUpdated = DateTime.UtcNow
+                    };
+
+                    var emptyDocRef = _db.Collection("sellerRatings").Document(sellerId);
+                    await emptyDocRef.SetAsync(emptyRating);
                     return;
                 }
 
@@ -240,16 +250,17 @@ namespace api.Repositories
                 {
                     SellerId = sellerId,
                     TotalReviews = reviews.Count,
-                    AverageRating = reviews.Average(r => r.Rating),
+                    AverageRating = Math.Round(reviews.Average(r => r.Rating), 2),
                     LastUpdated = DateTime.UtcNow
                 };
 
-                // Calculate rating distribution
+                // Calculate rating distribution - using string keys for Firestore compatibility
                 foreach (var review in reviews)
                 {
-                    if (sellerRating.RatingDistribution.ContainsKey(review.Rating))
+                    if (review.Rating >= 1 && review.Rating <= 5)
                     {
-                        sellerRating.RatingDistribution[review.Rating]++;
+                        var ratingKey = review.Rating.ToString();
+                        sellerRating.RatingDistribution[ratingKey]++;
                     }
                 }
 
@@ -261,7 +272,6 @@ namespace api.Repositories
                 _logger.LogError(ex, "Error updating seller rating: {SellerId}", sellerId);
             }
         }
-
         public async Task UpdateMenuItemRatingAsync(string menuId)
         {
             try
@@ -275,6 +285,17 @@ namespace api.Repositories
 
                 if (reviews.Count == 0)
                 {
+                    // If no reviews, ensure we have a default entry with zero values
+                    var emptyRating = new MenuItemRating
+                    {
+                        MenuId = menuId,
+                        TotalReviews = 0,
+                        AverageRating = 0,
+                        LastUpdated = DateTime.UtcNow
+                    };
+
+                    var emptyDocRef = _db.Collection("menuItemRatings").Document(menuId);
+                    await emptyDocRef.SetAsync(emptyRating);
                     return;
                 }
 
@@ -282,16 +303,17 @@ namespace api.Repositories
                 {
                     MenuId = menuId,
                     TotalReviews = reviews.Count,
-                    AverageRating = reviews.Average(r => r.Rating),
+                    AverageRating = Math.Round(reviews.Average(r => r.Rating), 2),
                     LastUpdated = DateTime.UtcNow
                 };
 
-                // Calculate rating distribution
+                // Calculate rating distribution - using string keys for Firestore compatibility
                 foreach (var review in reviews)
                 {
-                    if (menuItemRating.RatingDistribution.ContainsKey(review.Rating))
+                    if (review.Rating >= 1 && review.Rating <= 5)
                     {
-                        menuItemRating.RatingDistribution[review.Rating]++;
+                        var ratingKey = review.Rating.ToString();
+                        menuItemRating.RatingDistribution[ratingKey]++;
                     }
                 }
 

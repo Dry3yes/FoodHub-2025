@@ -187,14 +187,12 @@ namespace api.Controllers
             try
             {
                 var reviews = await _reviewRepository.GetReviewsBySellerIdAsync(sellerId, limit, offset);
-                var sellerRating = await _reviewRepository.GetSellerRatingAsync(sellerId);
-
-                var response = new SellerRatingDto
+                var sellerRating = await _reviewRepository.GetSellerRatingAsync(sellerId); var response = new SellerRatingDto
                 {
                     SellerId = sellerId,
                     AverageRating = sellerRating?.AverageRating ?? 0,
                     TotalReviews = sellerRating?.TotalReviews ?? 0,
-                    RatingDistribution = sellerRating?.RatingDistribution ?? new Dictionary<int, int>(),
+                    RatingDistribution = sellerRating?.RatingDistribution ?? new Dictionary<string, int>(),
                     RecentReviews = reviews.Select(r => new ReviewDto
                     {
                         Id = r.Id,
@@ -236,14 +234,12 @@ namespace api.Controllers
             try
             {
                 var reviews = await _reviewRepository.GetMenuItemReviewsByMenuIdAsync(menuId, limit, offset);
-                var menuItemRating = await _reviewRepository.GetMenuItemRatingAsync(menuId);
-
-                var response = new MenuItemRatingDto
+                var menuItemRating = await _reviewRepository.GetMenuItemRatingAsync(menuId); var response = new MenuItemRatingDto
                 {
                     MenuId = menuId,
                     AverageRating = menuItemRating?.AverageRating ?? 0,
                     TotalReviews = menuItemRating?.TotalReviews ?? 0,
-                    RatingDistribution = menuItemRating?.RatingDistribution ?? new Dictionary<int, int>(),
+                    RatingDistribution = menuItemRating?.RatingDistribution ?? new Dictionary<string, int>(),
                     RecentReviews = reviews.Select(r => new MenuItemReviewDto
                     {
                         Id = r.Id,

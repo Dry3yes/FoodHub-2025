@@ -83,9 +83,7 @@ namespace api.Models
 
         [FirestoreProperty]
         public bool IsVisible { get; set; } = true;
-    }
-
-    // Aggregate rating data for quick access
+    }    // Aggregate rating data for quick access
     [FirestoreData]
     public class SellerRating
     {
@@ -99,15 +97,14 @@ namespace api.Models
         public int TotalReviews { get; set; }
 
         [FirestoreProperty]
-        public Dictionary<int, int> RatingDistribution { get; set; } = new Dictionary<int, int>
+        public Dictionary<string, int> RatingDistribution { get; set; } = new Dictionary<string, int>
         {
-            { 1, 0 }, { 2, 0 }, { 3, 0 }, { 4, 0 }, { 5, 0 }
+            { "1", 0 }, { "2", 0 }, { "3", 0 }, { "4", 0 }, { "5", 0 }
         };
 
         [FirestoreProperty]
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
     }
-
     [FirestoreData]
     public class MenuItemRating
     {
@@ -121,9 +118,9 @@ namespace api.Models
         public int TotalReviews { get; set; }
 
         [FirestoreProperty]
-        public Dictionary<int, int> RatingDistribution { get; set; } = new Dictionary<int, int>
+        public Dictionary<string, int> RatingDistribution { get; set; } = new Dictionary<string, int>
         {
-            { 1, 0 }, { 2, 0 }, { 3, 0 }, { 4, 0 }, { 5, 0 }
+            { "1", 0 }, { "2", 0 }, { "3", 0 }, { "4", 0 }, { "5", 0 }
         };
 
         [FirestoreProperty]

@@ -48,13 +48,12 @@ namespace api.Dtos.Review
         public DateTime CreatedAt { get; set; }
         public bool CanEdit { get; set; }
     }
-
     public class SellerRatingDto
     {
         public string SellerId { get; set; } = string.Empty;
         public double AverageRating { get; set; }
         public int TotalReviews { get; set; }
-        public Dictionary<int, int> RatingDistribution { get; set; } = new Dictionary<int, int>();
+        public Dictionary<string, int> RatingDistribution { get; set; } = new Dictionary<string, int>();
         public List<ReviewDto> RecentReviews { get; set; } = new List<ReviewDto>();
     }
 
@@ -63,7 +62,7 @@ namespace api.Dtos.Review
         public string MenuId { get; set; } = string.Empty;
         public double AverageRating { get; set; }
         public int TotalReviews { get; set; }
-        public Dictionary<int, int> RatingDistribution { get; set; } = new Dictionary<int, int>();
+        public Dictionary<string, int> RatingDistribution { get; set; } = new Dictionary<string, int>();
         public List<MenuItemReviewDto> RecentReviews { get; set; } = new List<MenuItemReviewDto>();
     }
 
