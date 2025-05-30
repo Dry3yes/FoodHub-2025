@@ -40,10 +40,9 @@ const ReviewsSection = ({ sellerId }) => {
       day: 'numeric'
     });
   };
-
   const getRatingPercentage = (rating) => {
     if (!sellerRating?.totalReviews) return 0;
-    const count = sellerRating.ratingDistribution[rating] || 0;
+    const count = sellerRating.ratingDistribution[rating.toString()] || 0;
     return (count / sellerRating.totalReviews) * 100;
   };
 
@@ -97,9 +96,8 @@ const ReviewsSection = ({ sellerId }) => {
                   className={styles['rating-bar-fill']} 
                   style={{ width: `${getRatingPercentage(rating)}%` }}
                 ></div>
-              </div>
-              <span className={styles['rating-count']}>
-                {sellerRating.ratingDistribution[rating] || 0}
+              </div>              <span className={styles['rating-count']}>
+                {sellerRating.ratingDistribution[rating.toString()] || 0}
               </span>
             </div>
           ))}
