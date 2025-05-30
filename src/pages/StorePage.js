@@ -5,17 +5,8 @@ import Header from "../components/Header"
 import CartSidebar from "../components/CartSidebar"
 import ConfirmationModal from "../components/ConfirmationModal"
 import { useCart } from "../hooks/useCart"
-import { fetchStoreBySlug, fetchMenusByStore } from "../services/Api"
+import { fetchStoreBySlug, fetchMenusByStore, getSellerReviews } from "../services/Api"
 import "../styles/StorePage.css"
-
-// Generate random additional data for store display if missing from backend
-const generateRandomData = () => {
-  const ratings = [4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]
-  
-  return {
-    rating: ratings[Math.floor(Math.random() * ratings.length)],
-  }
-}
 
 // Fallback data in case API fails
 const fallbackStoreData = [
@@ -193,15 +184,27 @@ function StorePage() {
           setLoading(false)
           return
         }
+          // Add random data for fields not available in the backend
+        let rating = null;
+        let totalReviews = 0;
         
-        // Add random data for fields not available in the backend
-        const randomData = generateRandomData()
+        try {
+          const ratingData = await getSellerReviews(storeData.sellerId, 1, 0);
+          if (ratingData && ratingData.totalReviews > 0) {
+            rating = ratingData.averageRating;
+            totalReviews = ratingData.totalReviews;
+          }
+        } catch (error) {
+          console.error(`Failed to fetch rating for store ${storeData.sellerId}:`, error);
+        }
+        
         const completeStoreData = {
           id: storeData.sellerId,
           name: storeData.storeName,
           coverImage: storeData.storeImageUrl || "/placeholder.svg?height=300&width=900", // Use placeholder if none exists
           logo: "/placeholder.svg?height=100&width=100",
-          rating: randomData.rating,
+          rating: rating,
+          totalReviews: totalReviews,
           deliveryTime: storeData.deliveryTimeEstimate + " min",
           description: storeData.description,
         }
@@ -325,23 +328,44 @@ function StorePage() {
               </div>
               <div className="store-header-content">
                 <h1 className="store-title">{store.name}</h1>
-                <div className="store-info">
-                  <div className="store-rating">
-                    {[...Array(5)].map((_, i) => (
-                      <svg
-                        key={i}
-                        className={`star-icon ${i < Math.floor(store.rating) ? "filled" : "empty"}`}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                      </svg>
-                    ))}
-                    <span>{store.rating}</span>
+                <div className="store-info">                  <div className="store-rating">
+                    {store.rating !== null ? (
+                      <>
+                        {[...Array(5)].map((_, i) => (
+                          <svg
+                            key={i}
+                            className={`star-icon ${i < Math.floor(store.rating) ? "filled" : "empty"}`}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                          </svg>
+                        ))}
+                        <span>{store.rating.toFixed(1)}</span>
+                      </>
+                    ) : (
+                      <>
+                        {[...Array(5)].map((_, i) => (
+                          <svg
+                            key={i}
+                            className="star-icon empty"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                          </svg>
+                        ))}
+                        <span>N/A</span>
+                      </>
+                    )}
                   </div>
                   <span className="info-separator">•</span>
                   <span>{store.deliveryTime}</span>
