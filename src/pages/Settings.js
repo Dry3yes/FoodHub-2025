@@ -242,7 +242,7 @@ const Settings = () => {
             
             <form className="profile-form" onSubmit={handleUserSubmit}>
               <div className="form-group">
-                <label htmlFor="username">Username</label>
+                <label htmlFor="username">Name</label>
                 <input 
                   type="text" 
                   id="username" 
