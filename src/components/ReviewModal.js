@@ -195,7 +195,7 @@ const ReviewModal = ({
 
             {/* Menu Items Rating */}
             <div className={styles['review-section']}>
-              <h4>Rate Individual Items (Optional)</h4>
+              <h4 className={styles['review-item-section-title']}>Rate Individual Items (Optional)</h4>
               <div className={styles['menu-items-review']}>
                 {orderData?.items?.map((item, index) => (
                   <div key={index} className={styles['menu-item-review']}>
