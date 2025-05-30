@@ -27,11 +27,10 @@ function SellerDashboard() {
   
   // Menu category tabs
   const [activeTab, setActiveTab] = useState("all");
-  
-  const sellerTabs = [
+    const sellerTabs = [
     { id: "all", name: "All Items" },
-    { id: "makanan", name: "Makanan" },
-    { id: "minuman", name: "Minuman" },
+    { id: "Makanan", name: "Makanan" },
+    { id: "Minuman", name: "Minuman" },
   ];
 
   // Menu state
