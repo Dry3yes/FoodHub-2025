@@ -55,7 +55,7 @@ const RatingStars = ({
       </div>
       {showCount && (
         <span className={styles['rating-info']}>
-          ({rating.toFixed(1)}) • {reviewCount} review{reviewCount !== 1 ? 's' : ''}
+          ({rating ? rating.toFixed(1) : 'N/A'}) &nbsp;•&nbsp; {reviewCount} review{reviewCount !== 1 ? 's' : ''}
         </span>
       )}
     </div>

@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom"
 import Header from "../components/Header"
 import CartSidebar from "../components/CartSidebar"
 import ConfirmationModal from "../components/ConfirmationModal"
+import MenuItemRating from "../components/MenuItemRating"
 import { useCart } from "../hooks/useCart"
 import { fetchStoreBySlug, fetchMenusByStore, getSellerReviews } from "../services/Api"
 import "../styles/StorePage.css"
@@ -15,7 +16,8 @@ const fallbackStoreData = [
     name: "Baked Fillets Shrimp Eggplant",
     coverImage: "/placeholder.svg?height=300&width=900",
     logo: "/placeholder.svg?height=100&width=100",
-    rating: 4.8,
+    rating: null,
+    totalReviews: 0,
     cuisine: "Seafood",
     deliveryTime: "25-30 min",
     description:
@@ -89,13 +91,13 @@ const fallbackStoreData = [
         ],
       },
     ],
-  },
-  {
+  },  {
     id: 2,
     name: "Truffle Belly Shrimp",
     coverImage: "/placeholder.svg?height=300&width=900",
     logo: "/placeholder.svg?height=100&width=100",
-    rating: 4.5,
+    rating: null,
+    totalReviews: 0,
     cuisine: "Seafood",
     deliveryTime: "20-30 min",
     description: "Gourmet seafood restaurant specializing in truffle-infused dishes and premium shrimp preparations.",
@@ -386,11 +388,11 @@ function StorePage() {
                       <div key={item.id} className="menu-item">
                         <div className="menu-item-image-container">
                           <img src={item.image || "/placeholder.svg"} alt={item.name} className="menu-item-image" />
-                        </div>
-                        <div className="menu-item-content">
+                        </div>                        <div className="menu-item-content">
                           <div>
                             <h4 className="menu-item-name">{item.name}</h4>
                             <p className="menu-item-description">{item.description}</p>
+                            <MenuItemRating menuId={item.id} />
                           </div>
                           <div className="store-menu-item-actions">
                             <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>                            <button

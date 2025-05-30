@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import ConfirmationModal from "../components/ConfirmationModal";
+import MenuItemRating from "../components/MenuItemRating";
 import styles from "../styles/SellerDashboard.module.css";
 import { 
   fetchStoreById, 
@@ -784,13 +785,13 @@ function SellerDashboard() {
                           className={styles['menu-item-image']} 
                         />
                       </div>
-                      <div className={styles['seller-menu-item-content']}>
-                        <div className={styles['menu-item-info']}>
+                      <div className={styles['seller-menu-item-content']}>                        <div className={styles['menu-item-info']}>
                           <h4 className={styles['menu-item-name']}>{item.itemName}</h4>
                           <div className={styles['menu-item-details']}>
                             <span className={styles['menu-category']}>{item.category}</span>
                             <span className={styles['menu-stock']}>Stock: {item.stock}</span>
                           </div>
+                          <MenuItemRating menuId={item.id} />
                         </div>
                         <div className={styles['menu-item-actions']}>
                           <span className={styles['menu-item-price']}>Rp {item.price.toLocaleString('id-ID')}</span>
