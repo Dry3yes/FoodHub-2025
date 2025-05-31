@@ -15,15 +15,18 @@ namespace api.Controllers
     {
         private readonly IChatRepository _chatRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ISellerRepository _sellerRepository;
         private readonly IHubContext<ChatHub> _hubContext;
 
         public ChatController(
             IChatRepository chatRepository,
             IUserRepository userRepository,
+            ISellerRepository sellerRepository,
             IHubContext<ChatHub> hubContext)
         {
             _chatRepository = chatRepository;
             _userRepository = userRepository;
+            _sellerRepository = sellerRepository;
             _hubContext = hubContext;
         }
 
@@ -41,18 +44,28 @@ namespace api.Controllers
 
                 foreach (var chat in chats)
                 {
-                    var participantDetails = new List<ChatParticipantDto>();
-
-                    // Get details for other participants
+                    var participantDetails = new List<ChatParticipantDto>();                    // Get details for other participants
                     foreach (var participantId in chat.Participants.Where(p => p != userId))
                     {
                         var participant = await _userRepository.GetByIdAsync(participantId);
                         if (participant != null)
                         {
+                            var displayName = participant.Name;
+
+                            // If the participant is a seller, get store name
+                            if (participant.Role == "Seller")
+                            {
+                                var seller = await _sellerRepository.GetSellerByUserIdAsync(participantId);
+                                if (seller != null && !string.IsNullOrEmpty(seller.StoreName))
+                                {
+                                    displayName = seller.StoreName;
+                                }
+                            }
+
                             participantDetails.Add(new ChatParticipantDto
                             {
                                 UserId = participant.UserId,
-                                Name = participant.Name,
+                                Name = displayName,
                                 Role = participant.Role,
                                 IsOnline = ChatHub.IsUserOnline(participantId)
                             });
@@ -143,18 +156,28 @@ namespace api.Controllers
 
                 // Verify user is a participant
                 if (!chat.Participants.Contains(userId))
-                    return Forbid("You are not a participant in this chat"); var participantDetails = new List<ChatParticipantDto>();
-
-                // Get details for all participants
+                    return Forbid("You are not a participant in this chat"); var participantDetails = new List<ChatParticipantDto>();                // Get details for all participants
                 foreach (var participantId in chat.Participants)
                 {
                     var participant = await _userRepository.GetByIdAsync(participantId);
                     if (participant != null)
                     {
+                        var displayName = participant.Name;
+
+                        // If the participant is a seller, get store name
+                        if (participant.Role == "Seller")
+                        {
+                            var seller = await _sellerRepository.GetSellerByUserIdAsync(participantId);
+                            if (seller != null && !string.IsNullOrEmpty(seller.StoreName))
+                            {
+                                displayName = seller.StoreName;
+                            }
+                        }
+
                         participantDetails.Add(new ChatParticipantDto
                         {
                             UserId = participant.UserId,
-                            Name = participant.Name,
+                            Name = displayName,
                             Role = participant.Role,
                             IsOnline = ChatHub.IsUserOnline(participantId)
                         });
@@ -241,16 +264,15 @@ namespace api.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving messages", error = ex.Message });
             }
         }
-
         [HttpPost("{chatId}/messages")]
         public async Task<ActionResult<MessageDto>> SendMessage(string chatId, [FromBody] SendMessageDto sendMessageDto)
         {
             try
             {
                 var userId = GetCurrentUserId();
-                var userName = await GetCurrentUserNameAsync();
+                var displayName = await GetDisplayNameAsync(userId);
 
-                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userName))
+                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(displayName))
                     return Unauthorized();
 
                 // Set the chat ID from the route
@@ -261,7 +283,7 @@ namespace api.Controllers
                 if (!isParticipant)
                     return Forbid("You are not a participant in this chat");
 
-                var message = await _chatRepository.SendMessageAsync(sendMessageDto, userId, userName);
+                var message = await _chatRepository.SendMessageAsync(sendMessageDto, userId, displayName);
 
                 var messageDto = new MessageDto
                 {
@@ -405,7 +427,6 @@ namespace api.Controllers
                    User.Identity?.Name ??
                    "Unknown User";
         }
-
         private async Task<string> GetCurrentUserNameAsync()
         {
             var userId = GetCurrentUserId();
@@ -416,6 +437,35 @@ namespace api.Controllers
             {
                 var user = await _userRepository.GetByIdAsync(userId);
                 return user?.Name ?? "Unknown User";
+            }
+            catch
+            {
+                return "Unknown User";
+            }
+        }
+
+        private async Task<string> GetDisplayNameAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return "Unknown User";
+
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                    return "Unknown User";
+
+                // If the user is a seller, return store name instead of user name
+                if (user.Role == "Seller")
+                {
+                    var seller = await _sellerRepository.GetSellerByUserIdAsync(userId);
+                    if (seller != null && !string.IsNullOrEmpty(seller.StoreName))
+                    {
+                        return seller.StoreName;
+                    }
+                }
+
+                return user.Name ?? "Unknown User";
             }
             catch
             {
