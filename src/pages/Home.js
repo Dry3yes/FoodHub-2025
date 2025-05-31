@@ -4,14 +4,18 @@ import Header from "../components/Header"
 import FoodCategories from "../components/FoodCategories"
 import FoodItems from "../components/FoodItems"
 import CartSidebar from "../components/CartSidebar"
-import { fetchStores, getSellerReviews } from "../services/Api"
+import { fetchStores, getSellerReviews, searchMenusByName } from "../services/Api"
 import "../styles/Home.css"
 
 function Home() {
   const [restaurants, setRestaurants] = useState([])
+  const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState(true)
+  const [searchLoading, setSearchLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isSearchMode, setIsSearchMode] = useState(false)
 
   useEffect(() => {
     const loadStores = async () => {
@@ -57,33 +61,146 @@ function Home() {
     
     loadStores()
   }, [])
+
+  // Handle search functionality
+  const handleSearch = async (query) => {
+    setSearchQuery(query)
+    
+    if (!query || query.trim().length === 0) {
+      setIsSearchMode(false)
+      setSearchResults([])
+      return
+    }
+
+    setIsSearchMode(true)
+    setSearchLoading(true)
+    setError(null)
+
+    try {
+      const results = await searchMenusByName(query.trim())
+      
+      if (results && results.length > 0) {
+        // Transform search results to match restaurant display format
+        const transformedResults = await Promise.all(results.map(async result => {
+          let rating = null;
+          let totalReviews = 0;
+          
+          try {
+            const ratingData = await getSellerReviews(result.sellerId, 1, 0);
+            if (ratingData && ratingData.totalReviews > 0) {
+              rating = ratingData.averageRating;
+              totalReviews = ratingData.totalReviews;
+            }
+          } catch (error) {
+            console.error(`Failed to fetch rating for store ${result.sellerId}:`, error);
+          }
+          
+          return {
+            id: result.sellerId,
+            name: result.storeName,
+            slug: result.storeName.toLowerCase().replace(/\s+/g, ''),
+            image: "/placeholder.svg?height=200&width=300", // Default image for search results
+            deliveryTime: "25-35 min", // Default delivery time for search results
+            rating: rating,
+            totalReviews: totalReviews,
+            matchingMenus: result.matchingMenus || [] // Include matching menu items
+          }
+        }))
+        
+        setSearchResults(transformedResults)
+      } else {
+        setSearchResults([])
+      }
+    } catch (err) {
+      console.error("Search error:", err)
+      setError("Failed to search restaurants. Please try again.")
+      setSearchResults([])
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
+  // Get the restaurants to display (search results or regular restaurants)
+  const displayRestaurants = isSearchMode ? searchResults : restaurants
+  const isLoading = isSearchMode ? searchLoading : loading
+
   return (
     <div className="home-container">
-      <Header />
+      <Header 
+        onSearch={handleSearch}
+        searchQuery={searchQuery}
+        showSearch={true}
+      />
 
       <main className="main-content">
         <div className="grid-layout">
           <div className="main-column">
-            <h1 className="page-title">Order delicious food online</h1>
+            <h1 className="page-title">
+              {isSearchMode 
+                ? `Search Results for "${searchQuery}"` 
+                : "Order delicious food online"
+              }
+            </h1>
 
-            <FoodCategories 
-              selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-            />
+            {!isSearchMode && (
+              <FoodCategories 
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+              />
+            )}
 
             <div className="section">
-              <h2 className="section-title">Popular Restaurants</h2>
-              {loading ? (
+              <h2 className="section-title">
+                {isSearchMode 
+                  ? `Restaurants (${displayRestaurants.length} found)`
+                  : "Popular Restaurants"
+                }
+              </h2>
+              
+              {/* Search results summary */}
+              {isSearchMode && searchResults.length > 0 && (
+                <div className="search-summary">
+                  <p className="search-summary-text">
+                    Found {searchResults.length} restaurant{searchResults.length !== 1 ? 's' : ''} with menu items matching "{searchQuery}"
+                  </p>
+                </div>
+              )}
+
+              {isLoading ? (
                 <div className="loading-container">
-                  <p>Loading restaurants...</p>
+                  <p>{isSearchMode ? "Searching..." : "Loading restaurants..."}</p>
                 </div>
               ) : error ? (
                 <div className="error-container">
                   <p>{error}</p>
+                  {isSearchMode && (
+                    <button 
+                      onClick={() => handleSearch("")}
+                      className="back-to-restaurants-btn"
+                    >
+                      Back to all restaurants
+                    </button>
+                  )}
+                </div>
+              ) : displayRestaurants.length === 0 ? (
+                <div className="no-results-container">
+                  {isSearchMode ? (
+                    <>
+                      <p>No restaurants found with menu items matching "{searchQuery}".</p>
+                      <button 
+                        onClick={() => handleSearch("")}
+                        className="back-to-restaurants-btn"
+                      >
+                        Back to all restaurants
+                      </button>
+                    </>
+                  ) : (
+                    <p>No restaurants available at the moment.</p>
+                  )}
                 </div>
               ) : (
               <div className="restaurant-grid">
-                {restaurants.map((restaurant) => (
+                {displayRestaurants.map((restaurant) => (
                   <Link to={`/store/${restaurant.slug}`} key={restaurant.id} className="restaurant-card-link">
                     <div className="restaurant-card">
                       <div className="restaurant-image-container">
@@ -92,9 +209,36 @@ function Home() {
                           alt={restaurant.name}
                           className="restaurant-image"
                         />
+                        {/* Show "Search Match" badge for search results */}
+                        {isSearchMode && (
+                          <div className="search-match-badge">
+                            Search Match
+                          </div>
+                        )}
                       </div>
                       <div className="restaurant-content">
                         <h3 className="restaurant-name">{restaurant.name}</h3>
+                        
+                        {/* Show matching menu items for search results */}
+                        {isSearchMode && restaurant.matchingMenus && restaurant.matchingMenus.length > 0 && (
+                          <div className="matching-items">
+                            <p className="matching-items-label">Matching items:</p>
+                            <div className="matching-items-list">
+                              {restaurant.matchingMenus.slice(0, 3).map((item, index) => (
+                                <span key={item.id} className="matching-item">
+                                  {item.itemName}
+                                  {index < Math.min(restaurant.matchingMenus.length, 3) - 1 && ", "}
+                                </span>
+                              ))}
+                              {restaurant.matchingMenus.length > 3 && (
+                                <span className="more-items">
+                                  +{restaurant.matchingMenus.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
                         <div className="restaurant-info">
                           <div className="restaurant-rating">
                             {restaurant.rating !== null ? (
@@ -135,7 +279,7 @@ function Home() {
                               </>
                             )}
                           </div>
-                          <span className="info-separator">•</span>
+                          <span className="info-separator">&nbsp;•&nbsp;</span>
                           <span>{restaurant.deliveryTime}</span>
                         </div>
                       </div>
@@ -146,10 +290,12 @@ function Home() {
               )}
             </div>
 
-            <div className="section">
-              <h2 className="section-title">Featured Items</h2>
-              <FoodItems selectedCategory={selectedCategory} />
-            </div>
+            {!isSearchMode && (
+              <div className="section">
+                <h2 className="section-title">Featured Items</h2>
+                <FoodItems selectedCategory={selectedCategory} />
+              </div>
+            )}
           </div>
 
           <div className="sidebar-column">

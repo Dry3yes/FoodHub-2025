@@ -503,6 +503,29 @@ export const getMenusByCategory = async (category) => {
     }
 };
 
+// Search menus by name and return stores with matching items
+export const searchMenusByName = async (query) => {
+    try {
+        if (!query || query.trim().length === 0) {
+            return [];
+        }
+
+        const response = await fetch(`${apiEndpoint}/api/v1/search-menus/${encodeURIComponent(query.trim())}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            }
+        });
+        
+        const data = await response.json();
+        return data.success ? data.data : [];
+    } catch (error) {
+        console.error(`Error searching menus with query "${query}":`, error);
+        return [];
+    }
+};
+
 // ========================
 // CART API FUNCTIONS
 // ========================
