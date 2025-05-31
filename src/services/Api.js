@@ -998,9 +998,68 @@ export const updateUser = async (userId, userData) => {
             throw new Error(errorData.message || 'Failed to update user profile');
         }
         
-        return await response.json();
-    } catch (error) {
+        return await response.json();    } catch (error) {
         console.error('Error updating user profile:', error);
+        throw error;
+    }
+};
+
+// ========================
+// CHAT API FUNCTIONS
+// ========================
+
+// Find or create a chat conversation and send initial message
+export const findOrCreateChat = async (otherUserId, initialMessage) => {
+    try {
+        // Step 1: Find or create the chat
+        const chatResponse = await fetch(`${apiEndpoint}/api/chat/find-or-create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify({
+                participants: [otherUserId], // API expects array of participant IDs
+                chatType: "user_seller"
+            })
+        });
+        
+        if (!chatResponse.ok) {
+            const errorData = await chatResponse.json();
+            throw new Error(errorData.message || 'Failed to create chat');
+        }
+        
+        const chatData = await chatResponse.json();
+        console.log('Chat created/found:', chatData);
+        
+        // Step 2: Send the initial message if provided
+        if (initialMessage && initialMessage.trim()) {
+            const messageResponse = await fetch(`${apiEndpoint}/api/chat/${chatData.chatId}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify({
+                    content: initialMessage,
+                    messageType: "text"
+                })
+            });
+            
+            if (!messageResponse.ok) {
+                const errorData = await messageResponse.json();
+                console.error('Failed to send initial message:', errorData);
+                // Don't throw error here, chat was created successfully
+                // Just log the issue with sending the message
+            } else {
+                const messageData = await messageResponse.json();
+                console.log('Initial message sent:', messageData);
+            }
+        }
+        
+        return chatData;
+    } catch (error) {
+        console.error('Error creating chat:', error);
         throw error;
     }
 };
