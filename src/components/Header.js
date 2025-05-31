@@ -125,7 +125,7 @@ function Header({ onSearch, searchQuery = "", showSearch = true }) {
         </nav>
 
         {/* Search Bar - Only show on home page or when explicitly enabled */}
-        {showSearch && (
+        {showSearch && !isSeller && (
           <div className={styles["search-container"]}>
             <form onSubmit={handleSearchSubmit} className={styles["search-form"]}>
               <div className={styles["search-input-wrapper"]}>

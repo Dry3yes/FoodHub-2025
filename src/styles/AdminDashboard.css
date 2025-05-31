@@ -551,6 +551,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  max-width: 75%;
 }
 
 .user-avatar img {
