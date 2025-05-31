@@ -282,6 +282,7 @@ namespace api.Controllers
                     return NotFound(new { success = false, message = "No menus found for this store" });
                 }
                 var menuDtos = storeMenus.Select(m => m.ToMenuDto()).ToList();
+
                 _logger.LogInformation("Successfully retrieved {Count} menus for seller ID: {SellerId}",
                                      menuDtos.Count, sellerId);
                 return Ok(new { success = true, data = menuDtos });
@@ -290,6 +291,51 @@ namespace api.Controllers
             {
                 _logger.LogError(ex, "Error retrieving menus for store {SellerId}", sellerId);
                 return StatusCode(500, new { success = false, message = "Error retrieving menus for store" });
+            }
+        }
+
+        [HttpGet]
+        [Route("search-menus/{query}")]
+        [AllowAnonymous]
+        [ResponseCache(Duration = 60)]  // Cache for 1 minute
+        public async Task<IActionResult> SearchMenus(string query)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(query))
+                {
+                    return BadRequest(new { success = false, message = "Search query is required" });
+                }
+
+                _logger.LogInformation("Searching menus with query: {Query}", query);
+                var searchResults = await _menuRepository.SearchMenusByNameAsync(query);
+
+                if (!searchResults.Any())
+                {
+                    _logger.LogInformation("No menus found for search query: {Query}", query);
+                    return NotFound(new { success = false, message = "No menus found matching your search" });
+                }
+
+                // Group by SellerId and get unique stores with their matching menu items
+                var storesWithMenus = searchResults
+                    .GroupBy(m => m.SellerId)
+                    .Select(group => new
+                    {
+                        SellerId = group.Key,
+                        StoreName = group.First().StoreName,
+                        MatchingMenus = group.Select(m => m.ToMenuDto()).ToList()
+                    })
+                    .ToList();
+
+                _logger.LogInformation("Found {Count} stores with matching menus for query: {Query}",
+                                     storesWithMenus.Count, query);
+
+                return Ok(new { success = true, data = storesWithMenus });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching menus with query: {Query}", query);
+                return StatusCode(500, new { success = false, message = "Error searching menus" });
             }
         }
     }
