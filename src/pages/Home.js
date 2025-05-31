@@ -4,7 +4,7 @@ import Header from "../components/Header"
 import FoodCategories from "../components/FoodCategories"
 import FoodItems from "../components/FoodItems"
 import CartSidebar from "../components/CartSidebar"
-import { fetchStores, getSellerReviews, searchMenusByName } from "../services/Api"
+import { fetchStores, fetchStoreById, getSellerReviews, searchMenusByName } from "../services/Api"
 import "../styles/Home.css"
 
 function Home() {
@@ -84,6 +84,7 @@ function Home() {
         const transformedResults = await Promise.all(results.map(async result => {
           let rating = null;
           let totalReviews = 0;
+          let storeData = null;
           
           try {
             const ratingData = await getSellerReviews(result.sellerId, 1, 0);
@@ -95,12 +96,19 @@ function Home() {
             console.error(`Failed to fetch rating for store ${result.sellerId}:`, error);
           }
           
+          // Fetch complete store data to get the store image
+          try {
+            storeData = await fetchStoreById(result.sellerId);
+          } catch (error) {
+            console.error(`Failed to fetch store data for store ${result.sellerId}:`, error);
+          }
+          
           return {
             id: result.sellerId,
             name: result.storeName,
             slug: result.storeName.toLowerCase().replace(/\s+/g, ''),
-            image: "/placeholder.svg?height=200&width=300", // Default image for search results
-            deliveryTime: "25-35 min", // Default delivery time for search results
+            image: storeData?.storeImageUrl || "/placeholder.svg?height=200&width=300",
+            deliveryTime: storeData?.deliveryTimeEstimate ? storeData.deliveryTimeEstimate + " min" : "N/A",
             rating: rating,
             totalReviews: totalReviews,
             matchingMenus: result.matchingMenus || [] // Include matching menu items
