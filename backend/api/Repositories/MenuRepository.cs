@@ -58,12 +58,27 @@ namespace api.Repositories
             var snapshot = await query.GetSnapshotAsync();
             return snapshot.Documents.Select(doc => doc.ConvertTo<Menu>()).ToList();
         }
-        
+
         public async Task<IEnumerable<Menu>> GetMenusBySellerIdAsync(string sellerId)
         {
             var query = _firestoreDb.Collection("Menus").WhereEqualTo("SellerId", sellerId);
             var snapshot = await query.GetSnapshotAsync();
             return snapshot.Documents.Select(doc => doc.ConvertTo<Menu>()).ToList();
+        }
+
+        public async Task<IEnumerable<Menu>> SearchMenusByNameAsync(string query)
+        {
+            // Get all menus and filter by item name containing the search query
+            var allMenusSnapshot = await _firestoreDb.Collection("Menus").GetSnapshotAsync();
+            var allMenus = allMenusSnapshot.Documents
+                .Where(u => u.Exists && u.Id != "init")
+                .Select(u => u.ConvertTo<Menu>())
+                .ToList();
+
+            // Filter menus where ItemName contains the search query (case-insensitive)
+            return allMenus.Where(menu =>
+                menu.ItemName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
 
         public async Task<Menu> UpdateMenuAsync(Menu menu)

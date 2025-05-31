@@ -73,10 +73,15 @@
   white-space: nowrap;
 }
 
+.food-item-rating span {
+  margin-left: 0.1rem;
+}
+
 .star-icon {
   width: 1rem;
   height: 1rem;
   margin-right: 0.25rem;
+  margin-bottom: 0.15rem;
 }
 
 .star-icon.filled {

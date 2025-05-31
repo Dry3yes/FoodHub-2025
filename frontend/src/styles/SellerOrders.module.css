@@ -257,7 +257,8 @@
 }
 
 .verify-payment-btn,
-.status-update-btn {
+.status-update-btn,
+.message-customer-btn {
   flex: 1;
   padding: 0.75rem 1rem;
   border: none;
@@ -285,6 +286,17 @@
   background-color: #2563eb;
 }
 
+.message-customer-btn {
+  background-color: #10b981;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.message-customer-btn:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .seller-orders-main {
@@ -305,5 +317,15 @@
   
   .order-tab {
     padding: 0.75rem 1rem;
+  }
+  
+  .order-actions {
+    flex-direction: column;
+  }
+  
+  .verify-payment-btn,
+  .status-update-btn,
+  .message-customer-btn {
+    flex: none;
   }
 }

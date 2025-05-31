@@ -74,9 +74,14 @@ namespace api.Repositories
             var snapshot = await query.GetSnapshotAsync();
             return snapshot.Documents.Select(doc => doc.ConvertTo<Chat>()).ToList();
         }
-
-        public async Task<Chat?> GetOrCreateChatAsync(List<string> participants, string chatType = "user_seller")
+        public async Task<Chat?> GetOrCreateChatAsync(List<string> participants, string chatType = "user_seller", string? currentUserId = null)
         {
+            // Add current user to participants if provided and not already included
+            if (!string.IsNullOrEmpty(currentUserId) && !participants.Contains(currentUserId))
+            {
+                participants = participants.Concat(new[] { currentUserId }).ToList();
+            }
+
             // Sort participants to ensure consistent ordering
             var sortedParticipants = participants.OrderBy(p => p).ToList();
 
@@ -105,7 +110,9 @@ namespace api.Repositories
                 ChatType = chatType
             };
 
-            return await CreateChatAsync(createChatDto, participants.First());
+            // Use currentUserId if provided, otherwise use first participant
+            var creatorUserId = !string.IsNullOrEmpty(currentUserId) ? currentUserId : participants.First();
+            return await CreateChatAsync(createChatDto, creatorUserId);
         }
 
         public async Task<bool> AddParticipantAsync(string chatId, string userId)

@@ -7,7 +7,7 @@ import ConfirmationModal from "../components/ConfirmationModal"
 import MenuItemRating from "../components/MenuItemRating"
 import { useCart } from "../hooks/useCart"
 import { fetchStoreBySlug, fetchMenusByStore, getSellerReviews } from "../services/Api"
-import "../styles/StorePage.css"
+import styles from "../styles/StorePage.module.css"
 
 // Fallback data in case API fails
 const fallbackStoreData = [
@@ -263,10 +263,10 @@ function StorePage() {
 
   if (loading) {
     return (
-      <div className="store-page-container">
+      <div className={styles["store-page-container"]}>
         <Header />
-        <main className="store-main-content">
-          <div className="loading-container">
+        <main className={styles["store-main-content"]}>
+          <div className={styles["loading-container"]}>
             <p>Loading store information...</p>
           </div>
         </main>
@@ -276,12 +276,12 @@ function StorePage() {
 
   if (error || !store) {
     return (
-      <div className="store-page-container">
+      <div className={styles["store-page-container"]}>
         <Header />
-        <main className="store-main-content">
-          <Link to="/" className="back-link">
+        <main className={styles["store-main-content"]}>
+          <Link to="/" className={styles["back-link"]}>
             <svg
-              className="back-icon"
+              className={styles["back-icon"]}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -293,9 +293,9 @@ function StorePage() {
             </svg>
             Back to restaurants
           </Link>
-          <div className="error-container">
+          <div className={styles["error-container"]}>
             <p>{error || "Store not found"}</p>
-            <Link to="/" className="back-button">Return to Home</Link>
+            <Link to="/" className={styles["back-button"]}>Return to Home</Link>
           </div>
         </main>
       </div>
@@ -303,13 +303,13 @@ function StorePage() {
   }
   
   return (
-    <div className="store-page-container">
+    <div className={styles["store-page-container"]}>
       <Header />
 
-      <main className="store-main-content">
-        <Link to="/" className="back-link">
+      <main className={styles["store-main-content"]}>
+        <Link to="/" className={styles["back-link"]}>
           <svg
-            className="back-icon"
+            className={styles["back-icon"]}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -322,21 +322,22 @@ function StorePage() {
           Back to restaurants
         </Link>
 
-        <div className="store-grid-layout">
-          <div className="store-main-column">
-            <div className="store-header-card">
-              <div className="store-cover-image-container">
-                <img src={store.coverImage || "/placeholder.svg"} alt={store.name} className="store-cover-image" />
+        <div className={styles["store-grid-layout"]}>
+          <div className={styles["store-main-column"]}>
+            <div className={styles["store-header-card"]}>
+              <div className={styles["store-cover-image-container"]}>
+                <img src={store.coverImage || "/placeholder.svg"} alt={store.name} className={styles["store-cover-image"]} />
               </div>
-              <div className="store-header-content">
-                <h1 className="store-title">{store.name}</h1>
-                <div className="store-info">                  <div className="store-rating">
+              <div className={styles["store-header-content"]}>
+                <h1 className={styles["store-title"]}>{store.name}</h1>
+                <div className={styles["store-info"]}>                  
+                  <div className={styles["store-rating"]}>
                     {store.rating !== null ? (
                       <>
                         {[...Array(5)].map((_, i) => (
                           <svg
                             key={i}
-                            className={`star-icon ${i < Math.floor(store.rating) ? "filled" : "empty"}`}
+                            className={`${styles["star-icon"]} ${i < Math.floor(store.rating) ? styles["filled"] : styles["empty"]}`}
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -354,7 +355,7 @@ function StorePage() {
                         {[...Array(5)].map((_, i) => (
                           <svg
                             key={i}
-                            className="star-icon empty"
+                            className={`${styles["star-icon"]} ${styles["empty"]}`}
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -369,34 +370,36 @@ function StorePage() {
                       </>
                     )}
                   </div>
-                  <span className="info-separator">•</span>
+                  <span className={styles["info-separator"]}>•</span>
                   <span>{store.deliveryTime}</span>
                 </div>
-                <p className="store-description">{store.description}</p>
+                <p className={styles["store-description"]}>{store.description}</p>
               </div>
             </div>
 
-            <div className="menu-card">
-              <h2 className="store-menu-title">Menu</h2>
+            <div className={styles["menu-card"]}>
+              <h2 className={styles["store-menu-title"]}>Menu</h2>
 
               {store.menuCategories && store.menuCategories.length > 0 ? (
                 store.menuCategories.map((category) => (
-                <div key={category.id} className="menu-category">
-                  <h3 className="category-title">{category.name}</h3>
-                  <div className="menu-items">
+                <div key={category.id} className={styles["menu-category"]}>
+                  <h3 className={styles["category-title"]}>{category.name}</h3>
+                  <div className={styles["menu-items"]}>
                     {category.items.map((item) => (
-                      <div key={item.id} className="menu-item">
-                        <div className="menu-item-image-container">
-                          <img src={item.image || "/placeholder.svg"} alt={item.name} className="menu-item-image" />
-                        </div>                        <div className="menu-item-content">
+                      <div key={item.id} className={styles["menu-item"]}>
+                        <div className={styles["menu-item-image-container"]}>
+                          <img src={item.image || "/placeholder.svg"} alt={item.name} className={styles["menu-item-image"]} />
+                        </div>
+                        <div className={styles["menu-item-content"]}>
                           <div>
-                            <h4 className="menu-item-name">{item.name}</h4>
-                            <p className="menu-item-description">{item.description}</p>
+                            <h4 className={styles["menu-item-name"]}>{item.name}</h4>
+                            <p className={styles["menu-item-description"]}>{item.description}</p>
                             <MenuItemRating menuId={item.id} />
                           </div>
-                          <div className="store-menu-item-actions">
-                            <span className="menu-item-price">Rp {item.price.toLocaleString('id-ID')}</span>                            <button
-                              className="add-to-cart-button"
+                          <div className={styles["store-menu-item-actions"]}>
+                            <span className={styles["menu-item-price"]}>Rp {item.price.toLocaleString('id-ID')}</span>
+                            <button
+                              className={styles["add-to-cart-button"]}
                               onClick={() => handleAddToCart(item)}
                             >
                               Add to Cart
@@ -409,20 +412,21 @@ function StorePage() {
                 </div>
               )))
               : (
-                <div className="no-menu-items">
+                <div className={styles["no-menu-items"]}>
                   <p>No menu items available for this restaurant.</p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="store-sidebar-column">
+          <div className={styles["store-sidebar-column"]}>
             <CartSidebar />
           </div>
         </div>
-      </main>      <footer className="store-footer">
-        <div className="footer-content">
-          <div className="footer-text">
+      </main>
+      <footer className={styles["store-footer"]}>
+        <div className={styles["footer-content"]}>
+          <div className={styles["footer-text"]}>
             <p>© 2023 FoodHub. All rights reserved.</p>
           </div>
         </div>

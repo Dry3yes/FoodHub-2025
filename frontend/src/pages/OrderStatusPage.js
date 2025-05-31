@@ -16,13 +16,13 @@ const OrderStatusPage = () => {
   const [showPickupConfirmation, setShowPickupConfirmation] = useState(false);  const [countdown, setCountdown] = useState(900); // 15 minutes in seconds
   const [connection, setConnection] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
-
   const statusSteps = [
     { id: "pending", label: "Menunggu Verifikasi", icon: "⏳", status: "Pending" },
     { id: "confirmed", label: "Pesanan Dikonfirmasi", icon: "✅", status: "Confirmed" },
     { id: "preparing", label: "Sedang Dimasak", icon: "👨‍🍳", status: "Preparing" },
     { id: "ready", label: "Siap Diambil", icon: "🍽️", status: "Ready" },
     { id: "completed", label: "Selesai", icon: "🎉", status: "Completed" },
+    { id: "cancelled", label: "Pesanan Dibatalkan", icon: "❌", status: "Cancelled" },
   ];
 
   useEffect(() => {
@@ -170,8 +170,12 @@ const OrderStatusPage = () => {
 
   const handleBackToHome = () => {
     navigate('/');
-  };
-  const getStepStatus = (step) => {
+  };  const getStepStatus = (step) => {
+    // If order is cancelled, only show cancelled step as active
+    if (currentStatus === 'Cancelled') {
+      return step.status === 'Cancelled';
+    }
+    
     const currentStepIndex = statusSteps.findIndex(s => s.status === currentStatus);
     const stepIndex = statusSteps.findIndex(s => s.id === step.id);
     return stepIndex <= currentStepIndex;
@@ -229,49 +233,66 @@ const OrderStatusPage = () => {
         <div className="order-status-container">
           <div className="status-header">
             <h2>Status Pesanan</h2>
-            <div className="order-id">ID Pesanan: {orderData.id}</div>
-            {statusMessage && (
-              <div className="status-message">
+            <div className="order-id">ID Pesanan: {orderData.id}</div>            {statusMessage && (
+              <div className={`status-message ${currentStatus === 'Cancelled' ? 'cancelled' : ''}`}>
                 <p>{statusMessage}</p>
+              </div>
+            )}
+            {currentStatus === 'Cancelled' && !statusMessage && (
+              <div className="status-message cancelled">
+                <p>Pesanan telah dibatalkan oleh seller</p>
               </div>
             )}
           </div>
 
-          <div className="status-timeline">
-            {statusSteps.map((step, index) => (
-              <div key={step.id} className={`status-step ${getStepStatus(step) ? "active" : ""}`}>
-                <div className="step-icon">{step.icon}</div>
+          <div className="status-timeline">            {currentStatus === 'Cancelled' ? (
+              // Show only cancelled status for cancelled orders
+              <div className="status-step active cancelled">
+                <div className="step-icon">❌</div>
                 <div className="step-content">
-                  <div className="step-label">{step.label}</div>
-                  {step.status === currentStatus && step.status === 'Pending' && (
-                    <div className="step-description">
-                      Bukti pembayaran Anda sedang diverifikasi oleh seller. Proses ini biasanya memakan waktu 5-15 menit.
-                    </div>
-                  )}
-                  {step.status === currentStatus && step.status === 'Confirmed' && (
-                    <div className="step-description">
-                      Pesanan Anda telah dikonfirmasi dan akan segera diproses.
-                    </div>
-                  )}
-                  {step.status === currentStatus && step.status === 'Preparing' && (
-                    <div className="step-description">
-                      Pesanan Anda sedang dimasak. Mohon tunggu sebentar.
-                    </div>
-                  )}
-                  {step.status === currentStatus && step.status === 'Ready' && (
-                    <div className="step-description">
-                      Pesanan Anda sudah siap untuk diambil! Silakan konfirmasi setelah mengambil pesanan.
-                    </div>
-                  )}
-                  {step.status === currentStatus && step.status === 'Completed' && (
-                    <div className="step-description">
-                      Pesanan telah selesai. Terima kasih sudah berbelanja!
-                    </div>
-                  )}
+                  <div className="step-label">Pesanan Dibatalkan</div>
+                  <div className="step-description">
+                    Pesanan Anda telah dibatalkan oleh seller. Mohon maaf atas ketidaknyamanannya.
+                  </div>
                 </div>
-                {index < statusSteps.length - 1 && <div className="step-line"></div>}
               </div>
-            ))}
+            ) : (
+              // Show normal timeline for other statuses
+              statusSteps.filter(step => step.status !== 'Cancelled').map((step, index) => (
+                <div key={step.id} className={`status-step ${getStepStatus(step) ? "active" : ""}`}>
+                  <div className="step-icon">{step.icon}</div>
+                  <div className="step-content">
+                    <div className="step-label">{step.label}</div>
+                    {step.status === currentStatus && step.status === 'Pending' && (
+                      <div className="step-description">
+                        Bukti pembayaran Anda sedang diverifikasi oleh seller. Proses ini biasanya memakan waktu 5-15 menit.
+                      </div>
+                    )}
+                    {step.status === currentStatus && step.status === 'Confirmed' && (
+                      <div className="step-description">
+                        Pesanan Anda telah dikonfirmasi dan akan segera diproses.
+                      </div>
+                    )}
+                    {step.status === currentStatus && step.status === 'Preparing' && (
+                      <div className="step-description">
+                        Pesanan Anda sedang dimasak. Mohon tunggu sebentar.
+                      </div>
+                    )}
+                    {step.status === currentStatus && step.status === 'Ready' && (
+                      <div className="step-description">
+                        Pesanan Anda sudah siap untuk diambil! Silakan konfirmasi setelah mengambil pesanan.
+                      </div>
+                    )}
+                    {step.status === currentStatus && step.status === 'Completed' && (
+                      <div className="step-description">
+                        Pesanan telah selesai. Terima kasih sudah berbelanja!
+                      </div>
+                    )}
+                  </div>
+                  {index < statusSteps.filter(s => s.status !== 'Cancelled').length - 1 && <div className="step-line"></div>}
+                </div>
+              ))
+            )}
           </div>
 
           <div className="order-details">

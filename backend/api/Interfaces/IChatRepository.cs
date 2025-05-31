@@ -8,7 +8,7 @@ namespace api.Interfaces
         Task<Chat> CreateChatAsync(CreateChatDto createChatDto, string currentUserId);
         Task<Chat?> GetChatByIdAsync(string chatId);
         Task<List<Chat>> GetUserChatsAsync(string userId);
-        Task<Chat?> GetOrCreateChatAsync(List<string> participants, string chatType = "user_seller");
+        Task<Chat?> GetOrCreateChatAsync(List<string> participants, string chatType = "user_seller", string? currentUserId = null);
         Task<bool> AddParticipantAsync(string chatId, string userId);
         Task<bool> RemoveParticipantAsync(string chatId, string userId);
         Task<bool> UpdateLastMessageAsync(string chatId, string message, string senderId, DateTime timestamp);

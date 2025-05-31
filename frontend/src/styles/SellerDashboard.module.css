@@ -121,7 +121,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .store-image-upload-btn {
@@ -160,6 +160,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  max-width: 190px;
+  align-items: center;
 }
 
 .upload-actions {
@@ -176,6 +178,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 11rem;
 }
 
 .seller-upload-btn, .seller-cancel-btn {
@@ -720,6 +723,13 @@
   margin: 0;
 }
 
+.pending-revenue {
+  font-size: 0.75rem;
+  color: #f59e0b;
+  margin: 0.25rem 0 0 0;
+  font-weight: 500;
+}
+
 /* Dashboard sidebar */
 .dashboard-sidebar {
   background-color: white;
@@ -851,6 +861,13 @@
   gap: 1rem;
 }
 
+.no-recent-orders {
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  padding: 1rem;
+}
+
 .order-item {
   display: flex;
   flex-direction: column;
@@ -901,6 +918,26 @@
 .order-status.pending {
   background-color: #fef3c7;
   color: #d97706;
+}
+
+.order-status.confirmed {
+  background-color: #dbeafe;
+  color: #3b82f6;
+}
+
+.order-status.preparing {
+  background-color: #e9d5ff;
+  color: #8b5cf6;
+}
+
+.order-status.ready {
+  background-color: #d1fae5;
+  color: #10b981;
+}
+
+.order-status.cancelled {
+  background-color: #fee2e2;
+  color: #ef4444;
 }
 
 .order-status.processing {

@@ -3,17 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import Header from "../components/Header";
 import PaymentVerificationModal from "../components/PaymentVerificationModal";
-import { getPendingOrders, getSellerOrders, updateOrderStatus } from "../services/Api";
+import CommunicationModal from "../components/CommunicationModal";
+import { getPendingOrders, getSellerOrders, updateOrderStatus, findOrCreateChat } from "../services/Api";
 import styles from "../styles/SellerOrders.module.css";
 
 function SellerOrdersPage() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("pending");
+  const [error, setError] = useState("");  const [activeTab, setActiveTab] = useState("pending");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showCommunicationModal, setShowCommunicationModal] = useState(false);
+  const [selectedOrderForMessage, setSelectedOrderForMessage] = useState(null);
   const [connection, setConnection] = useState(null);
 
   const orderTabs = [
@@ -189,13 +191,36 @@ function SellerOrdersPage() {
       default: return '#6b7280';
     }
   };
-
   const getNextStatus = (currentStatus) => {
     switch (currentStatus.toLowerCase()) {
       case 'confirmed': return 'Preparing';
       case 'preparing': return 'Ready';
       case 'ready': return 'Completed';
       default: return null;
+    }
+  };  const handleMessageCustomer = (order) => {
+    setSelectedOrderForMessage(order);
+    setShowCommunicationModal(true);
+  };  const handleSendMessage = async (order, message) => {
+    try {
+      const customerId = order.customerId;
+      
+      if (!customerId) {
+        throw new Error('Customer ID not found in order data');
+      }
+      
+      const result = await findOrCreateChat(customerId, message);
+      
+      // Close the modal
+      setShowCommunicationModal(false);
+      setSelectedOrderForMessage(null);
+      
+      // Show success message
+      alert(`Message sent successfully to ${order.customerName || 'customer'}! The conversation has been started and you can continue chatting in the chat section.`);
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error; // Re-throw to be handled by the modal
     }
   };
 
@@ -308,26 +333,24 @@ function SellerOrdersPage() {
                         </div>
                       ))}
                     </div>
-                  </div>
-                    <div className={styles['order-actions']}>
-                    {console.log("Order in render:", order.id, "Status:", order.status, "PaymentProofUrl:", order.paymentProofUrl)}
+                  </div>                  <div className={styles['order-actions']}>
+                    {/* Message Customer Button - Hide for completed and cancelled orders */}
+                    {order.status.toLowerCase() !== 'completed' && order.status.toLowerCase() !== 'cancelled' && (
+                      <button
+                        className={styles['message-customer-btn']}
+                        onClick={() => handleMessageCustomer(order)}
+                        title="Send a message to the customer"
+                      >
+                        💬 Message
+                      </button>
+                    )}
+                    
                     {activeTab === "pending" && order.paymentProofUrl && (
                       <button
                         className={styles['verify-payment-btn']}
                         onClick={() => handleViewPaymentProof(order)}
                       >
                         Verify Payment
-                      </button>
-                    )}
-                    
-                    {/* Always show button for debugging */}
-                    {activeTab === "pending" && !order.paymentProofUrl && (
-                      <button
-                        className={styles['verify-payment-btn']}
-                        onClick={() => handleViewPaymentProof(order)}
-                        style={{ backgroundColor: '#f59e0b', opacity: 0.7 }}
-                      >
-                        Debug: No Payment Proof
                       </button>
                     )}
                     
@@ -346,18 +369,32 @@ function SellerOrdersPage() {
           )}
         </div>
       </main>      {/* Payment Verification Modal */}
-      {console.log("Modal render check - showPaymentModal:", showPaymentModal, "selectedOrder:", selectedOrder)}
       {showPaymentModal && selectedOrder && (
         <PaymentVerificationModal
-          isOpen={showPaymentModal}
-          onClose={() => {
-            console.log("Closing payment modal");
+          isOpen={showPaymentModal}          onClose={() => {
             setShowPaymentModal(false);
             setSelectedOrder(null);
           }}
           order={selectedOrder}
           onApprove={() => handleApproveOrder(selectedOrder.id)}
           onReject={() => handleRejectOrder(selectedOrder.id)}
+        />
+      )}      {/* Communication Modal */}
+      {showCommunicationModal && selectedOrderForMessage && (
+        <CommunicationModal
+          isOpen={showCommunicationModal}
+          onClose={() => {
+            setShowCommunicationModal(false);
+            setSelectedOrderForMessage(null);
+          }}
+          order={{
+            orderId: selectedOrderForMessage.id,
+            customerName: selectedOrderForMessage.name || 'Customer', // Use 'name' field from OrderDto
+            customerId: selectedOrderForMessage.userId, // Use 'userId' field from OrderDto
+            status: selectedOrderForMessage.status,
+            totalAmount: selectedOrderForMessage.total
+          }}
+          onSendMessage={handleSendMessage}
         />
       )}
     </div>

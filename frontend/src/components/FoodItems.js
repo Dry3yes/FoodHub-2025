@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { useCart } from "../hooks/useCart"
 import { fetchStores, fetchMenusByStore, getMenusByCategory, getMenuItemReviews } from "../services/Api"
 import ConfirmationModal from "./ConfirmationModal"
-import "../styles/FoodItems.css"
+import styles from "../styles/FoodItems.module.css"
 
 // Fallback data in case API calls fail
 const fallbackFoodItems = [
@@ -201,31 +201,31 @@ function FoodItems({ selectedCategory = "all" }) {
   }, [selectedCategory])
 
   return (
-    <div className="food-items-grid">
+    <div className={styles["food-items-grid"]}>
       {loading ? (
-        <div className="loading-container">
+        <div className={styles["loading-container"]}>
           <p>Loading featured items...</p>
         </div>
       ) : foodItems.length === 0 ? (
-        <div className="no-items-container">
+        <div className={styles["no-items-container"]}>
           <p>No featured items available.</p>
         </div>
       ) : (
         foodItems.map((item) => (
-        <div key={item.id} className="food-item-card">
-          <div className="food-item-image-container">
-            <img src={item.image || "/placeholder.svg"} alt={item.name} className="food-item-image" />
+        <div key={item.id} className={styles["food-item-card"]}>
+          <div className={styles["food-item-image-container"]}>
+            <img src={item.image || "/placeholder.svg"} alt={item.name} className={styles["food-item-image"]} />
           </div>
-          <div className="food-item-content">
-            <h3 className="food-item-name">{item.name}</h3>
-            <div className="food-item-info">
-              <div className="food-item-rating">
+          <div className={styles["food-item-content"]}>
+            <h3 className={styles["food-item-name"]}>{item.name}</h3>
+            <div className={styles["food-item-info"]}>
+              <div className={styles["food-item-rating"]}>
                 {item.rating !== null ? (
                   <>
                     {[...Array(5)].map((_, i) => (
                       <svg
                         key={i}
-                        className={`star-icon ${i < Math.floor(item.rating) ? "filled" : "empty"}`}
+                        className={`${styles["star-icon"]} ${i < Math.floor(item.rating) ? styles["filled"] : styles["empty"]}`}
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -236,14 +236,14 @@ function FoodItems({ selectedCategory = "all" }) {
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                       </svg>
                     ))}
-                    <span className="rating-value">{item.rating.toFixed(1)}</span>
+                    <span className={styles["rating-value"]}>{item.rating.toFixed(1)}</span>
                   </>
                 ) : (
                   <>
                     {[...Array(5)].map((_, i) => (
                       <svg
                         key={i}
-                        className="star-icon empty"
+                        className={`${styles["star-icon"]} ${styles["empty"]}`}
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -254,18 +254,18 @@ function FoodItems({ selectedCategory = "all" }) {
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                       </svg>
                     ))}
-                    <span className="rating-value">N/A</span>
+                    <span className={styles["rating-value"]}>N/A</span>
                   </>
                 )}
               </div>
-              <span className="info-separator">•</span>
+              <span className={styles["info-separator"]}>•</span>
               <span>{item.restaurant}</span>
             </div>
-            <div className="food-item-price">Rp {item.price.toLocaleString('id-ID')}</div>
+            <div className={styles["food-item-price"]}>Rp {item.price.toLocaleString('id-ID')}</div>
           </div>
-          <div className="food-item-footer">
+          <div className={styles["food-item-footer"]}>
             <button
-              className="add-to-cart-button"
+              className={styles["add-to-cart-button"]}
               onClick={() => handleAddToCart(item)}
             >
               Add to Cart
