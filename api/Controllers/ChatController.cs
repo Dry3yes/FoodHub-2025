@@ -362,9 +362,7 @@ namespace api.Controllers
             {
                 var userId = GetCurrentUserId();
                 if (string.IsNullOrEmpty(userId))
-                    return Unauthorized();
-
-                var chat = await _chatRepository.GetOrCreateChatAsync(createChatDto.Participants, createChatDto.ChatType);
+                    return Unauthorized(); var chat = await _chatRepository.GetOrCreateChatAsync(createChatDto.Participants, createChatDto.ChatType, userId);
                 if (chat == null)
                     return StatusCode(500, "Failed to create or find chat");
 
