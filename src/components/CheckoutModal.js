@@ -23,18 +23,55 @@ function CheckoutModal({ onClose }) {
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
   const feeservice = 2000;
   const total = subtotal + feeservice;
-
   // Handle form submission for step 1
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    // Create the order and proceed to payment step
-    await handleCreateOrder();
+    // Just move to payment step without creating order
+    await handleMoveToPaymentStep();
   };
 
   // Handle file upload for payment proof
   const handleFileUpload = (e) => {
     if (e.target.files && e.target.files[0]) {
       setPaymentProof(e.target.files[0]);
+    }
+  };
+  // Handle moving to payment step without creating order
+  const handleMoveToPaymentStep = async () => {
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      // Get the seller ID from cart items to fetch QRIS code
+      if (items.length > 0) {
+        const firstItem = items[0];
+        if (firstItem.sellerId) {
+          try {
+            const storeData = await fetchStoreById(firstItem.sellerId);
+            
+            if (storeData && storeData.qrisUrl) {
+              setQrisImageUrl(storeData.qrisUrl);
+            } else {
+              setQrisImageUrl('/placeholder.svg');
+            }
+          } catch (err) {
+            console.error('Error fetching seller details:', err);
+            setQrisImageUrl('/placeholder.svg');
+          }
+        } else {
+          setQrisImageUrl('/placeholder.svg');
+        }
+      } else {
+        setQrisImageUrl('/placeholder.svg');
+      }
+      
+      // Move to the payment step
+      setStep(2);
+    } catch (err) {
+      console.error('Error moving to payment step:', err);
+      setError(err.message || 'An error occurred');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -50,38 +87,19 @@ function CheckoutModal({ onClose }) {
       if (response.success) {
         // Store the order ID for later use
         setOrderId(response.data.id);
-        
-        // Fetch the seller's QRIS code if we have a sellerId
-        if (response.data.sellerId) {
-          try {
-            const storeData = await fetchStoreById(response.data.sellerId);
-            
-            if (storeData && storeData.qrisUrl) {
-              setQrisImageUrl(storeData.qrisUrl);
-            } else {
-              setQrisImageUrl('/placeholder.svg');
-            }
-          } catch (err) {
-            console.error('Error fetching seller details:', err);
-            setQrisImageUrl('/placeholder.svg');
-          }
-        } else {
-          setQrisImageUrl('/placeholder.svg');
-        }
-        
-        // Move to the payment step
-        setStep(2);
+        return response.data.id;
       } else {
         setError(response.message || 'Failed to create order');
+        return null;
       }
     } catch (err) {
       console.error('Error during checkout:', err);
       setError(err.message || 'An error occurred during checkout');
+      return null;
     } finally {
       setIsSubmitting(false);
     }
   };
-
   // Handle final submission with payment proof
   const handleFinalSubmit = async () => {
     if (!paymentProof) {
@@ -93,19 +111,29 @@ function CheckoutModal({ onClose }) {
     setError('');
 
     try {
-      // Use the API function from Api.js
-      const response = await uploadPaymentProof(orderId, paymentProof);      if (response.success) {
+      // First, create the order
+      const createdOrderId = await handleCreateOrder();
+      
+      if (!createdOrderId) {
+        setError('Failed to create order');
+        return;
+      }
+
+      // Then upload the payment proof
+      const response = await uploadPaymentProof(createdOrderId, paymentProof);
+      
+      if (response.success) {
         // Clear the cart after successful payment
         await clearCart();
         // Close the modal and redirect to order status page
         onClose();
-        navigate(`/order-status/${orderId}`);
+        navigate(`/order-status/${createdOrderId}`);
       } else {
         setError(response.message || 'Failed to upload payment proof');
       }
     } catch (err) {
       console.error('Error uploading payment proof:', err);
-      setError(err.message || 'An error occurred while uploading payment proof');
+      setError(err.message || 'An error occurred while processing your order');
     } finally {
       setIsSubmitting(false);
     }
@@ -179,10 +207,8 @@ function CheckoutModal({ onClose }) {
                         placeholder="Catatan khusus untuk pesanan"
                         rows="3"
                         />
-                    </div>
-
-                    <button type="submit" className={styles['checkout-btn-primary']}>
-                        Lanjut ke Pembayaran
+                    </div>                    <button type="submit" className={styles['checkout-btn-primary']} disabled={isSubmitting}>
+                        {isSubmitting ? "Loading..." : "Lanjut ke Pembayaran"}
                     </button>
                     </form>
                 </div>
@@ -235,15 +261,17 @@ function CheckoutModal({ onClose }) {
                             Bayar sesuai nominal exact: <strong>Rp {total.toLocaleString("id-ID")}</strong>
                         </li>
                         <li>Scan QRIS dengan aplikasi e-wallet Anda</li>
-                        <li>Screenshot bukti pembayaran setelah berhasil</li>
-                        <li>Upload bukti pembayaran di step selanjutnya</li>
+                        <li>Screenshot bukti pembayaran setelah berhasil</li>                        <li>Upload bukti pembayaran di step selanjutnya</li>
+                        <li>Pesanan akan dibuat setelah Anda mengupload bukti pembayaran</li>
                         <li>Pesanan akan diproses setelah pembayaran terverifikasi</li>
                         </ul>
                     </div>
                     </div>
 
-                    <div className={styles['checkout-modal-actions']}>
-                    <button className={styles['checkout-btn-secondary']} onClick={() => setStep(1)}>
+                    <div className={styles['checkout-modal-actions']}>                    <button className={styles['checkout-btn-secondary']} onClick={() => {
+                        setStep(1);
+                        setError(''); // Clear any errors when going back
+                    }}>
                         Kembali
                     </button>
                     <button className={styles['checkout-btn-primary']} onClick={() => setStep(3)}>
@@ -311,12 +339,13 @@ function CheckoutModal({ onClose }) {
                     </div>
                     </div>
 
-                    <div className={styles['checkout-modal-actions']}>
-                    <button className={styles['checkout-btn-secondary']} onClick={() => setStep(2)}>
+                    <div className={styles['checkout-modal-actions']}>                    <button className={styles['checkout-btn-secondary']} onClick={() => {
+                        setStep(2);
+                        setError(''); // Clear any errors when going back
+                    }}>
                         Kembali
-                    </button>
-                    <button className={styles['checkout-btn-primary']} onClick={handleFinalSubmit} disabled={!paymentProof || isSubmitting}>
-                        {isSubmitting ? "Mengirim Pesanan..." : "Kirim Pesanan"}
+                    </button><button className={styles['checkout-btn-primary']} onClick={handleFinalSubmit} disabled={!paymentProof || isSubmitting}>
+                        {isSubmitting ? "Membuat Pesanan..." : "Buat & Kirim Pesanan"}
                     </button>
                     </div>
                 </div>
