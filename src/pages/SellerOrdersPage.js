@@ -334,14 +334,16 @@ function SellerOrdersPage() {
                       ))}
                     </div>
                   </div>                  <div className={styles['order-actions']}>
-                    {/* Message Customer Button - Always available */}
-                    <button
-                      className={styles['message-customer-btn']}
-                      onClick={() => handleMessageCustomer(order)}
-                      title="Send a message to the customer"
-                    >
-                      💬 Message
-                    </button>
+                    {/* Message Customer Button - Hide for completed and cancelled orders */}
+                    {order.status.toLowerCase() !== 'completed' && order.status.toLowerCase() !== 'cancelled' && (
+                      <button
+                        className={styles['message-customer-btn']}
+                        onClick={() => handleMessageCustomer(order)}
+                        title="Send a message to the customer"
+                      >
+                        💬 Message
+                      </button>
+                    )}
                     
                     {activeTab === "pending" && order.paymentProofUrl && (
                       <button
@@ -367,7 +369,6 @@ function SellerOrdersPage() {
           )}
         </div>
       </main>      {/* Payment Verification Modal */}
-      {console.log("Modal render check - showPaymentModal:", showPaymentModal, "selectedOrder:", selectedOrder)}
       {showPaymentModal && selectedOrder && (
         <PaymentVerificationModal
           isOpen={showPaymentModal}          onClose={() => {
