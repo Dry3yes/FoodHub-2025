@@ -59,21 +59,21 @@ function SellerDashboard() {
   // QRIS code upload state
   const [isUploadingQrisCode, setIsUploadingQrisCode] = useState(false);
   const [qrisImageFile, setQrisImageFile] = useState(null);
-
   // Statistics state
   const [statistics, setStatistics] = useState({
     monthlyOrders: 0,
     monthlyRevenue: 0,
+    pendingRevenue: 0,
     uniqueCustomers: 0,
     recentOrders: []
   });
-
   // Calculate statistics from orders data
   const calculateStatistics = (orders) => {
     if (!orders || orders.length === 0) {
       return {
         monthlyOrders: 0,
         monthlyRevenue: 0,
+        pendingRevenue: 0,
         uniqueCustomers: 0,
         recentOrders: []
       };
@@ -83,20 +83,33 @@ function SellerDashboard() {
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
 
-    // Filter orders for current month
+    // Filter orders for current month (exclude cancelled orders)
     const monthlyOrders = orders.filter(order => {
       const orderDate = new Date(order.createdAt);
-      return orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear;
+      return orderDate.getMonth() === currentMonth && 
+             orderDate.getFullYear() === currentYear &&
+             order.status !== 'Cancelled';
     });
 
-    // Calculate monthly revenue
-    const monthlyRevenue = monthlyOrders.reduce((total, order) => total + order.total, 0);
+    // Calculate monthly revenue from COMPLETED orders only
+    const completedOrders = monthlyOrders.filter(order => order.status === 'Completed');
+    const monthlyRevenue = completedOrders.reduce((total, order) => total + order.total, 0);
 
-    // Calculate unique customers from all orders
-    const uniqueUserIds = new Set(orders.map(order => order.userId));
+    // Calculate pending revenue from non-completed, non-cancelled orders
+    const pendingOrders = monthlyOrders.filter(order => 
+      order.status === 'Pending' || 
+      order.status === 'Confirmed' || 
+      order.status === 'Preparing' || 
+      order.status === 'Ready'
+    );
+    const pendingRevenue = pendingOrders.reduce((total, order) => total + order.total, 0);
 
-    // Get recent orders (latest 5 orders) for sidebar
-    const recentOrders = orders
+    // Calculate unique customers from all orders (excluding cancelled)
+    const validOrders = orders.filter(order => order.status !== 'Cancelled');
+    const uniqueUserIds = new Set(validOrders.map(order => order.userId));
+
+    // Get recent orders (latest 5 orders) for sidebar (excluding cancelled)
+    const recentOrders = validOrders
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5)
       .map(order => ({
@@ -107,8 +120,9 @@ function SellerDashboard() {
       }));
 
     return {
-      monthlyOrders: monthlyOrders.length,
+      monthlyOrders: completedOrders.length, // Only completed orders count
       monthlyRevenue: monthlyRevenue,
+      pendingRevenue: pendingRevenue,
       uniqueCustomers: uniqueUserIds.size,
       recentOrders: recentOrders
     };
@@ -886,21 +900,24 @@ function SellerDashboard() {
             {/* Stats Section */}
             <div className={styles['stats-card']}>
               <h2 className={styles['section-title']}>Store Statistics</h2>
-              <div className={styles['stats-grid']}>
-                <div className={styles['stat-card']}>
+              <div className={styles['stats-grid']}>                <div className={styles['stat-card']}>
                   <div className={styles['stat-icon']}><span role="img" aria-label="Orders">📦</span></div>
                   <div className={styles['stat-content']}>
                     <h3 className={styles['stat-title']}>Orders</h3>
                     <p className={styles['stat-value']}>{statistics.monthlyOrders}</p>
-                    <p className={styles['stat-subtitle']}>This month</p>
+                    <p className={styles['stat-subtitle']}>Completed this month</p>
                   </div>
-                </div>
-                <div className={styles['stat-card']}>
+                </div><div className={styles['stat-card']}>
                   <div className={styles['stat-icon']}><span role="img" aria-label="Revenue">💰</span></div>
                   <div className={styles['stat-content']}>
                     <h3 className={styles['stat-title']}>Revenue</h3>
                     <p className={styles['stat-value']}>Rp {statistics.monthlyRevenue.toLocaleString('id-ID')}</p>
-                    <p className={styles['stat-subtitle']}>This month</p>
+                    <p className={styles['stat-subtitle']}>Completed orders this month</p>
+                    {statistics.pendingRevenue > 0 && (
+                      <p className={styles['pending-revenue']}>
+                        + Rp {statistics.pendingRevenue.toLocaleString('id-ID')} pending
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className={styles['stat-card']}>

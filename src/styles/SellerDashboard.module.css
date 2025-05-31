@@ -720,6 +720,13 @@
   margin: 0;
 }
 
+.pending-revenue {
+  font-size: 0.75rem;
+  color: #f59e0b;
+  margin: 0.25rem 0 0 0;
+  font-weight: 500;
+}
+
 /* Dashboard sidebar */
 .dashboard-sidebar {
   background-color: white;
