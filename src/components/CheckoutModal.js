@@ -74,12 +74,8 @@ function CheckoutModal({ onClose }) {
       setIsSubmitting(false);
     }
   };
-
   // Handle order creation and payment
   const handleCreateOrder = async () => {
-    setIsSubmitting(true);
-    setError('');
-
     try {
       // Call the checkout API
       const response = await checkout(formData.name, formData.phone, formData.notes);
@@ -96,8 +92,6 @@ function CheckoutModal({ onClose }) {
       console.error('Error during checkout:', err);
       setError(err.message || 'An error occurred during checkout');
       return null;
-    } finally {
-      setIsSubmitting(false);
     }
   };
   // Handle final submission with payment proof
@@ -339,12 +333,14 @@ function CheckoutModal({ onClose }) {
                     </div>
                     </div>
 
-                    <div className={styles['checkout-modal-actions']}>                    <button className={styles['checkout-btn-secondary']} onClick={() => {
+                    <div className={styles['checkout-modal-actions']}>                    
+                        <button className={styles['checkout-btn-secondary']} onClick={() => {
                         setStep(2);
                         setError(''); // Clear any errors when going back
                     }}>
                         Kembali
-                    </button><button className={styles['checkout-btn-primary']} onClick={handleFinalSubmit} disabled={!paymentProof || isSubmitting}>
+                    </button>
+                    <button className={styles['checkout-btn-primary']} onClick={handleFinalSubmit} disabled={!paymentProof || isSubmitting}>
                         {isSubmitting ? "Membuat Pesanan..." : "Buat & Kirim Pesanan"}
                     </button>
                     </div>
