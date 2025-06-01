@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/Api";
 import { Eye } from "lucide-react";
 import { useCart } from "../hooks/useCart";
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +15,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const navigate = useNavigate();
   const { syncCartWithBackend } = useCart();
 
@@ -143,10 +145,13 @@ const LoginPage = () => {
                 <div className="remember-me">
                   <input type="checkbox" id="remember" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
                   <label htmlFor="remember">Remember me</label>
-                </div>
-                <a href="#forgot" className="forgot-link">
+                </div>                <button 
+                  type="button" 
+                  className="forgot-link" 
+                  onClick={() => setShowForgotPasswordModal(true)}
+                >
                   Forgot Password
-                </a>
+                </button>
               </div>
               
               {error && <p className="error-message">{error}</p>}
@@ -185,7 +190,12 @@ const LoginPage = () => {
             </p>
           </div>
         </div>
-      </div>
+      </div>      {showForgotPasswordModal && (
+        <ForgotPasswordModal 
+          isOpen={showForgotPasswordModal}
+          onClose={() => setShowForgotPasswordModal(false)} 
+        />
+      )}
     </div>
   );
 };

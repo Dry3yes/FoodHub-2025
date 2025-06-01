@@ -43,6 +43,25 @@ export const registerUser = async (userData) => {
     }
   }
 
+export const forgotPassword = async (email) => {
+    try {
+      const response = await fetch(`${apiEndpoint}/api/v1/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending forgot password email:', error);
+      throw error;
+    }
+  }
+
 
 
 // Fetch all available stores for the home page
