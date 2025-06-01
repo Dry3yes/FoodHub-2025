@@ -12,13 +12,15 @@ namespace api.Hubs
     {
         private readonly IChatRepository _chatRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ISellerRepository _sellerRepository;
         private static readonly ConcurrentDictionary<string, string> _userConnections = new();
         private static readonly ConcurrentDictionary<string, HashSet<string>> _chatGroups = new();
 
-        public ChatHub(IChatRepository chatRepository, IUserRepository userRepository)
+        public ChatHub(IChatRepository chatRepository, IUserRepository userRepository, ISellerRepository sellerRepository)
         {
             _chatRepository = chatRepository;
             _userRepository = userRepository;
+            _sellerRepository = sellerRepository;
         }
         public override async Task OnConnectedAsync()
         {
@@ -279,10 +281,14 @@ namespace api.Hubs
             await Clients.OthersInGroup($"chat_{chatId}")
                 .SendAsync("UserStoppedTyping", chatId, userId);
         }
-
         public static bool IsUserOnline(string userId)
         {
             return _userConnections.ContainsKey(userId);
+        }
+
+        public static string? GetConnectionId(string userId)
+        {
+            return _userConnections.TryGetValue(userId, out var connectionId) ? connectionId : null;
         }
 
         public static List<string> GetOnlineUsersInChat(string chatId)
@@ -317,7 +323,6 @@ namespace api.Hubs
                    Context.User?.Identity?.Name ??
                    "Unknown User";
         }
-
         private async Task<string> GetUserNameAsync()
         {
             var userId = GetUserId();
@@ -327,7 +332,26 @@ namespace api.Hubs
             try
             {
                 var user = await _userRepository.GetByIdAsync(userId);
-                return user?.Name ?? "Unknown User";
+                if (user == null)
+                    return "Unknown User";
+
+                // If the user is an admin, return "Support Team"
+                if (user.Role == "Admin")
+                {
+                    return "Support Team";
+                }
+
+                // If the user is a seller, return store name instead of user name
+                if (user.Role == "Seller")
+                {
+                    var seller = await _sellerRepository.GetSellerByUserIdAsync(userId);
+                    if (seller != null && !string.IsNullOrEmpty(seller.StoreName))
+                    {
+                        return seller.StoreName;
+                    }
+                }
+
+                return user.Name ?? "Unknown User";
             }
             catch
             {

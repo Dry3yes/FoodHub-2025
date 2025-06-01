@@ -115,6 +115,48 @@ namespace api.Repositories
             return await CreateChatAsync(createChatDto, creatorUserId);
         }
 
+        public async Task<(Chat?, bool isNewChat)> GetOrCreateChatWithStatusAsync(List<string> participants, string chatType = "user_seller", string? currentUserId = null)
+        {
+            // Add current user to participants if provided and not already included
+            if (!string.IsNullOrEmpty(currentUserId) && !participants.Contains(currentUserId))
+            {
+                participants = participants.Concat(new[] { currentUserId }).ToList();
+            }
+
+            // Sort participants to ensure consistent ordering
+            var sortedParticipants = participants.OrderBy(p => p).ToList();
+
+            // Try to find existing chat with these participants
+            var query = _db.Collection("chats")
+                .WhereEqualTo("chatType", chatType)
+                .WhereEqualTo("isActive", true);
+
+            var snapshot = await query.GetSnapshotAsync();
+
+            foreach (var doc in snapshot.Documents)
+            {
+                var chat = doc.ConvertTo<Chat>();
+                var sortedChatParticipants = chat.Participants.OrderBy(p => p).ToList();
+
+                if (sortedChatParticipants.SequenceEqual(sortedParticipants))
+                {
+                    return (chat, false); // Existing chat found
+                }
+            }
+
+            // Create new chat if none exists
+            var createChatDto = new CreateChatDto
+            {
+                Participants = participants,
+                ChatType = chatType
+            };
+
+            // Use currentUserId if provided, otherwise use first participant
+            var creatorUserId = !string.IsNullOrEmpty(currentUserId) ? currentUserId : participants.First();
+            var newChat = await CreateChatAsync(createChatDto, creatorUserId);
+            return (newChat, true); // New chat created
+        }
+
         public async Task<bool> AddParticipantAsync(string chatId, string userId)
         {
             var docRef = _db.Collection("chats").Document(chatId);

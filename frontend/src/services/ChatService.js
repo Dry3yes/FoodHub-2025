@@ -65,78 +65,90 @@ class ChatService {
   setupEventHandlers() {
     if (!this.connection) return;
 
-    // Connection state handlers
-    this.connection.onreconnecting((error) => {
-      console.log('SignalR Reconnecting...', error);
-      this.isConnected = false;
-      this.emit('connectionStateChanged', { connected: false, reconnecting: true });
+    this.connection.on('connectionStateChanged', (state) => {
+      console.log('SignalR connection state changed:', state);
+      this.emit('connectionStateChanged', state);
     });
 
-    this.connection.onreconnected((connectionId) => {
-      console.log('SignalR Reconnected:', connectionId);
-      this.isConnected = true;
-      this.reconnectAttempts = 0;
-      this.emit('connectionStateChanged', { connected: true });
-    });
-
-    this.connection.onclose((error) => {
-      console.log('SignalR Connection Closed:', error);
-      this.isConnected = false;
-      this.emit('connectionStateChanged', { connected: false, error });
-      
-      // Attempt manual reconnection if needed
-      if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        this.attemptReconnection();
-      }
-    });
-
-    // Chat event handlers
     this.connection.on('ReceiveMessage', (message) => {
+      console.log('Received ReceiveMessage event:', message);
       this.emit('messageReceived', message);
     });
 
     this.connection.on('MessageRead', (messageId, userId) => {
+      console.log('Received MessageRead event:', { messageId, userId });
       this.emit('messageRead', { messageId, userId });
     });
 
     this.connection.on('ChatRead', (chatId, userId) => {
+      console.log('Received ChatRead event:', { chatId, userId });
       this.emit('chatRead', { chatId, userId });
     });
 
     this.connection.on('UserTyping', (chatId, userId, userName) => {
+      console.log('Received UserTyping event:', { chatId, userId, userName });
       this.emit('userTyping', { chatId, userId, userName });
     });
 
     this.connection.on('UserStoppedTyping', (chatId, userId) => {
+      console.log('Received UserStoppedTyping event:', { chatId, userId });
       this.emit('userStoppedTyping', { chatId, userId });
     });
 
     this.connection.on('UserOnline', (userId) => {
+      console.log('Received UserOnline event:', { userId });
       this.emit('userOnline', { userId });
     });
 
     this.connection.on('UserOffline', (userId) => {
+      console.log('Received UserOffline event:', { userId });
       this.emit('userOffline', { userId });
     });
 
     this.connection.on('NewChat', (chatId) => {
+      console.log('🔔 Received NewChat event in ChatService:', chatId);
+      console.log('🔔 Current connection state:', this.connection.state);
+      console.log('🔔 Emitting newChat event to listeners');
       this.emit('newChat', { chatId });
     });
 
+    this.connection.on('NewChatGlobal', (data) => {
+      console.log('🔔 Received NewChatGlobal event in ChatService:', data);
+      // Check if this notification is for the current user
+      // You'd need to get the current user ID and compare with data.forUserId
+      this.emit('newChat', { chatId: data.chatId });
+    });
+
     this.connection.on('JoinedChat', (chatId) => {
+      console.log('Received JoinedChat event:', { chatId });
       this.emit('joinedChat', { chatId });
     });
 
     this.connection.on('LeftChat', (chatId) => {
+      console.log('Received LeftChat event:', { chatId });
       this.emit('leftChat', { chatId });
     });
 
     this.connection.on('UnreadCountUpdate', (count) => {
+      console.log('Received UnreadCountUpdate event:', { count });
       this.emit('unreadCountUpdate', { count });
     });
 
-    this.connection.on('Error', (message) => {
-      this.emit('error', { message });
+    this.connection.on('Error', (error) => {
+      console.error('SignalR Error:', error);
+    });
+
+    // Add a catch-all listener for debugging
+    this.connection.onclose((error) => {
+      console.log('SignalR connection closed:', error);
+    });
+
+    this.connection.onreconnecting((error) => {
+      console.log('SignalR reconnecting:', error);
+    });
+
+    this.connection.onreconnected((connectionId) => {
+      console.log('SignalR reconnected with connection ID:', connectionId);
     });
   }
 

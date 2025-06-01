@@ -8,6 +8,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 var credentialPath = Path.Combine(Directory.GetCurrentDirectory(), "serviceAccountKey.json");
@@ -27,6 +28,9 @@ builder.Services.AddSignalR(options =>
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
     options.HandshakeTimeout = TimeSpan.FromSeconds(15);
 });
+
+// Configure SignalR User ID Provider
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 // Add Response Compression
 builder.Services.AddResponseCompression(options =>

@@ -52,8 +52,13 @@ namespace api.Controllers
                         {
                             var displayName = participant.Name;
 
+                            // If the participant is an admin, show "Support Team"
+                            if (participant.Role == "Admin")
+                            {
+                                displayName = "Support Team";
+                            }
                             // If the participant is a seller, get store name
-                            if (participant.Role == "Seller")
+                            else if (participant.Role == "Seller")
                             {
                                 var seller = await _sellerRepository.GetSellerByUserIdAsync(participantId);
                                 if (seller != null && !string.IsNullOrEmpty(seller.StoreName))
@@ -164,8 +169,13 @@ namespace api.Controllers
                     {
                         var displayName = participant.Name;
 
+                        // If the participant is an admin, show "Support Team"
+                        if (participant.Role == "Admin")
+                        {
+                            displayName = "Support Team";
+                        }
                         // If the participant is a seller, get store name
-                        if (participant.Role == "Seller")
+                        else if (participant.Role == "Seller")
                         {
                             var seller = await _sellerRepository.GetSellerByUserIdAsync(participantId);
                             if (seller != null && !string.IsNullOrEmpty(seller.StoreName))
@@ -376,7 +386,6 @@ namespace api.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving unread count", error = ex.Message });
             }
         }
-
         [HttpPost("find-or-create")]
         public async Task<ActionResult<ChatDto>> FindOrCreateChat([FromBody] CreateChatDto createChatDto)
         {
@@ -384,9 +393,30 @@ namespace api.Controllers
             {
                 var userId = GetCurrentUserId();
                 if (string.IsNullOrEmpty(userId))
-                    return Unauthorized(); var chat = await _chatRepository.GetOrCreateChatAsync(createChatDto.Participants, createChatDto.ChatType, userId);
+                    return Unauthorized();
+
+                // Get or create chat with status indicating if it's new
+                var (chat, isNewChat) = await _chatRepository.GetOrCreateChatWithStatusAsync(createChatDto.Participants, createChatDto.ChatType, userId);
                 if (chat == null)
-                    return StatusCode(500, "Failed to create or find chat");
+                    return StatusCode(500, "Failed to create or find chat");                // If this is a new chat, notify all participants
+                if (isNewChat)
+                {
+                    Console.WriteLine($"New chat created: {chat.ChatId}, notifying participants: {string.Join(", ", chat.Participants)}");
+
+                    foreach (var participantId in chat.Participants)
+                    {
+                        try
+                        {
+                            // Send to specific user via SignalR User Identity
+                            await _hubContext.Clients.User(participantId).SendAsync("NewChat", chat.ChatId);
+                            Console.WriteLine($"Sent NewChat notification to user {participantId} via Clients.User");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error sending NewChat notification to {participantId}: {ex.Message}");
+                        }
+                    }
+                }
 
                 return Ok(new ChatDto
                 {
@@ -443,7 +473,6 @@ namespace api.Controllers
                 return "Unknown User";
             }
         }
-
         private async Task<string> GetDisplayNameAsync(string userId)
         {
             if (string.IsNullOrEmpty(userId))
@@ -454,6 +483,12 @@ namespace api.Controllers
                 var user = await _userRepository.GetByIdAsync(userId);
                 if (user == null)
                     return "Unknown User";
+
+                // If the user is an admin, return "Support Team"
+                if (user.Role == "Admin")
+                {
+                    return "Support Team";
+                }
 
                 // If the user is a seller, return store name instead of user name
                 if (user.Role == "Seller")

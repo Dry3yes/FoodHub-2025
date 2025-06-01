@@ -23,11 +23,28 @@ export default function AdminDashboard() {
     totalTickets: 0,
     chartData: []
   })
+  const [isLoading, setIsLoading] = useState(false)
 
-  const [isLoading, setIsLoading] = useState(false)  // Fetch analytics data
-  const fetchAnalyticsData = async () => {
+  // Comprehensive refresh function that refreshes all dashboard data
+  const refreshAllData = async () => {
     try {
       setIsLoading(true)
+      // Fetch all data simultaneously for faster refresh
+      await Promise.all([
+        fetchAnalyticsData(),
+        fetchSupportTickets(),
+        fetchSellerApplications()
+      ])
+    } catch (error) {
+      console.error('Error refreshing all data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Fetch analytics data
+  const fetchAnalyticsData = async () => {
+    try {
       const response = await getAnalytics()
       if (response.success) {
         setAnalyticsData(prev => ({
@@ -43,8 +60,6 @@ export default function AdminDashboard() {
       await fetchPendingTicketsCount()
     } catch (error) {
       console.error('Error fetching analytics:', error)
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -182,18 +197,13 @@ const sidebarItems = [
   { id: "help", label: "Help Tickets", icon: <img src="/support.png" alt="Help" style={{ width: 20, height: 20 }} /> },
   { id: "approve", label: "Approve Sellers", icon: <img src="/approve.png" alt="Approve" style={{ width: 20, height: 20 }} /> },
 ]
-
   // Load data on component mount
   useEffect(() => {
-    fetchAnalyticsData()
-    fetchSupportTickets()
-    fetchSellerApplications()
+    refreshAllData()
 
     // Auto-refresh data every 30 seconds
     const interval = setInterval(() => {
-      fetchAnalyticsData()
-      fetchSupportTickets()
-      fetchSellerApplications()
+      refreshAllData()
     }, 30000)
     return () => clearInterval(interval)
   }, [])
@@ -248,9 +258,8 @@ const sidebarItems = [
           {activeTab === "overview" && (
             <div>
               <div className="page-header">
-                <h2>Admin Dashboard</h2>
-                <div className="page-actions">
-                  <button className="latest-reports-btn" onClick={fetchAnalyticsData} disabled={isLoading}>
+                <h2>Admin Dashboard</h2>                <div className="page-actions">
+                  <button className="latest-reports-btn" onClick={refreshAllData} disabled={isLoading}>
                     {isLoading ? "Loading..." : "Refresh Data"}
                   </button>
                   <button className="logout-btn" onClick={handleLogout}>
