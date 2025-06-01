@@ -90,9 +90,7 @@ const Chat = () => {
 
     const handleUnreadCountUpdate = ({ count }) => {
       setTotalUnreadCount(count);
-    };
-
-    const handleChatRead = ({ chatId, userId }) => {
+    };    const handleChatRead = ({ chatId, userId }) => {
       // Update UI to show messages as read
       setMessages(prev => ({
         ...prev,
@@ -101,6 +99,51 @@ const Chat = () => {
           isRead: msg.senderId === userId ? true : msg.isRead
         }))
       }));
+    };    const handleNewChat = async ({ chatId }) => {
+      console.log('🎯 handleNewChat called with chatId:', chatId);
+      console.log('🎯 Current chats count:', chats.length);
+      
+      try {
+        // Fetch the new chat details
+        console.log('🎯 Fetching chat details from API...');
+        const response = await fetch(`https://localhost:5001/api/chat/${chatId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const newChat = await response.json();
+          console.log('🎯 Fetched new chat details:', newChat);
+          
+          // Add the new chat to the existing chats list
+          setChats(prevChats => {
+            console.log('🎯 Previous chats:', prevChats.length);
+            
+            // Check if chat already exists to avoid duplicates
+            const chatExists = prevChats.some(chat => chat.chatId === newChat.chatId);
+            if (chatExists) {
+              console.log('🎯 Chat already exists, skipping addition');
+              return prevChats;
+            }
+            
+            console.log('🎯 Adding new chat to the list');
+            // Add new chat at the beginning since it's the most recent
+            const updatedChats = [newChat, ...prevChats];
+            console.log('🎯 Updated chats count:', updatedChats.length);
+            return updatedChats;
+          });
+        } else {
+          console.error('🎯 Failed to fetch new chat details, status:', response.status);
+          // Fallback to reloading all chats
+          loadUserChats();
+        }
+      } catch (error) {
+        console.error('Error handling new chat:', error);
+        // Fallback to reloading all chats
+        loadUserChats();
+      }
     };
 
     // Register event listeners
@@ -112,8 +155,7 @@ const Chat = () => {
     chatService.on('userOffline', handleUserOffline);
     chatService.on('unreadCountUpdate', handleUnreadCountUpdate);
     chatService.on('chatRead', handleChatRead);
-
-    return () => {
+    chatService.on('newChat', handleNewChat);    return () => {
       chatService.off('connectionStateChanged', handleConnectionStateChanged);
       chatService.off('messageReceived', handleMessageReceived);
       chatService.off('userTyping', handleUserTyping);
@@ -122,6 +164,7 @@ const Chat = () => {
       chatService.off('userOffline', handleUserOffline);
       chatService.off('unreadCountUpdate', handleUnreadCountUpdate);
       chatService.off('chatRead', handleChatRead);
+      chatService.off('newChat', handleNewChat);
     };
   }, [activeChat]);
 
@@ -283,10 +326,18 @@ const Chat = () => {
       minute: '2-digit' 
     });
   };
-
   // Get chat display name
   const getChatDisplayName = (chat) => {
     if (chat.participantDetails && chat.participantDetails.length > 0) {
+      // Find the participant who is NOT the current user
+      const currentUserId = getCurrentUserId();
+      const otherParticipant = chat.participantDetails.find(p => p.userId !== currentUserId);
+      
+      if (otherParticipant) {
+        return otherParticipant.name;
+      }
+      
+      // Fallback to first participant if can't find other
       return chat.participantDetails[0].name;
     }
     return 'Unknown User';
