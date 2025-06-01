@@ -2,8 +2,10 @@ using api.Dtos.Support;
 using api.Dtos.Chat;
 using api.Interfaces;
 using api.Mappers;
+using api.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace api.Controllers
@@ -16,15 +18,21 @@ namespace api.Controllers
         private readonly ISupportTicketRepository _supportTicketRepository;
         private readonly IUserRepository _userRepository;
         private readonly IChatRepository _chatRepository;
+        private readonly ISellerRepository _sellerRepository;
+        private readonly IHubContext<ChatHub> _hubContext;
         private readonly ILogger<SupportController> _logger; public SupportController(
             ISupportTicketRepository supportTicketRepository,
             IUserRepository userRepository,
             IChatRepository chatRepository,
+            ISellerRepository sellerRepository,
+            IHubContext<ChatHub> hubContext,
             ILogger<SupportController> logger)
         {
             _supportTicketRepository = supportTicketRepository;
             _userRepository = userRepository;
             _chatRepository = chatRepository;
+            _sellerRepository = sellerRepository;
+            _hubContext = hubContext;
             _logger = logger;
         }
 
@@ -219,12 +227,15 @@ namespace api.Controllers
                         {
                             // Get or create chat between admin and user
                             var participants = new List<string> { adminUser.UserId, ticket.UserId };
-                            var chat = await _chatRepository.GetOrCreateChatAsync(participants, "support");
+                            var (chat, isNewChat) = await _chatRepository.GetOrCreateChatWithStatusAsync(participants, "support");
 
                             if (chat != null)
                             {
                                 // Send message with support ticket context
                                 var messageContent = $"Support Ticket Response:\n\nSubject: {ticket.Subject}\nTicket ID: {ticket.TicketId}\nStatus: {ticket.Status}\n\nResponse: {statusDto.AdminResponse}";
+
+                                // Get proper display name for admin
+                                var adminDisplayName = await GetDisplayNameAsync(adminUser.UserId);
 
                                 var sendMessageDto = new SendMessageDto
                                 {
@@ -233,7 +244,26 @@ namespace api.Controllers
                                     MessageType = "text"
                                 };
 
-                                await _chatRepository.SendMessageAsync(sendMessageDto, adminUser.UserId, adminUser.Name);
+                                var message = await _chatRepository.SendMessageAsync(sendMessageDto, adminUser.UserId, adminDisplayName);
+
+                                // If this is a new chat, notify the user about the new chat
+                                if (isNewChat)
+                                {
+                                    await _hubContext.Clients.User(ticket.UserId).SendAsync("NewChat", chat.ChatId);
+                                }
+
+                                // Notify the user about the new message via SignalR
+                                await _hubContext.Clients.Group($"chat_{chat.ChatId}").SendAsync("ReceiveMessage", new MessageDto
+                                {
+                                    MessageId = message.MessageId,
+                                    ChatId = message.ChatId,
+                                    SenderId = message.SenderId,
+                                    SenderName = message.SenderName,
+                                    Content = message.Content,
+                                    MessageType = message.MessageType,
+                                    Timestamp = message.Timestamp,
+                                    IsRead = false
+                                });
                             }
                         }
                     }
@@ -283,6 +313,41 @@ namespace api.Controllers
             {
                 _logger.LogError(ex, "Error deleting support ticket {TicketId}", ticketId);
                 return StatusCode(500, new { success = false, message = "Error deleting ticket" });
+            }
+        }
+
+        private async Task<string> GetDisplayNameAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return "Unknown User";
+
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                    return "Unknown User";
+
+                // If the user is an admin, return "Support Team"
+                if (user.Role == "Admin")
+                {
+                    return "Support Team";
+                }
+
+                // If the user is a seller, return store name instead of user name
+                if (user.Role == "Seller")
+                {
+                    var seller = await _sellerRepository.GetSellerByUserIdAsync(userId);
+                    if (seller != null && !string.IsNullOrEmpty(seller.StoreName))
+                    {
+                        return seller.StoreName;
+                    }
+                }
+
+                return user.Name ?? "Unknown User";
+            }
+            catch
+            {
+                return "Unknown User";
             }
         }
     }
