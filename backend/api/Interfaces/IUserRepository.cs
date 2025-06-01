@@ -12,5 +12,6 @@ namespace api.Interfaces
         Task<bool> UpdateUserAsync(User user);
         Task<bool> UpdateUserWithEmailAsync(User originalUser, User updatedUser);
         Task<(string? Token, string? RefreshToken)> RefreshTokenAsync(string userId, string refreshToken);
+        Task<bool> SendPasswordResetEmailAsync(string email);
     }
 }

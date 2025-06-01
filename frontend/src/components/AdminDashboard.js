@@ -15,31 +15,16 @@ export default function AdminDashboard() {
 
   // Seller approval state
   const [pendingUsers, setPendingUsers] = useState([])
-
   // Analytics data
   const [analyticsData, setAnalyticsData] = useState({
     activeUsers: 0,
     activeSellers: 0,
     pendingApprovals: 0,
     totalTickets: 0,
-    chartData: [
-      { month: "Jan", mobile: 4200, desktop: 2800 },
-      { month: "Feb", mobile: 4800, desktop: 2600 },
-      { month: "Mar", mobile: 5100, desktop: 2400 },
-      { month: "Apr", mobile: 5600, desktop: 2200 },
-      { month: "May", mobile: 6200, desktop: 2000 },
-      { month: "Jun", mobile: 6800, desktop: 1900 },
-      { month: "Jul", mobile: 7100, desktop: 1800 },
-      { month: "Aug", mobile: 7800, desktop: 1600 },
-      { month: "Sep", mobile: 8200, desktop: 1500 },
-      { month: "Oct", mobile: 8600, desktop: 1400 },
-      { month: "Nov", mobile: 9100, desktop: 1300 },
-      { month: "Dec", mobile: 9500, desktop: 1200 },
-    ],
+    chartData: []
   })
 
-  const [isLoading, setIsLoading] = useState(false)
-  // Fetch analytics data
+  const [isLoading, setIsLoading] = useState(false)  // Fetch analytics data
   const fetchAnalyticsData = async () => {
     try {
       setIsLoading(true)
@@ -49,7 +34,8 @@ export default function AdminDashboard() {
           ...prev,
           activeUsers: response.data.activeUsers,
           activeSellers: response.data.activeSellers,
-          pendingApprovals: response.data.pendingApprovals
+          pendingApprovals: response.data.pendingApprovals,
+          chartData: response.data.chartData || []
         }))
       }
       
@@ -316,36 +302,14 @@ const sidebarItems = [
                     <p className="admin-stat-change neutral">Need attention</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Chart Section */}
-              {/* <div className="chart-card">
+              </div>              {/* Chart Section */}
+              <div className="chart-card">
                 <div className="chart-header">
-                  <h3>Platform Usage Chart</h3>
+                  <h3>Daily New Users & Sellers</h3>
                   <div className="chart-controls">
                     <div className="chart-toggles">
-                      <button
-                        className={`chart-toggle ${selectedChart === "mobile" ? "active" : ""}`}
-                        onClick={() => setSelectedChart("mobile")}
-                      >
-                        📱 Mobile
-                      </button>
-                      <button
-                        className={`chart-toggle ${selectedChart === "desktop" ? "active" : ""}`}
-                        onClick={() => setSelectedChart("desktop")}
-                      >
-                        💻 Desktop
-                      </button>
+                      <span className="chart-info">📊 Registration Activity</span>
                     </div>
-                    <select
-                      className="chart-period-select"
-                      value={chartPeriod}
-                      onChange={(e) => setChartPeriod(e.target.value)}
-                    >
-                      <option value="monthly">Monthly</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="daily">Daily</option>
-                    </select>
                   </div>
                 </div>
                 <div className="chart-content">
@@ -360,54 +324,64 @@ const sidebarItems = [
                       }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#666" }} />
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 12, fill: "#666" }} 
+                      />
                       <YAxis
                         axisLine={false}
                         tickLine={false}
                         tick={{ fontSize: 12, fill: "#666" }}
-                        tickFormatter={(value) => `${(value / 1000).toFixed(1)}k`}
+                        allowDecimals={false}
                       />
                       <Tooltip content={<CustomTooltip />} />
                       <Line
                         type="monotone"
-                        dataKey="mobile"
+                        dataKey="newUsers"
                         stroke="#3b82f6"
                         strokeWidth={3}
                         dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
                         activeDot={{ r: 6, stroke: "#3b82f6", strokeWidth: 2 }}
-                        name="Mobile"
+                        name="New Users"
                       />
                       <Line
                         type="monotone"
-                        dataKey="desktop"
-                        stroke="#f59e0b"
+                        dataKey="newSellers"
+                        stroke="#10b981"
                         strokeWidth={3}
-                        dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
-                        activeDot={{ r: 6, stroke: "#f59e0b", strokeWidth: 2 }}
-                        name="Desktop"
+                        dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: "#10b981", strokeWidth: 2 }}
+                        name="New Sellers"
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="chart-summary">
                   <div className="summary-item">
-                    <span className="summary-label">Mobile Growth:</span>
-                    <span className="summary-value positive">+126.2%</span>
+                    <span className="summary-label">Total New Users (Last 2 weeks):</span>
+                    <span className="summary-value positive">
+                      {analyticsData.chartData.reduce((sum, day) => sum + (day.newUsers || 0), 0)}
+                    </span>
                   </div>
                   <div className="summary-item">
-                    <span className="summary-label">Desktop Trend:</span>
-                    <span className="summary-value negative">-57.1%</span>
+                    <span className="summary-label">Total New Sellers (Last 2 weeks):</span>
+                    <span className="summary-value positive">
+                      {analyticsData.chartData.reduce((sum, day) => sum + (day.newSellers || 0), 0)}
+                    </span>
                   </div>
                   <div className="summary-item">
-                    <span className="summary-label">Total Sessions:</span>
+                    <span className="summary-label">Average Daily Growth:</span>
                     <span className="summary-value">
-                      {(
-                        analyticsData.chartData[11]?.mobile + analyticsData.chartData[11]?.desktop || 0
-                      ).toLocaleString()}
+                      {analyticsData.chartData.length > 0 
+                        ? Math.round((analyticsData.chartData.reduce((sum, day) => sum + (day.newUsers || 0) + (day.newSellers || 0), 0)) / analyticsData.chartData.length * 100) / 100
+                        : 0
+                      } registrations/day
                     </span>
                   </div>
                 </div>
-              </div> */}
+              </div>
             </div>
           )}
 

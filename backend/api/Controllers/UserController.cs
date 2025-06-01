@@ -175,6 +175,43 @@ namespace api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("forgot-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto forgotPasswordDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid email format"
+                    });
+                }
+
+                var result = await _userRepository.SendPasswordResetEmailAsync(forgotPasswordDto.Email);
+
+                // Always return success to avoid revealing if email exists
+                return Ok(new
+                {
+                    success = true,
+                    message = "If an account with that email exists, a password reset link has been sent"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing forgot password request for email: {Email}", forgotPasswordDto.Email);
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred while processing your request"
+                });
+            }
+        }
+
         [HttpGet]
         [Route("users")]
         [Authorize(Roles = "Admin")]
@@ -325,7 +362,6 @@ namespace api.Controllers
                 });
             }
         }
-
         [HttpGet]
         [Route("analytics")]
         [Authorize(Roles = "Admin")]
@@ -341,6 +377,29 @@ namespace api.Controllers
                 var totalActiveSellers = users.Count(u => u.Role == "Seller" && u.IsActive);
                 var pendingApprovals = sellers.Count();
 
+                // Generate daily new users/sellers chart data for the last 14 days (excluding Sundays)
+                var chartData = new List<object>();
+                var endDate = DateTime.Now.Date;
+                var startDate = endDate.AddDays(-13); // Get 14 days of data
+
+                for (var date = startDate; date <= endDate; date = date.AddDays(1))
+                {
+                    // Skip Sundays (DayOfWeek.Sunday = 0)
+                    if (date.DayOfWeek == DayOfWeek.Sunday)
+                        continue;
+
+                    var newUsers = users.Count(u => u.CreatedAt.Date == date && u.Role == "User");
+                    var newSellers = users.Count(u => u.CreatedAt.Date == date && u.Role == "Seller");
+
+                    chartData.Add(new
+                    {
+                        date = date.ToString("MM/dd"),
+                        dayName = date.ToString("ddd"),
+                        newUsers = newUsers,
+                        newSellers = newSellers
+                    });
+                }
+
                 return Ok(new
                 {
                     success = true,
@@ -348,7 +407,8 @@ namespace api.Controllers
                     {
                         activeUsers = totalActiveUsers,
                         activeSellers = totalActiveSellers,
-                        pendingApprovals = pendingApprovals
+                        pendingApprovals = pendingApprovals,
+                        chartData = chartData
                     }
                 });
             }
