@@ -362,7 +362,6 @@ namespace api.Controllers
                 });
             }
         }
-
         [HttpGet]
         [Route("analytics")]
         [Authorize(Roles = "Admin")]
@@ -378,6 +377,29 @@ namespace api.Controllers
                 var totalActiveSellers = users.Count(u => u.Role == "Seller" && u.IsActive);
                 var pendingApprovals = sellers.Count();
 
+                // Generate daily new users/sellers chart data for the last 14 days (excluding Sundays)
+                var chartData = new List<object>();
+                var endDate = DateTime.Now.Date;
+                var startDate = endDate.AddDays(-13); // Get 14 days of data
+
+                for (var date = startDate; date <= endDate; date = date.AddDays(1))
+                {
+                    // Skip Sundays (DayOfWeek.Sunday = 0)
+                    if (date.DayOfWeek == DayOfWeek.Sunday)
+                        continue;
+
+                    var newUsers = users.Count(u => u.CreatedAt.Date == date && u.Role == "User");
+                    var newSellers = users.Count(u => u.CreatedAt.Date == date && u.Role == "Seller");
+
+                    chartData.Add(new
+                    {
+                        date = date.ToString("MM/dd"),
+                        dayName = date.ToString("ddd"),
+                        newUsers = newUsers,
+                        newSellers = newSellers
+                    });
+                }
+
                 return Ok(new
                 {
                     success = true,
@@ -385,7 +407,8 @@ namespace api.Controllers
                     {
                         activeUsers = totalActiveUsers,
                         activeSellers = totalActiveSellers,
-                        pendingApprovals = pendingApprovals
+                        pendingApprovals = pendingApprovals,
+                        chartData = chartData
                     }
                 });
             }
