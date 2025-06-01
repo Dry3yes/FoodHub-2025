@@ -133,5 +133,26 @@ namespace api.Services
                 return false;
             }
         }
+
+        public async Task<bool> SendPasswordResetEmailAsync(string email)
+        {
+            try
+            {
+                await _authProvider.SendPasswordResetEmailAsync(email);
+                _logger.LogInformation("Password reset email sent successfully to: {Email}", email);
+                return true;
+            }
+            catch (FirebaseAuth.FirebaseAuthException ex) when (ex.Reason == FirebaseAuth.AuthErrorReason.UserNotFound)
+            {
+                _logger.LogWarning("Password reset attempted for non-existent email: {Email}", email);
+                // Return true to avoid revealing if email exists for security reasons
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending password reset email to: {Email}", email);
+                return false;
+            }
+        }
     }
 }

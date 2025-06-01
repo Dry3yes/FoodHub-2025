@@ -285,5 +285,20 @@ namespace api.Repositories
                 throw;
             }
         }
+
+        public async Task<bool> SendPasswordResetEmailAsync(string email)
+        {
+            try
+            {
+                var result = await _firebaseAuthService.SendPasswordResetEmailAsync(email);
+                _logger.LogInformation("Password reset email request processed for email: {Email}", email);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending password reset email for: {Email}", email);
+                return false;
+            }
+        }
     }
 }

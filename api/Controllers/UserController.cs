@@ -175,6 +175,43 @@ namespace api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("forgot-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto forgotPasswordDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Invalid email format"
+                    });
+                }
+
+                var result = await _userRepository.SendPasswordResetEmailAsync(forgotPasswordDto.Email);
+
+                // Always return success to avoid revealing if email exists
+                return Ok(new
+                {
+                    success = true,
+                    message = "If an account with that email exists, a password reset link has been sent"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing forgot password request for email: {Email}", forgotPasswordDto.Email);
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred while processing your request"
+                });
+            }
+        }
+
         [HttpGet]
         [Route("users")]
         [Authorize(Roles = "Admin")]
