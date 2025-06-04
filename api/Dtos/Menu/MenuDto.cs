@@ -9,7 +9,7 @@ namespace api.Dtos.Menu
         public double Price { get; set; }
         public string ImageURL { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
-        public int Stock { get; set; }
+        public bool IsOutOfStock { get; set; } = false;
         public DateTime CreatedAt { get; set; }
     }
 }

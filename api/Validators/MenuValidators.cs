@@ -17,15 +17,10 @@ namespace api.Validators
             RuleFor(x => x.ImageURL)
                 .Must(uri => string.IsNullOrEmpty(uri) || Uri.TryCreate(uri, UriKind.Absolute, out _))
                 .WithMessage("Image URL must be a valid URL")
-                .When(x => !string.IsNullOrEmpty(x.ImageURL));
-
-            RuleFor(x => x.Category)
+                .When(x => !string.IsNullOrEmpty(x.ImageURL)); RuleFor(x => x.Category)
                 .NotEmpty().WithMessage("Category is required")
                 .Must(category => new[] { "Makanan", "Minuman" }.Contains(category))
                 .WithMessage("Category must be one of: Makanan, Minuman");
-
-            RuleFor(x => x.Stock)
-                .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative");
         }
     }
 
@@ -49,9 +44,6 @@ namespace api.Validators
                 .NotEmpty().WithMessage("Category is required")
                 .Must(category => new[] { "Makanan", "Minuman" }.Contains(category))
                 .WithMessage("Category must be one of: Makanan, Minuman");
-
-            RuleFor(x => x.Stock)
-                .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative");
         }
     }
 }

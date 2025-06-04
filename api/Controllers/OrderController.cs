@@ -65,9 +65,7 @@ namespace api.Controllers
                 if (cart == null || !cart.Items.Any())
                 {
                     return BadRequest(new { success = false, message = "Cart is empty" });
-                }
-
-                // Check stock availability for all items
+                }                // Check availability for all items
                 foreach (var cartItem in cart.Items)
                 {
                     var menu = await _menuRepository.GetMenuByIdAsync(cartItem.MenuId);
@@ -76,26 +74,15 @@ namespace api.Controllers
                         return BadRequest(new { success = false, message = $"Menu item '{cartItem.MenuItemName}' not found" });
                     }
 
-                    if (menu.Stock < cartItem.Quantity)
+                    if (menu.IsOutOfStock)
                     {
-                        return BadRequest(new { success = false, message = $"Insufficient stock for '{cartItem.MenuItemName}'" });
+                        return BadRequest(new { success = false, message = $"'{cartItem.MenuItemName}' is currently out of stock" });
                     }
                 }
 
                 // Create the order from the cart
                 var order = cart.ToOrderFromCart(createOrderDto.Notes, createOrderDto.Name, createOrderDto.Phone);
                 var createdOrder = await _orderRepository.CreateOrderAsync(order);
-
-                // Update stock for each menu item
-                foreach (var orderItem in order.Items)
-                {
-                    var menu = await _menuRepository.GetMenuByIdAsync(orderItem.MenuId);
-                    if (menu != null)
-                    {
-                        menu.Stock -= orderItem.Quantity;
-                        await _menuRepository.UpdateMenuAsync(menu);
-                    }
-                }
 
                 // Clear the cart after successful checkout
                 await _cartRepository.ClearCartAsync(userId);

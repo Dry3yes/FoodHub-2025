@@ -338,5 +338,66 @@ namespace api.Controllers
                 return StatusCode(500, new { success = false, message = "Error searching menus" });
             }
         }
+
+        [HttpPatch]
+        [Route("toggle-stock-status/{id}")]
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> ToggleStockStatus(string id)
+        {
+            try
+            {
+                // Get Firebase UID from claims
+                var firebaseUid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(firebaseUid))
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated" });
+                }
+
+                // Get the seller information based on the Firebase UID
+                var users = await _userRepository.GetAllAsync();
+                var user = users.FirstOrDefault(u => u.FirebaseUid == firebaseUid);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                // Get seller information based on the UserId
+                var sellerEntity = await _sellerRepository.GetSellerByUserIdAsync(user.UserId);
+                if (sellerEntity == null)
+                {
+                    return NotFound(new { success = false, message = "Seller not found for this user. You may need to apply to become a seller first." });
+                }
+
+                var menu = await _menuRepository.GetMenuByIdAsync(id);
+                if (menu == null)
+                {
+                    return NotFound(new { success = false, message = "Menu not found" });
+                }
+
+                // Verify that the authenticated seller owns this menu
+                if (menu.SellerId != sellerEntity.SellerId)
+                {
+                    return Forbid();
+                }
+
+                // Toggle the out-of-stock status
+                menu.IsOutOfStock = !menu.IsOutOfStock;
+
+                await _menuRepository.UpdateMenuAsync(menu);
+
+                var statusMessage = menu.IsOutOfStock ? "marked as out of stock" : "marked as available";
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Menu item {statusMessage} successfully",
+                    isOutOfStock = menu.IsOutOfStock
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling stock status for menu {Id}", id);
+                return StatusCode(500, new { success = false, message = "Error toggling stock status" });
+            }
+        }
     }
 }

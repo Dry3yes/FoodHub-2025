@@ -27,7 +27,7 @@ namespace api.Models
         public string Category { get; set; } = string.Empty;
 
         [FirestoreProperty]
-        public int Stock { get; set; }
+        public bool IsOutOfStock { get; set; } = false;
 
         [FirestoreProperty]
         public DateTime CreatedAt { get; set; }

@@ -16,7 +16,7 @@ namespace api.Mappers
                 Price = menuModel.Price,
                 ImageURL = menuModel.ImageURL,
                 Category = menuModel.Category,
-                Stock = menuModel.Stock,
+                IsOutOfStock = menuModel.IsOutOfStock,
                 CreatedAt = menuModel.CreatedAt
             };
         }
@@ -29,7 +29,7 @@ namespace api.Mappers
                 Price = menuDto.Price,
                 ImageURL = menuDto.ImageURL ?? string.Empty,
                 Category = menuDto.Category,
-                Stock = menuDto.Stock,
+                IsOutOfStock = menuDto.IsOutOfStock,
                 CreatedAt = menuDto.CreatedAt
             };
         }
@@ -42,7 +42,7 @@ namespace api.Mappers
                 Price = menuDto.Price,
                 ImageURL = menuDto.ImageURL,
                 Category = menuDto.Category,
-                Stock = menuDto.Stock,
+                IsOutOfStock = menuDto.IsOutOfStock,
                 CreatedAt = menuDto.CreatedAt
             };
         }

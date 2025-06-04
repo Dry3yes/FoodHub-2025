@@ -91,14 +91,13 @@ namespace api.Controllers
                 }
 
                 // Get menu item details
-                var menu = await _menuRepository.GetMenuByIdAsync(request.MenuId);
-                if (menu == null)
+                var menu = await _menuRepository.GetMenuByIdAsync(request.MenuId); if (menu == null)
                 {
                     return NotFound(new { success = false, message = "Menu item not found" });
-                }                // Check if sufficient stock is available
-                if (menu.Stock < request.Quantity)
+                }                // Check if item is out of stock
+                if (menu.IsOutOfStock)
                 {
-                    return BadRequest(new { success = false, message = "Insufficient stock available" });
+                    return BadRequest(new { success = false, message = "Item is currently out of stock" });
                 }                // Check for single-store restriction
                 var existingCart = await _cartRepository.GetCartByUserIdAsync(userId);
                 if (existingCart != null && existingCart.Items.Count > 0)
@@ -158,16 +157,15 @@ namespace api.Controllers
                 }
 
                 // Get menu item to check stock
-                var menu = await _menuRepository.GetMenuByIdAsync(request.MenuId);
-                if (menu == null)
+                var menu = await _menuRepository.GetMenuByIdAsync(request.MenuId); if (menu == null)
                 {
                     return NotFound(new { success = false, message = "Menu item not found" });
                 }
 
-                // Check if sufficient stock is available
-                if (menu.Stock < request.Quantity)
+                // Check if item is out of stock
+                if (menu.IsOutOfStock)
                 {
-                    return BadRequest(new { success = false, message = "Insufficient stock available" });
+                    return BadRequest(new { success = false, message = "Item is currently out of stock" });
                 }
 
                 var updatedCart = await _cartRepository.UpdateCartItemAsync(userId, request.MenuId, request.Quantity);
