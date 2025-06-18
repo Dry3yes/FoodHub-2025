@@ -4,33 +4,33 @@ function Testimonials() {
   const testimonials = [
     {
       id: 1,
-      name: "Sarah Johnson",
-      image: "/Sarah.png?height=100&width=100",
-      text: "FoodHub has made ordering food so convenient! The delivery is always on time and the food arrives hot and fresh.",
+      name: "Gabriel A.R.",
+      image: "/52824834.jpeg?height=100&width=100",
+      text: "FoodHub membuat pesan makanan jadi sangat mudah! Pengirimannya selalu tepat waktu dan makanannya tiba dalam keadaan hangat.",
     },
     {
       id: 2,
-      name: "Michael Chen",
-      image: "/Michael.png?height=100&width=100",
-      text: "The customer service is exceptional! When I had an issue with my order, they resolved it immediately.",
+      name: "Luther Choo",
+      image: "/Luther.jpg?height=100&width=100",
+      text: "Layanan pelanggan sangat luar biasa! Ketika saya mengalami masalah dengan pesanan saya, mereka segera menyelesaikannya.",
     },
     {
       id: 3,
-      name: "Emily Rodriguez",
-      image: "/Emily.png?height=100&width=100",
-      text: "The customer service is exceptional! When I had an issue with my order, they resolved it immediately.",
+      name: "Farell Rafael",
+      image: "/Farell.jpg?height=100&width=100",
+      text: "Layanan pelanggan sangat luar biasa! Ketika saya mengalami masalah dengan pesanan saya, mereka segera menyelesaikannya.",
     },
     {
       id: 4,
-      name: "David Kim",
+      name: "Jason",
       image: "/David.png?height=100&width=100",
-      text: "FoodHub has the best deals and discounts. I save so much money ordering through them regularly.",
+      text: "Pesan makanan kapan aja pakai FoodHub! Prosesnya cepat, aman, dan makanan yang kamu pesan selalu diterima hangat dan nikmat.",
     },
   ]
 
   return (
     <section className="testimonials">
-      <h2>FoodHub in Their Words</h2>
+      <h2>Cerita Mereka Tentang FoodHub</h2>
 
       <div className="testimonials-container">
         {testimonials.map((testimonial) => (

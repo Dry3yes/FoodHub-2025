@@ -54,3 +54,6 @@ launchSettings.json
 # Logs
 logs/
 *.log
+
+# Publish
+publish/

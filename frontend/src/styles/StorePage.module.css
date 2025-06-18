@@ -229,7 +229,7 @@
 }
 
 .store-footer {
-  background-color: white;
+  background-color: black;
   border-top: 1px solid #e5e7eb;
   padding: 1.5rem 0;
   margin-top: auto;
@@ -244,5 +244,6 @@
 .footer-text {
   text-align: center;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: white;
+  font-weight: 500;
 }

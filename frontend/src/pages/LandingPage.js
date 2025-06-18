@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
-import Stats from '../components/Stats';
 import HowItWorks from '../components/HowItWorks';
 import AboutUs from '../components/AboutUs';
 import Testimonials from '../components/Testimonials';
@@ -26,7 +25,6 @@ function LandingPage() {
       <Header />
       <main>
         <Hero />
-        <Stats />
         <HowItWorks />
         <div id="about">
           <AboutUs />

@@ -1,4 +1,4 @@
-const apiEndpoint = "https://localhost:5001";
+const apiEndpoint = process.env.REACT_APP_API_URL || "https://api.marcelpeterson.me";
 
 const getAuthHeader = () => {
     const token = localStorage.getItem('token');

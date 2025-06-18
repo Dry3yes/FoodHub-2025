@@ -13,7 +13,6 @@ namespace api.Middlewares
             _next = next;
             _logger = logger;
         }
-
         public async Task InvokeAsync(HttpContext context)
         {
             try
@@ -23,7 +22,26 @@ namespace api.Middlewares
             catch (Exception error)
             {
                 var response = context.Response;
-                response.ContentType = "application/json";
+                response.ContentType = "application/json";                // Preserve CORS headers in error responses
+                var origin = context.Request.Headers["Origin"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(origin))
+                {
+                    var allowedOrigins = new List<string>
+                    {
+                        "https://foodhub.marcelpeterson.me",
+                        "https://www.foodhub.marcelpeterson.me",
+                        "https://foodhub-project.vercel.app",
+                        "http://localhost:3000",
+                        "http://localhost:3001"
+                    };
+
+                    if (allowedOrigins.Contains(origin) ||
+                        context.RequestServices.GetService<IWebHostEnvironment>()?.IsDevelopment() == true)
+                    {
+                        response.Headers["Access-Control-Allow-Origin"] = origin;
+                        response.Headers["Access-Control-Allow-Credentials"] = "true";
+                    }
+                }
 
                 switch (error)
                 {

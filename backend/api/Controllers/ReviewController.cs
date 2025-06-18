@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using api.Interfaces;
 using api.Models;
 using api.Dtos.Review;
+using api.Services;
 using System.Security.Claims;
 
 namespace api.Controllers
@@ -15,17 +16,20 @@ namespace api.Controllers
         private readonly IReviewRepository _reviewRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ICachedReviewService _cachedReviewService;
         private readonly ILogger<ReviewController> _logger;
 
         public ReviewController(
             IReviewRepository reviewRepository,
             IOrderRepository orderRepository,
             IUserRepository userRepository,
+            ICachedReviewService cachedReviewService,
             ILogger<ReviewController> logger)
         {
             _reviewRepository = reviewRepository;
             _orderRepository = orderRepository;
             _userRepository = userRepository;
+            _cachedReviewService = cachedReviewService;
             _logger = logger;
         }
         [HttpPost]
@@ -93,14 +97,17 @@ namespace api.Controllers
                         Rating = menuItemReviewDto.Rating,
                         Comment = menuItemReviewDto.Comment,
                         Tags = menuItemReviewDto.Tags
-                    };
-
-                    var createdMenuItemReview = await _reviewRepository.CreateMenuItemReviewAsync(menuItemReview);
+                    }; var createdMenuItemReview = await _reviewRepository.CreateMenuItemReviewAsync(menuItemReview);
                     if (createdMenuItemReview != null)
                     {
                         createdMenuItemReviews.Add(createdMenuItemReview);
+                        // Invalidate menu cache when new review is added
+                        await _cachedReviewService.InvalidateMenuCacheAsync(menuItemReviewDto.MenuId);
                     }
                 }
+
+                // Invalidate seller cache when new review is added
+                await _cachedReviewService.InvalidateSellerCacheAsync(createReviewDto.SellerId);
 
                 return Ok(new
                 {
@@ -182,12 +189,13 @@ namespace api.Controllers
             }
         }
         [HttpGet("review/seller/{sellerId}")]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "limit", "offset" })] // 5 minutes cache
         public async Task<IActionResult> GetSellerReviews(string sellerId, [FromQuery] int limit = 10, [FromQuery] int offset = 0)
         {
             try
             {
-                var reviews = await _reviewRepository.GetReviewsBySellerIdAsync(sellerId, limit, offset);
-                var sellerRating = await _reviewRepository.GetSellerRatingAsync(sellerId); var response = new SellerRatingDto
+                var reviews = await _cachedReviewService.GetReviewsBySellerIdAsync(sellerId, limit, offset);
+                var sellerRating = await _cachedReviewService.GetSellerRatingAsync(sellerId); var response = new SellerRatingDto
                 {
                     SellerId = sellerId,
                     AverageRating = sellerRating?.AverageRating ?? 0,
@@ -229,12 +237,13 @@ namespace api.Controllers
             }
         }
         [HttpGet("review/menu/{menuId}")]
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "limit", "offset" })] // 5 minutes cache
         public async Task<IActionResult> GetMenuItemReviews(string menuId, [FromQuery] int limit = 10, [FromQuery] int offset = 0)
         {
             try
             {
-                var reviews = await _reviewRepository.GetMenuItemReviewsByMenuIdAsync(menuId, limit, offset);
-                var menuItemRating = await _reviewRepository.GetMenuItemRatingAsync(menuId); var response = new MenuItemRatingDto
+                var reviews = await _cachedReviewService.GetMenuItemReviewsByMenuIdAsync(menuId, limit, offset);
+                var menuItemRating = await _cachedReviewService.GetMenuItemRatingAsync(menuId); var response = new MenuItemRatingDto
                 {
                     MenuId = menuId,
                     AverageRating = menuItemRating?.AverageRating ?? 0,

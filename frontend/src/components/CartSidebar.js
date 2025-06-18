@@ -10,9 +10,7 @@ function CartSidebar() {
   const navigate = useNavigate()
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
 
-  const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0)
-  const feeservice = 2000
-  const total = subtotal + feeservice
+  const total = items.reduce((total, item) => total + item.price * item.quantity, 0)
 
   const handleCheckout = () => {
     if (!isAuthenticated()) {
@@ -151,14 +149,6 @@ function CartSidebar() {
           <div className="cart-divider"></div>
 
           <div className="cart-summary">
-            <div className="summary-row">
-              <span>Subtotal</span>
-              <span>Rp {subtotal.toLocaleString('id-ID')}</span>
-            </div>
-            <div className="summary-row">
-              <span>Fee Service</span>
-              <span>Rp {feeservice.toLocaleString('id-ID')}</span>
-            </div>
             <div className="summary-row total">
               <span>Total</span>
               <span>Rp {total.toLocaleString('id-ID')}</span>
