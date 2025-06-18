@@ -3,9 +3,10 @@
 }
 
 .categories-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #222;
+  margin-bottom: 20px;
 }
 
 .categories-list {
@@ -46,4 +47,12 @@
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
+}
+
+.category-icon-img {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  object-fit: contain;
+  vertical-align: middle;
 }

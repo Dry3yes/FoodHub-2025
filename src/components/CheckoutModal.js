@@ -20,9 +20,7 @@ function CheckoutModal({ onClose }) {
   const [orderId, setOrderId] = useState(null);
 
   // Calculate total
-  const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
-  const feeservice = 2000;
-  const total = subtotal + feeservice;
+  const total = items.reduce((total, item) => total + item.price * item.quantity, 0)
   // Handle form submission for step 1
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -160,10 +158,6 @@ function CheckoutModal({ onClose }) {
                             <span>Rp {(item.price * item.quantity).toLocaleString("id-ID")}</span>
                         </div>
                         ))}
-                        <div className={styles['mini-item']}>
-                            <span>Fee Service</span>
-                            <span>Rp {feeservice.toLocaleString("id-ID")}</span>
-                        </div>
                     </div>
                     <div className={styles['mini-total']}>
                         <strong>Total: Rp {total.toLocaleString("id-ID")}</strong>

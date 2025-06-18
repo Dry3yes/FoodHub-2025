@@ -106,7 +106,7 @@ const Chat = () => {
       try {
         // Fetch the new chat details
         console.log('🎯 Fetching chat details from API...');
-        const response = await fetch(`https://localhost:5001/api/chat/${chatId}`, {
+        const response = await fetch(`https://api.marcelpeterson.me/api/chat/${chatId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
@@ -185,7 +185,7 @@ const Chat = () => {
   const loadUserChats = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://localhost:5001/api/chat', {
+      const response = await fetch('https://api.marcelpeterson.me/api/chat', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
@@ -207,7 +207,7 @@ const Chat = () => {
   // Load messages for a specific chat
   const loadChatMessages = async (chatId) => {
     try {
-      const response = await fetch(`https://localhost:5001/api/chat/${chatId}/messages`, {
+      const response = await fetch(`https://api.marcelpeterson.me/api/chat/${chatId}/messages`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'

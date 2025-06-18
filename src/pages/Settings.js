@@ -23,6 +23,11 @@ const Settings = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [isUserSeller, setIsUserSeller] = useState(false);
+  
+  // PDF Modal state
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfType, setPdfType] = useState(''); // 'terms' or 'privacy'
+  
 
   // Check if the user is already a seller
   useEffect(() => {
@@ -48,6 +53,17 @@ const Settings = () => {
       setEmail(user.email);
     }
   }, [navigate, location.pathname]);
+
+  // Handle PDF modal
+  const openPdfModal = (type) => {
+    setPdfType(type);
+    setShowPdfModal(true);
+  };
+
+  const closePdfModal = () => {
+    setShowPdfModal(false);
+    setPdfType('');
+  };
 
   // Handle face image upload for seller mode
   const handleImageUpload = (index, e) => {
@@ -209,19 +225,61 @@ const Settings = () => {
     setIsSellerMode(!isSellerMode);
   };
 
+  // PDF Modal Component
+  const PdfModal = () => {
+    if (!showPdfModal) return null;
+
+    // Updated PDF URL paths - langsung dari public folder
+    const pdfUrl = pdfType === 'terms' 
+      ? '/terms.pdf'  // File terms.pdf di public folder
+      : '/privacy-policy.pdf'; // Atau sesuaikan dengan nama file privacy policy Anda
+
+    const title = pdfType === 'terms' 
+      ? 'Terms & Conditions' 
+      : 'Privacy Policy';
+
+    return (
+      <div className="pdf-modal-overlay" onClick={closePdfModal}>
+        <div className="pdf-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="pdf-modal-header">
+            <h3>{title}</h3>
+            <button className="pdf-modal-close" onClick={closePdfModal}>
+              ×
+            </button>
+          </div>
+          <div className="pdf-modal-body">
+            <iframe
+              src={pdfUrl}
+              width="100%"
+              height="600px"
+              title={title}
+              onError={(e) => {
+                console.error('Error loading PDF:', e);
+                setError('Failed to load PDF. Please make sure the file exists in the public folder.');
+              }}
+            />
+          </div>
+          <div className="pdf-modal-footer">
+            <button className="pdf-download-btn">
+              <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">
+                Download PDF
+              </a>
+            </button>
+            <button className="pdf-close-btn" onClick={closePdfModal}>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <Header />
       <div className="settings-page">
       {/* Left Sidebar */}
       <div className="settings-sidebar">
-        {/* <div className="user-profile">
-          <div className="profile-picture">
-            <img src="/Images/User_Profile_Picture.png" alt="User" />
-          </div>
-          <button className="change-profile-btn">Change Profile</button>
-        </div> */}
-
         <nav className="sidebar-nav">
           <ul>
             <label>My Account</label>
@@ -380,8 +438,25 @@ const Settings = () => {
                   </label>
                 </div>
                 <p className="terms-notice">
-                  By clicking, you agree to the <a href="#terms">Terms & Conditions</a> and 
-                  <a href="#privacy"> Privacy Policy</a>
+                  By clicking, you agree to the{' '}
+                  <a 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openPdfModal('terms');
+                    }}
+                  >
+                    Terms & Conditions
+                  </a> {' '}
+                  <a 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openPdfModal('privacy');
+                    }}
+                  >
+                  
+                  </a>
                 </p>
                 
                 <ul className="terms-list">
@@ -433,6 +508,9 @@ const Settings = () => {
           </div>
         )}
       </div>
+
+      {/* PDF Modal */}
+      <PdfModal />
     </div>
     </>
   );

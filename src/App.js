@@ -26,7 +26,7 @@ const AppContent = () => {
   
   return (
     <>
-      <Routes>
+      <Routes>        
         <Route path="/" element={<Home />} />
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/store/:id" element={<StorePage />} />

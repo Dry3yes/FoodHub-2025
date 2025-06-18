@@ -21,7 +21,7 @@
 }
 
 .support-header h1 {
-  color: #2c3e50;
+  color: black;
   font-size: 2.5rem;
   margin-bottom: 15px;
   font-weight: 600;
@@ -59,7 +59,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #2c3e50;
+  color: black;
   font-size: 0.9rem;
 }
 
@@ -154,14 +154,14 @@
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: red;
   color: white;
-  border-color: #007bff;
+  border-color: blac;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #0056b3;
-  border-color: #0056b3;
+  background-color: #c62828;
+  border-color: #c62828;
   transform: translateY(-1px);
   box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
 }
@@ -175,12 +175,12 @@
 
 .btn-secondary {
   background-color: transparent;
-  color: #6c757d;
+  color: black;
   border-color: #6c757d;
 }
 
 .btn-secondary:hover {
-  background-color: #6c757d;
+  background-color: black;
   color: white;
   transform: translateY(-1px);
 }

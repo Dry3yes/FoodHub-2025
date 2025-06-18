@@ -94,26 +94,26 @@ const SupportPage = () => {
       <Header />
       <div className="support-container">
         <div className="support-header">
-          <h1>Support Center</h1>
-          <p>Having trouble? We're here to help! Submit a support ticket and our team will get back to you as soon as possible.</p>
+          <h1>Pusat Bantuan</h1>
+          <p>Jika Anda mengalami masalah, kami siap membantu! Kirim tiket dukungan dan tim kami akan menghubungi Anda secepatnya.</p>
         </div>
 
         {submitStatus === 'success' && (
           <div className="alert alert-success">
-            <strong>Success!</strong> Your support ticket has been submitted successfully.
+            <strong>Berhasil!</strong> Tiket dukungan Anda telah berhasil dikirim.
           </div>
         )}
 
         {submitStatus === 'error' && (
           <div className="alert alert-error">
-            <strong>Error!</strong> There was a problem submitting your ticket. Please try again or contact us directly.
+            <strong>Error!</strong> Terjadi masalah saat mengirim tiket Anda. Silakan coba lagi atau hubungi kami langsung.
           </div>
         )}
 
         <form className="support-form" onSubmit={handleSubmit}>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="name">Full Name *</label>
+              <label htmlFor="name">Nama Lengkap *</label>
               <input
                 type="text"
                 id="name"
@@ -121,13 +121,13 @@ const SupportPage = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 className={errors.name ? 'error' : ''}
-                placeholder="Enter your full name"
+                placeholder="Masukkan nama lengkap Anda"
               />
               {errors.name && <span className="error-message">{errors.name}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">Email Address *</label>
+              <label htmlFor="email">Alamat Email *</label>
               <input
                 type="email"
                 id="email"
@@ -135,7 +135,7 @@ const SupportPage = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 className={errors.email ? 'error' : ''}
-                placeholder="Enter your email"
+                placeholder="Masukkan alamat email Anda"
               />
               {errors.email && <span className="error-message">{errors.email}</span>}
             </div>
@@ -143,7 +143,7 @@ const SupportPage = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="userType">I am a *</label>
+              <label htmlFor="userType">Saya adalah *</label>
               <select
                 id="userType"
                 name="userType"
@@ -163,14 +163,14 @@ const SupportPage = () => {
                 value={formData.category}
                 onChange={handleInputChange}
               >
-                <option value="bug">Bug Report</option>
-                <option value="other">Other</option>
+                <option value="bug">Laporan Bug</option>
+                <option value="other">Lainnya</option>
               </select>
             </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="subject">Subject *</label>
+            <label htmlFor="subject">Topik *</label>
             <input
               type="text"
               id="subject"
@@ -179,26 +179,26 @@ const SupportPage = () => {
               onChange={handleInputChange}
               className={errors.subject ? 'error' : ''}
               placeholder={formData.category === 'bug' 
-                ? "Report technical issues like errors, crashes, or unexpected behavior in the system"
-                : "Any other concerns or feedback not covered above. Please describe in detail"
+                ? "Laporkan masalah teknis seperti kesalahan, crash, atau perilaku tidak terduga dalam sistem"
+                : "Kekhawatiran atau umpan balik lain yang tidak tercakup di atas. Harap jelaskan secara rinci"
               }
             />
             {errors.subject && <span className="error-message">{errors.subject}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Detailed Description *</label>
+            <label htmlFor="description">Deskripsi Detail *</label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleInputChange}
               className={errors.description ? 'error' : ''}
-              placeholder="Please provide as much detail as possible about your issue. Include any error messages, steps you took, and what you expected to happen."
+              placeholder="Harap berikan detail sebanyak mungkin tentang masalah Anda. Sertakan pesan kesalahan, langkah-langkah yang Anda ambil, dan apa yang Anda harapkan terjadi."
               rows="6"
             />
             {errors.description && <span className="error-message">{errors.description}</span>}
-            <small className="form-help">Minimum 10 characters required</small>
+            <small className="form-help">Minimal 10 karakter diperlukan</small>
           </div>
 
           <div className="form-actions">
@@ -207,18 +207,20 @@ const SupportPage = () => {
               className="btn-secondary"
               onClick={() => navigate(-1)}
             >
-              Cancel
+              Batal
             </button>
             <button
               type="submit"
               className="btn-primary"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Ticket'}
+              {isSubmitting ? 'Mengirim...' : 'Kirim'}
             </button>
+
           </div>
         </form>
       </div>
+       
     </div>
   );
 };
