@@ -18,6 +18,7 @@ namespace api.Controllers
         private readonly IUserRepository _userRepository;
         private readonly ISellerRepository _sellerRepository;
         private readonly IImageService _imageService;
+        private readonly ICachedMenuService _cachedMenuService;
         private readonly ILogger<MenuController> _logger;
 
         public MenuController(
@@ -25,12 +26,14 @@ namespace api.Controllers
             IUserRepository userRepository,
             ISellerRepository sellerRepository,
             IImageService imageService,
+            ICachedMenuService cachedMenuService,
             ILogger<MenuController> logger)
         {
             _menuRepository = menuRepository;
             _userRepository = userRepository;
             _sellerRepository = sellerRepository;
             _imageService = imageService;
+            _cachedMenuService = cachedMenuService;
             _logger = logger;
         }
 
@@ -76,9 +79,15 @@ namespace api.Controllers
 
                 // Set seller information directly from the seller entity
                 menuModel.SellerId = sellerEntity.SellerId;
-                menuModel.StoreName = sellerEntity.StoreName;
+                menuModel.StoreName = sellerEntity.StoreName; await _menuRepository.CreateMenuAsync(menuModel);
 
-                await _menuRepository.CreateMenuAsync(menuModel);
+                // Invalidate caches after creating new menu
+                await _cachedMenuService.InvalidateAllMenusCacheAsync();
+                await _cachedMenuService.InvalidateSellerMenusCacheAsync(menuModel.SellerId);
+                if (!string.IsNullOrEmpty(menuModel.Category))
+                {
+                    await _cachedMenuService.InvalidateCategoryMenusCacheAsync(menuModel.Category);
+                }
 
                 return Ok(new { success = true, message = "Menu created successfully", data = new { imageUrl } });
             }
@@ -92,14 +101,13 @@ namespace api.Controllers
                 return StatusCode(500, new { success = false, message = "Error creating menu" });
             }
         }
-
         [HttpGet]
         [Route("get-menus")]
         [AllowAnonymous]
-        [ResponseCache(Duration = 60)]  // Cache for 1 minute
+        [ResponseCache(Duration = 600)]  // Cache for 10 minutes
         public async Task<IActionResult> Get()
         {
-            var menus = await _menuRepository.GetAllMenusAsync();
+            var menus = await _cachedMenuService.GetAllMenusAsync();
             if (!menus.Any())
             {
                 return NotFound(new { success = false, message = "No menus found" });
@@ -108,14 +116,13 @@ namespace api.Controllers
 
             return Ok(new { success = true, data = menuDtos });
         }
-
         [HttpGet]
         [Route("get-menu/{id}")]
         [AllowAnonymous]
-        [ResponseCache(Duration = 60)]  // Cache for 1 minute
+        [ResponseCache(Duration = 900, VaryByQueryKeys = new[] { "id" })]  // Cache for 15 minutes
         public async Task<IActionResult> GetById(string id)
         {
-            var menu = await _menuRepository.GetMenuByIdAsync(id);
+            var menu = await _cachedMenuService.GetMenuByIdAsync(id);
             if (menu == null)
             {
                 return NotFound(new { success = false, message = "Menu not found" });
@@ -169,9 +176,16 @@ namespace api.Controllers
                 updatedMenu.Id = menu.Id;
                 updatedMenu.SellerId = menu.SellerId;
                 updatedMenu.StoreName = menu.StoreName;
-                updatedMenu.CreatedAt = menu.CreatedAt.ToUniversalTime();
+                updatedMenu.CreatedAt = menu.CreatedAt.ToUniversalTime(); await _menuRepository.UpdateMenuAsync(updatedMenu);
 
-                await _menuRepository.UpdateMenuAsync(updatedMenu);
+                // Invalidate caches after updating menu
+                await _cachedMenuService.InvalidateMenuCacheAsync(updatedMenu.Id);
+                await _cachedMenuService.InvalidateAllMenusCacheAsync();
+                await _cachedMenuService.InvalidateSellerMenusCacheAsync(updatedMenu.SellerId);
+                if (!string.IsNullOrEmpty(updatedMenu.Category))
+                {
+                    await _cachedMenuService.InvalidateCategoryMenusCacheAsync(updatedMenu.Category);
+                }
 
                 return Ok(new { success = true, message = "Menu updated successfully" });
             }
@@ -222,8 +236,16 @@ namespace api.Controllers
                 {
                     return Forbid();
                 }
-
                 await _menuRepository.DeleteMenuAsync(id);
+
+                // Invalidate caches after deleting menu
+                await _cachedMenuService.InvalidateMenuCacheAsync(id);
+                await _cachedMenuService.InvalidateAllMenusCacheAsync();
+                await _cachedMenuService.InvalidateSellerMenusCacheAsync(menu.SellerId);
+                if (!string.IsNullOrEmpty(menu.Category))
+                {
+                    await _cachedMenuService.InvalidateCategoryMenusCacheAsync(menu.Category);
+                }
 
                 return Ok(new { success = true, message = "Menu deleted successfully" });
             }
@@ -233,14 +255,13 @@ namespace api.Controllers
                 return StatusCode(500, new { success = false, message = "Error deleting menu" });
             }
         }
-
         [HttpGet]
         [Route("get-menus-by-category/{category}")]
         [AllowAnonymous]
-        [ResponseCache(Duration = 60)]  // Cache for 1 minute
+        [ResponseCache(Duration = 600, VaryByQueryKeys = new[] { "category" })] // Cache for 10 minutes
         public async Task<IActionResult> GetByCategory(string category)
         {
-            var menus = await _menuRepository.GetMenusByCategoryAsync(category);
+            var menus = await _cachedMenuService.GetMenusByCategoryAsync(category);
             if (!menus.Any())
             {
                 return NotFound(new { success = false, message = "No menus found for this category" });
@@ -266,16 +287,16 @@ namespace api.Controllers
                 return StatusCode(500, new { success = false, message = "Error retrieving image URL" });
             }
         }
-
         [HttpGet]
         [Route("get-menus-by-store/{sellerId}")]
         [AllowAnonymous]
+        [ResponseCache(Duration = 480, VaryByQueryKeys = new[] { "sellerId" })] // Cache for 8 minutes
         public async Task<IActionResult> GetMenuItemsByStore(string sellerId)
         {
             try
             {
                 _logger.LogInformation("Fetching menus for seller ID: {SellerId}", sellerId);
-                var storeMenus = await _menuRepository.GetMenusBySellerIdAsync(sellerId);
+                var storeMenus = await _cachedMenuService.GetMenusBySellerIdAsync(sellerId);
                 if (!storeMenus.Any())
                 {
                     _logger.LogInformation("No menus found for seller ID: {SellerId}", sellerId);
@@ -293,11 +314,10 @@ namespace api.Controllers
                 return StatusCode(500, new { success = false, message = "Error retrieving menus for store" });
             }
         }
-
         [HttpGet]
         [Route("search-menus/{query}")]
         [AllowAnonymous]
-        [ResponseCache(Duration = 60)]  // Cache for 1 minute
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "query" })] // Cache for 5 minutes
         public async Task<IActionResult> SearchMenus(string query)
         {
             try
@@ -308,7 +328,7 @@ namespace api.Controllers
                 }
 
                 _logger.LogInformation("Searching menus with query: {Query}", query);
-                var searchResults = await _menuRepository.SearchMenusByNameAsync(query);
+                var searchResults = await _cachedMenuService.SearchMenusByNameAsync(query);
 
                 if (!searchResults.Any())
                 {

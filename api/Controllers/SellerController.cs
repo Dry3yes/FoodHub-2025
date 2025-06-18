@@ -17,6 +17,7 @@ namespace api.Controllers
         private readonly ISellerRepository _sellerRepo;
         private readonly IUserRepository _userRepo;
         private readonly IImageService _imageService;
+        private readonly ICachedSellerService _cachedSellerService;
         private readonly ILogger<SellerController> _logger;
         private readonly FirebaseAuthService _firebaseAuthService;
 
@@ -24,12 +25,14 @@ namespace api.Controllers
             ISellerRepository sellerRepo,
             IUserRepository userRepo,
             IImageService imageService,
+            ICachedSellerService cachedSellerService,
             ILogger<SellerController> logger,
             FirebaseAuthService firebaseAuthService)
         {
             _sellerRepo = sellerRepo;
             _userRepo = userRepo;
             _imageService = imageService;
+            _cachedSellerService = cachedSellerService;
             _logger = logger;
             _firebaseAuthService = firebaseAuthService;
         }
@@ -216,11 +219,12 @@ namespace api.Controllers
         [HttpGet]
         [Route("get-stores")]
         [AllowAnonymous]
+        [ResponseCache(Duration = 900, Location = ResponseCacheLocation.Any)] // 15 minutes cache
         public async Task<IActionResult> GetStores()
         {
             try
             {
-                var stores = await _sellerRepo.GetStoreNamesAsync();
+                var stores = await _cachedSellerService.GetStoreNamesAsync();
                 return Ok(new { success = true, data = stores });
             }
             catch (Exception ex)
@@ -233,12 +237,13 @@ namespace api.Controllers
         [HttpGet]
         [Route("get-store/{sellerId}")]
         [AllowAnonymous]
+        [ResponseCache(Duration = 600, VaryByQueryKeys = new[] { "sellerId" })] // 10 minutes cache
         public async Task<IActionResult> GetStoreById(string sellerId)
         {
             try
             {
                 _logger.LogInformation("Retrieving store details for sellerId: {SellerId}", sellerId);
-                var store = await _sellerRepo.GetStoreByIdAsync(sellerId);
+                var store = await _cachedSellerService.GetStoreByIdAsync(sellerId);
 
                 if (store == null)
                 {
